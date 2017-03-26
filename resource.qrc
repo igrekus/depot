@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>gfx/closedfolder.ico</file>
+        <file>gfx/disabledfolder.ico</file>
+        <file>gfx/openfolder.ico</file>
+    </qresource>
+</RCC>

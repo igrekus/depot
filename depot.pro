@@ -13,8 +13,29 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-        mainwindow.cpp
+        mainwindow.cpp \
+    linkeddict.cpp \
+    databasemanager.cpp \
+    stockmodel.cpp \
+    dictmodel.cpp \
+    productitem.cpp \
+    stockitem.cpp \
+    categoryitem.cpp \
+    abstractitem.cpp \
+    groupitem.cpp
 
-HEADERS  += mainwindow.h
+HEADERS  += mainwindow.h \
+    linkeddict.h \
+    databasemanager.h \
+    stockmodel.h \
+    dictmodel.h \
+    productitem.h \
+    stockitem.h \
+    categoryitem.h \
+    abstractitem.h \
+    groupitem.h
 
 FORMS    += mainwindow.ui
+
+RESOURCES += \
+    resource.qrc
