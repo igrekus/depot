@@ -41,17 +41,17 @@ QSqlQuery DataBaseManager::execSimpleQuery(const QString &qry)
 
 CategoryItem::CategoryList DataBaseManager::getCategoryList()
 {
-//    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
 
     CategoryItem::CategoryList tmplist;
 
     QSqlQuery q = execSimpleQuery("SELECT `category_id`, `category_name` FROM `category` WHERE `category_id`<>0");
 
     while (q.next()) {
-        CategoryItem tmpitem(q.value(0).toInt(),
-                             q.value(1).toString());
 //        CategoryItem tmpitem(q.value(0).toInt(),
-//                             decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+//                             q.value(1).toString());
+        CategoryItem tmpitem(q.value(0).toInt(),
+                             decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmplist.append(tmpitem);
     }
     return tmplist;
@@ -60,7 +60,7 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 
 GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
 {
-//    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
 
     GroupItem::GroupList tmplist;
 
@@ -69,10 +69,10 @@ GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
                                   " WHERE `group_id`<>0 AND `group_categoryRef`="+QString::number(catId));
 
     while (q.next()) {
-        GroupItem tmpitem(q.value(0).toInt(),
-                          q.value(1).toString());
 //        GroupItem tmpitem(q.value(0).toInt(),
-//                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+//                          q.value(1).toString());
+        GroupItem tmpitem(q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmplist.append(tmpitem);
     }
     return tmplist;
@@ -80,27 +80,29 @@ GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
 
 StockItem::StockList DataBaseManager::getStockList(qint32 catId, qint32 groupId)
 {
-//    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
 
     StockItem::StockList tmplist;
-
 
     // TODO: неправильный запрос, запрашивать сток
     QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
 
     while (q.next()) {
+//        StockItem tmpitem(StockItem::ItemProduct,
+//                          StockItem::Level_2,
+//                          q.value(0).toInt(),     // id
+//                          q.value(1).toString(),  // name
+//                          q.value(2).toInt(),     // amount
+//                          q.value(3).toString(),  // serialn
+//                          q.value(4).toString()); // location
+
         StockItem tmpitem(StockItem::ItemProduct,
                           StockItem::Level_2,
                           q.value(0).toInt(),     // id
-                          q.value(1).toString(),  // name
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()),  // name
                           q.value(2).toInt(),     // amount
-                          q.value(3).toString(),  // serialn
-                          q.value(4).toString()); // location
-//        StockItem tmpitem(q.value(0).toInt(),                        // id
-//                          decode->toUnicode(q.value(1).toString()),  // name
-//                          q.value(2).toInt(),                        // amount
-//                          decode->toUnicode(q.value(3).toString()),  // serialn
-//                          decode->toUnicode(q.value(4).toString())); // location
+                          decode->toUnicode(q.value(3).toString().toLocal8Bit()),  // serialn
+                          decode->toUnicode(q.value(4).toString().toLocal8Bit())); // location
 
         tmplist.append(tmpitem);
     }
