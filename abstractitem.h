@@ -15,7 +15,7 @@ public:
         itemName()
     {}
 
-    explicit AbstractItem(qint32 id, const QString &name):
+    explicit AbstractItem(const qint32 id, const QString &name):
         itemId(id),
         itemName(name)
     {}
@@ -25,26 +25,7 @@ public:
         itemName(copy.itemName)
     {}
 
-//    AbstractItem &operator=(const AbstractItem &right) {
-//        if (this != &right) {
-//            itemId   = right.itemId;
-//            itemName = right.itemName;
-//        }
-//        return *this;
-//    }
-
-//    bool operator==(const AbstractItem &right) const {
-//        return (itemId   == right.itemId &&
-//                itemName == right.itemName);
-//    }
-
-//    friend QDebug operator<<(QDebug dbg, const AbstractItem &right) {
-//        dbg.nospace() << "Category("
-//                      << "id:"    << right.itemId
-//                      << " name:"  << right.itemName
-//                      << ")";
-//        return dbg.maybeSpace();
-//    }
+    virtual ~AbstractItem() {}
 };
 
 #endif // ABSTRACTITEM_H

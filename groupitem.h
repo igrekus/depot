@@ -18,8 +18,8 @@ public:
         AbstractItem(id, name)
     {}
 
-    explicit GroupItem(const GroupItem &copy):
-        AbstractItem(copy.itemId, copy.itemName)
+    GroupItem(const GroupItem &copy):
+        AbstractItem(copy)
     {}
 
     GroupItem &operator=(const GroupItem &right) {
@@ -44,6 +44,31 @@ public:
     }
 
     using GroupList = QVector<GroupItem>;
+
+    class GroupItemBuilder {
+    public:
+        qint32  groupId = 0;
+        QString groupName = QString();
+
+        GroupItemBuilder& setId(const qint32 id) {
+            this->groupId = id;
+            return *this;
+        }
+
+        GroupItemBuilder& setName(const QString &name) {
+            this->groupName = name;
+            return *this;
+        }
+//        Builder& setProductP(){          // pre-defined group, if needed
+//			this->i = 42;
+//			this->f = -1.0f/12.0f;
+//			this->c = '@';
+//			return *this;
+//		}
+        GroupItem buildGroupItem() {
+            return GroupItem(this->groupId, this->groupName);
+        }
+    };
 };
 
 #endif // GROUPITEM_H

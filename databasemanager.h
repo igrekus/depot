@@ -22,6 +22,7 @@ public:
     void connectToDatabase();
 
     QSqlQuery execSimpleQuery(const QString &qry);
+    QSqlQuery execParametrizedQuery(const QString &qry, const QVariantList &params);
 
     // получаем списки итемов из БД
     CategoryItem::CategoryList getCategoryList();

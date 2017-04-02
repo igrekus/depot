@@ -47,36 +47,40 @@ StockModel::~StockModel()
 
 StockModel::StockNode StockModel::nodeFactoryCategory(const CategoryItem &item)
 {
-    StockItem tmpitem(StockItem::ItemCategory,
-                      StockItem::LevelRoot,
-                      item.itemId,
-                      item.itemName,
-                      DATA_INVALID,
-                      QString(),
-                      QString());
-    return StockModel::StockNode(tmpitem);
+    StockItem::StockItemBuilder b;
+    b.setId         (item.itemId);
+    b.setName       (item.itemName);
+    b.setType       (StockItem::ItemCategory);
+    b.setLevel      (StockItem::LevelRoot);
+    b.setAmount     (DATA_INVALID);
+    b.setSerialn    (QString());
+    b.setProjectTag (QString());
+    b.setLocationRef(DATA_INVALID);
+    return StockModel::StockNode(b.buildStockItem());
 }
 
 StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockNode *parent)
 {
-    StockItem tmpitem(StockItem::ItemGroup,
-                      StockItem::Level_1,
-                      item.itemId,
-                      item.itemName,
-                      DATA_INVALID,
-                      QString(),
-                      QString());
-    return StockModel::StockNode(tmpitem, parent);
+    StockItem::StockItemBuilder b;
+    b.setId         (item.itemId);
+    b.setName       (item.itemName);
+    b.setType       (StockItem::ItemGroup);
+    b.setLevel      (StockItem::Level_1);
+    b.setAmount     (DATA_INVALID);
+    b.setSerialn    (QString());
+    b.setProjectTag (QString());
+    b.setLocationRef(DATA_INVALID);
+    return StockModel::StockNode(b.buildStockItem(), parent);
 }
 
 StockModel::StockNode StockModel::nodeFactoryStock(const StockItem &item, StockNode *parent)
 {
-    StockItem tmpitem(item);
-    return StockModel::StockNode(tmpitem, parent);
+    return StockModel::StockNode(item, parent);
 }
 
 void StockModel::initModel()
 {
+    // TODO: формировать уровни одновременно - надо ли?
     buildCategoryLevel();
     buildGroupLevel();
     buildStockLevel();
@@ -110,7 +114,6 @@ void StockModel::buildStockLevel()
 
     for (StockNode &it : _nodes) {
         for (StockNode &jt : it.children) {
-            // TODO: заменить ProductItem на StockItem напрямую
             StockItem::StockList list = m_dbman->getStockList(it.stockItem.itemId, jt.stockItem.itemId);
             for (const StockItem &kt : list) {
                 jt.children.append(std::move(nodeFactoryStock(kt, &jt)));
@@ -224,7 +227,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case LocationColumn: {
-            return tmpitem.itemLocation;
+            return tmpitem.itemLocationRef;
             break;
         }
         case ColumnCount:
@@ -241,6 +244,22 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         case SerialnColumn:
         case LocationColumn: {
             return tmpitem.itemLevel;
+            break;
+        }
+        case ColumnCount:
+        default:
+            break;
+        }
+        break;
+    }
+    case ROLE_NODE_TYPE: {
+        switch (index.column()) {
+        case NumberColumn:
+        case NameColumn:
+        case AmountColumn:
+        case SerialnColumn:
+        case LocationColumn: {
+            return tmpitem.itemType;
             break;
         }
         case ColumnCount:

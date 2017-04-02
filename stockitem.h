@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QDebug>
 
-class StockItem
+#include <abstractitem.h>
+
+class StockItem : public AbstractItem
 {
 public:
 
@@ -22,64 +24,66 @@ public:
     };
 
     // данные
-    qint32  itemType;
-    qint32  itemLevel;
-    qint32  itemId;
-    QString itemName;
-    qint32  itemAmount;
-    QString itemSerialn;
-    QString itemLocation;
+    ItemType  itemType;
+    ItemLevel itemLevel;
+    qint32    itemAmount;
+    QString   itemSerialn;
+    QString   itemProjectTag;
+    qint32    itemLocationRef;
 
     StockItem():
+        AbstractItem(),
         itemType(),
         itemLevel(),
-        itemId(),
-        itemName(),
         itemAmount(),
         itemSerialn(),
-        itemLocation()
+        itemProjectTag(),
+        itemLocationRef()
     {}
-    StockItem(ItemType type, ItemLevel level, qint32 id, const QString &name, qint32 amount, const QString &serialn, const QString &location):
-        itemType    (type),
-        itemLevel   (level),
-        itemId      (id),
-        itemName    (name),
-        itemAmount  (amount),
-        itemSerialn (serialn),
-        itemLocation(location)
+    StockItem(qint32 id, const QString &name, ItemType type, ItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const qint32 loc):
+        AbstractItem    (id,
+                         name),
+        itemType        (type),
+        itemLevel       (level),
+        itemAmount      (amount),
+        itemSerialn     (serialn),
+        itemProjectTag  (proj),
+        itemLocationRef (loc)
     {}
     StockItem(const StockItem &copy):
-        itemType    (copy.itemType),
-        itemLevel   (copy.itemLevel),
-        itemId      (copy.itemId),
-        itemName    (copy.itemName),
-        itemAmount  (copy.itemAmount),
-        itemSerialn (copy.itemSerialn),
-        itemLocation(copy.itemLocation)
+        AbstractItem    (copy),
+        itemType        (copy.itemType),
+        itemLevel       (copy.itemLevel),
+        itemAmount      (copy.itemAmount),
+        itemSerialn     (copy.itemSerialn),
+        itemProjectTag  (copy.itemProjectTag),
+        itemLocationRef (copy.itemLocationRef)
     {}
     ~StockItem(){}
 
     StockItem &operator=(const StockItem &right) {
         if (this != &right) {
-            itemType     = right.itemType;
-            itemLevel    = right.itemLevel;
-            itemId       = right.itemId;
-            itemName     = right.itemName;
-            itemAmount   = right.itemAmount;
-            itemSerialn  = right.itemSerialn;
-            itemLocation = right.itemLocation;
+            itemId          = right.itemId;
+            itemName        = right.itemName;
+            itemType        = right.itemType;
+            itemLevel       = right.itemLevel;
+            itemAmount      = right.itemAmount;
+            itemSerialn     = right.itemSerialn;
+            itemProjectTag  = right.itemProjectTag;
+            itemLocationRef = right.itemLocationRef;
         }
         return *this;
     }
 
     bool operator==(const StockItem &right) const {
-        return (itemType     == right.itemType    &&
-                itemLevel    == right.itemLevel   &&
-                itemId       == right.itemId      &&
-                itemName     == right.itemName    &&
-                itemAmount   == right.itemAmount  &&
-                itemSerialn  == right.itemSerialn &&
-                itemLocation == right.itemLocation);
+        return (itemType        == right.itemType       &&
+                itemLevel       == right.itemLevel      &&
+                itemId          == right.itemId         &&
+                itemName        == right.itemName       &&
+                itemAmount      == right.itemAmount     &&
+                itemSerialn     == right.itemSerialn    &&
+                itemProjectTag  == right.itemProjectTag &&
+                itemLocationRef == right.itemLocationRef);
     }
 
     friend QDebug operator<<(QDebug dbg, const StockItem &right) {
@@ -90,12 +94,64 @@ public:
                       << " name:" << right.itemName
                       << " amt:"  << right.itemAmount
                       << " sn:"   << right.itemSerialn
-                      << " loc:"  << right.itemLocation
+                      << " proj:" << right.itemProjectTag
+                      << " loc:"  << right.itemLocationRef
                       << ")";
         return dbg.maybeSpace();
     }
 
     using StockList = QVector<StockItem>;
+
+    class StockItemBuilder {
+    public:
+        qint32    stockId = 0;
+        QString   stockName = QString();
+        ItemType  stockType = ItemProduct;
+        ItemLevel stockLevel = Level_2;
+        qint32    stockAmount = 0;
+        QString   stockSerialn = QString();
+        QString   stockProjectTag = QString();
+        qint32    stockLocationRef = 0;
+
+        StockItemBuilder& setId(const qint32 id) {
+            this->stockId = id;
+            return *this;
+        }
+        StockItemBuilder& setName(const QString &name) {
+            this->stockName = name;
+            return *this;
+        }
+        StockItemBuilder& setType(const ItemType itemtype) {
+            this->stockType = itemtype;
+            return *this;
+        }
+        StockItemBuilder& setLevel(const ItemLevel itemlevel) {
+            this->stockLevel = itemlevel;
+            return *this;
+        }
+        StockItemBuilder& setAmount(const qint32 amout) {
+            this->stockAmount = amout;
+            return *this;
+        }
+        StockItemBuilder& setSerialn(const QString &serialn) {
+            this->stockSerialn = serialn;
+            return *this;
+        }
+        StockItemBuilder& setProjectTag(const QString &projtag) {
+            this->stockProjectTag = projtag;
+            return *this;
+        }
+        StockItemBuilder& setLocationRef(const qint32 loc) {
+            this->stockLocationRef = loc;
+            return *this;
+        }
+        StockItem buildStockItem() {
+            return StockItem(this->stockId,         this->stockName,
+                             this->stockType,       this->stockLevel,
+                             this->stockAmount,     this->stockSerialn,
+                             this->stockProjectTag, this->stockLocationRef);
+        }
+    };
 };
 
 #endif // STOCKITEM_H

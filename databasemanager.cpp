@@ -1,5 +1,7 @@
 #include "databasemanager.h"
 
+//#define AT_WORK
+
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
 
@@ -39,20 +41,45 @@ QSqlQuery DataBaseManager::execSimpleQuery(const QString &qry)
     return query;
 }
 
+QSqlQuery DataBaseManager::execParametrizedQuery(const QString &qry, const QVariantList &params)
+{
+    // TODO: если надо будет записывать много записей, сделать через execBatch (см хелп)
+    // FIXME: не работают бинды
+    QSqlQuery query(QSqlDatabase::database());
+    query.prepare(qry);
+    for (qint32 i=0; i<params.count(); ++i) {
+        query.bindValue(i, params.at(i));
+    }
+    query.exec();
+    qDebug().noquote() << ">" << query.lastQuery() << "|" << query.lastError()
+                       << "| rows: " << query.numRowsAffected();
+    Q_ASSERT(query.isActive());
+    return query;
+}
+
 CategoryItem::CategoryList DataBaseManager::getCategoryList()
 {
+#ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
 
     CategoryItem::CategoryList tmplist;
+    CategoryItem::CategoryItemBuilder b;
 
-    QSqlQuery q = execSimpleQuery("SELECT `category_id`, `category_name` FROM `category` WHERE `category_id`<>0");
+    QSqlQuery q = execSimpleQuery("CALL getCategoryList()");
 
     while (q.next()) {
-//        CategoryItem tmpitem(q.value(0).toInt(),
-//                             q.value(1).toString());
-        CategoryItem tmpitem(q.value(0).toInt(),
-                             decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmplist.append(tmpitem);
+#ifndef AT_WORK
+        b.setId  (q.value(0).toInt());
+        b.setName(q.value(1).toString());
+#endif
+
+#ifdef AT_WORK
+        b.setId  (q.value(0).toInt());
+        b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+#endif
+
+        tmplist.append(b.buildCategoryItem());
     }
     return tmplist;
 }
@@ -60,51 +87,71 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 
 GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
 {
+#ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-
+#endif
     GroupItem::GroupList tmplist;
+    GroupItem::GroupItemBuilder b;
+    QVariantList params;
 
-    QSqlQuery q = execSimpleQuery("SELECT `group_id`, `group_name` "
-                                  "  FROM `group` "
-                                  " WHERE `group_id`<>0 AND `group_categoryRef`="+QString::number(catId));
+    params.append(QVariant(catId));
+
+//    QSqlQuery q = execParametrizedQuery("CALL getGroupListByCategory(?)", params);
+    QSqlQuery q = execSimpleQuery("CALL getGroupListByCategory("+QString::number(catId)+");");
 
     while (q.next()) {
-//        GroupItem tmpitem(q.value(0).toInt(),
-//                          q.value(1).toString());
-        GroupItem tmpitem(q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmplist.append(tmpitem);
+#ifndef AT_WORK
+        b.setId  (q.value(0).toInt());
+        b.setName(q.value(1).toString());
+#endif
+
+#ifdef AT_WORK
+        b.setId  (q.value(0).toInt());
+        b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+#endif
+
+        tmplist.append(b.buildGroupItem());
     }
     return tmplist;
 }
 
 StockItem::StockList DataBaseManager::getStockList(qint32 catId, qint32 groupId)
 {
+#ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
 
     StockItem::StockList tmplist;
+    StockItem::StockItemBuilder b;
 
     // TODO: неправильный запрос, запрашивать сток
     QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
 
     while (q.next()) {
-//        StockItem tmpitem(StockItem::ItemProduct,
-//                          StockItem::Level_2,
-//                          q.value(0).toInt(),     // id
-//                          q.value(1).toString(),  // name
-//                          q.value(2).toInt(),     // amount
-//                          q.value(3).toString(),  // serialn
-//                          q.value(4).toString()); // location
 
-        StockItem tmpitem(StockItem::ItemProduct,
-                          StockItem::Level_2,
-                          q.value(0).toInt(),     // id
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()),  // name
-                          q.value(2).toInt(),     // amount
-                          decode->toUnicode(q.value(3).toString().toLocal8Bit()),  // serialn
-                          decode->toUnicode(q.value(4).toString().toLocal8Bit())); // location
+#ifndef AT_WORK
+        b.setId         (q.value(0).toInt());
+        b.setName       (q.value(1).toString());
+        b.setType       (StockItem::ItemProduct);
+        b.setLevel      (StockItem::Level_2);
+        b.setAmount     (q.value(2).toInt());
+        b.setSerialn    (q.value(3).toString());
+        b.setProjectTag (q.value(4).toString());
+        b.setLocationRef(q.value(4).toInt());
+#endif
 
-        tmplist.append(tmpitem);
+#ifdef AT_WORK
+        b.setId         (q.value(0).toInt());
+        b.setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        b.setType       (StockItem::ItemProduct);
+        b.setLevel      (StockItem::Level_2);
+        b.setAmount     (q.value(2).toInt());
+        b.setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
+        b.setProjectTag (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
+        b.setLocationRef(q.value(4).toInt());
+#endif
+
+        tmplist.append(b.buildStockItem());
     }
     return tmplist;
 }

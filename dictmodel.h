@@ -20,6 +20,9 @@ public:
     LinkedDict m_dictLocation;
     LinkedDict m_dictProduct;
 
+    QHash<qint32, QString> m_mapLocation;
+    QHash<qint32, QString> m_mapProject;
+
     DataBaseManager *m_dbman;
 
     explicit DictModel(DataBaseManager *dbman, QObject *parent = 0);

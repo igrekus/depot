@@ -9,6 +9,7 @@
 
 #define ROLE_LEVEL_ID  (Qt::UserRole+1)
 #define ROLE_NODE_TYPE (Qt::UserRole+2)
+#define ROLE_NODE_ID   (Qt::UserRole+3)
 
 class StockItem;
 
