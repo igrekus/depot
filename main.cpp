@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
     }
     catch (QSqlError err) {
         qDebug() << "DB connection error:" << err;
-        QMessageBox::warning(&w, "Ошибка!", "Ошибка подключения к БД, проверьте настройки подключения.");
+        QMessageBox::warning(&w, "Ошибка!", "Ошибка подключения к БД: "+err.text());
         return 1;
     }
 

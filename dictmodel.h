@@ -9,25 +9,27 @@
 
 #include <linkeddict.h>
 #include <databasemanager.h>
+#include <hashdict.h>
 
 class DictModel : public QObject
 {
     Q_OBJECT
 public:
-    LinkedDict m_dictStaff;
+
     LinkedDict m_dictCategory;
     LinkedDict m_dictGroup;
-    LinkedDict m_dictLocation;
     LinkedDict m_dictProduct;
 
-    QHash<qint32, QString> m_mapLocation;
-    QHash<qint32, QString> m_mapProject;
+    HashDict m_mapCategory;    // списко категорий
+    HashDict m_mapLocation;    // список мест хранения на складе
+    HashDict m_mapProjectTag;  // теги проектов
+//    HashDict m_mapMisc;        // разные теги
 
     DataBaseManager *m_dbman;
 
     explicit DictModel(DataBaseManager *dbman, QObject *parent = 0);
 
-    void initDicts(); // throws SqlError exception
+    void initDicts();       // throws SqlError exception
 
 signals:
 

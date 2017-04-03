@@ -21,7 +21,9 @@ SOURCES += main.cpp\
     stockitem.cpp \
     categoryitem.cpp \
     abstractitem.cpp \
-    groupitem.cpp
+    groupitem.cpp \
+    mapmodel.cpp \
+    hashdict.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -32,7 +34,9 @@ HEADERS  += mainwindow.h \
     stockitem.h \
     categoryitem.h \
     abstractitem.h \
-    groupitem.h
+    groupitem.h \
+    mapmodel.h \
+    hashdict.h
 
 FORMS    += mainwindow.ui
 

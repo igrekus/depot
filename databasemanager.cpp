@@ -1,6 +1,6 @@
 #include "databasemanager.h"
 
-//#define AT_WORK
+#define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
@@ -23,9 +23,10 @@ void DataBaseManager::connectToDatabase()
     db.setPassword("");
     db.setDatabaseName("depot");
 
-    if (!db.open()) {
-        throw db.lastError();
-    }
+    db.open();
+//    if (!db.open()) {
+//        throw db.lastError();
+//    }
 
     qDebug() << "ok";
 }
@@ -85,7 +86,7 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 }
 
 
-GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
+GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
@@ -115,7 +116,7 @@ GroupItem::GroupList DataBaseManager::getGroupList(qint32 catId)
     return tmplist;
 }
 
-StockItem::StockList DataBaseManager::getStockList(qint32 catId, qint32 groupId)
+StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qint32 groupId)
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
@@ -154,4 +155,108 @@ StockItem::StockList DataBaseManager::getStockList(qint32 catId, qint32 groupId)
         tmplist.append(b.buildStockItem());
     }
     return tmplist;
+}
+
+HashDict DataBaseManager::getMapLocation()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getLocationList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
+
+#ifdef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                          q.value(0).toInt());
+#endif
+    }
+    return tmphash;
+}
+
+HashDict DataBaseManager::getMapProjectTag()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getProjectTagList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
+
+#ifdef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                          q.value(0).toInt());
+#endif
+    }
+    return tmphash;
+}
+
+HashDict DataBaseManager::getMapMiscTag()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getMiscTagList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
+
+#ifdef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                          q.value(0).toInt());
+#endif
+    }
+    return tmphash;
+}
+
+HashDict DataBaseManager::getMapCategory()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getCategoryList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
+
+#ifdef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                          q.value(0).toInt());
+#endif
+    }
+    return tmphash;
 }

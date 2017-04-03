@@ -29,7 +29,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     m_dbman = new DataBaseManager(this);
     m_dictModel = new DictModel(m_dbman, this);
-    m_stockModel = new StockModel(m_dbman, this);
+    m_stockModel = new StockModel(m_dbman, m_dictModel, this);
+
+    m_categoryListModel = new MapModel(this);
+    m_projectTagListModel = new MapModel(this);
 
     ui->treeStock->setModel(m_stockModel);
 
@@ -44,6 +47,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeStock->setItemDelegateForColumn(2, new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(3, new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(4, new TextDelegate(ui->treeStock));
+
+    ui->comboCategory->setModel(m_categoryListModel);
+    ui->comboProject->setModel(m_projectTagListModel);
 }
 
 MainWindow::~MainWindow()
@@ -61,7 +67,10 @@ void MainWindow::initApplication()
     }
 
     m_stockModel->initModel();
-//    m_dictModel->initDicts();
+    m_dictModel->initDicts();
+
+    m_categoryListModel->initModel(m_dictModel->m_mapCategory);
+    m_projectTagListModel->initModel(m_dictModel->m_mapProjectTag);
 
     actRefreshView->trigger();
 }
@@ -135,7 +144,10 @@ void MainWindow::procActRefreshView()
 
 void MainWindow::on_btnCategory_clicked()
 {
-
+    m_categoryListModel->clearModel();
+    m_projectTagListModel->clearModel();
+    qDebug() << ui->comboCategory->currentData(ROLE_NODE_ID) << ui->comboCategory->currentData(Qt::DisplayRole);
+    qDebug() << ui->comboProject->currentData(ROLE_NODE_ID) << ui->comboProject->currentData(Qt::DisplayRole);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

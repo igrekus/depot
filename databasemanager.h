@@ -12,6 +12,7 @@
 #include <groupitem.h>
 #include <productitem.h>
 #include <stockitem.h>
+#include <hashdict.h>
 
 class DataBaseManager : public QObject
 {
@@ -24,11 +25,16 @@ public:
     QSqlQuery execSimpleQuery(const QString &qry);
     QSqlQuery execParametrizedQuery(const QString &qry, const QVariantList &params);
 
-    // получаем списки итемов из БД
+    // списки итемов из БД
     CategoryItem::CategoryList getCategoryList();
-    GroupItem::GroupList getGroupList(qint32 catId);
-    StockItem::StockList getStockList(qint32 catId, qint32 groupId);
+    GroupItem::GroupList getGroupList(const qint32 catId);
+    StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
 
+    // словари
+    HashDict getMapLocation();
+    HashDict getMapProjectTag();
+    HashDict getMapMiscTag();
+    HashDict getMapCategory();
 signals:
 
 public slots:

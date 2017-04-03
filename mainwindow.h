@@ -7,6 +7,7 @@
 #include <QPainter>
 #include <QImage>
 
+#include <mapmodel.h>
 #include <linkeddict.h>
 #include <databasemanager.h>
 #include <dictmodel.h>
@@ -55,7 +56,7 @@ private slots:
     // action processing
     void procActRefreshView();
 
-    // contrlo elements
+    // control events
     void on_btnCategory_clicked();
 
 private:
@@ -66,6 +67,10 @@ private:
     // model instances
     DictModel  *m_dictModel;
     StockModel *m_stockModel;
+
+    MapModel *m_categoryListModel;
+    MapModel *m_projectTagListModel;
+//    MapModel *m_miscTagListModel;
 
     // actions
     QAction *actRefreshView;

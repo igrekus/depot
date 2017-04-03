@@ -34,10 +34,11 @@ struct StockModel::StockNode
     bool m_isExpanded = false;                // раскрыт ли узел в view?
 };
 
-StockModel::StockModel(DataBaseManager *dbman, QObject *parent)
+StockModel::StockModel(DataBaseManager *dbman, DictModel *dictModel, QObject *parent)
     : QAbstractItemModel(parent)
 {
     m_dbman = dbman;
+    m_dictModel = dictModel;
 }
 
 StockModel::~StockModel()
@@ -92,6 +93,9 @@ void StockModel::buildCategoryLevel()
 
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
     for (const CategoryItem &it : list) {
+        if (it.itemName.isEmpty()) {
+            continue;
+        }
         _nodes.append(std::move(nodeFactoryCategory(it)));
     }
 }

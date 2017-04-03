@@ -4,6 +4,7 @@
 #include <QAbstractItemModel>
 
 #include <databasemanager.h>
+#include <dictmodel.h>
 
 #define DATA_INVALID -1
 
@@ -44,9 +45,10 @@ public:
 
     // менеджеры
     DataBaseManager *m_dbman;
+    DictModel *m_dictModel;
 
     // методы
-    explicit StockModel(DataBaseManager *dbman, QObject *parent = nullptr);
+    explicit StockModel(DataBaseManager *dbman, DictModel *dictModel, QObject *parent = nullptr);
     ~StockModel();
 
     // фабрики узлов дерева
