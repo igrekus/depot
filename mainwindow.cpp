@@ -144,10 +144,7 @@ void MainWindow::procActRefreshView()
 
 void MainWindow::on_btnCategory_clicked()
 {
-    m_categoryListModel->clearModel();
-    m_projectTagListModel->clearModel();
-    qDebug() << ui->comboCategory->currentData(ROLE_NODE_ID) << ui->comboCategory->currentData(Qt::DisplayRole);
-    qDebug() << ui->comboProject->currentData(ROLE_NODE_ID) << ui->comboProject->currentData(Qt::DisplayRole);
+    m_dbman->getTransactList();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

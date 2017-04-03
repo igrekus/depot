@@ -1,6 +1,6 @@
 #include "databasemanager.h"
 
-#define AT_WORK
+//#define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
@@ -259,4 +259,40 @@ HashDict DataBaseManager::getMapCategory()
 #endif
     }
     return tmphash;
+}
+
+void DataBaseManager::getTransactList()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+#ifndef AT_WORK
+#endif
+
+#ifdef AT_WORK
+#endif
+
+    qDebug() << "connecting to db...";
+
+    QSqlDatabase lite = QSqlDatabase::addDatabase("QSQLITE", "lite");
+
+    lite.setDatabaseName("C:\\sqlite.db");
+    lite.open();
+
+    QSqlQuery lq("     SELECT `sklad`.`date`, `product`.`productname`, `sklad`.`amount`, `sklad`.`kto_vz`"
+                 "       FROM `sklad`"
+                 " INNER JOIN `product` ON `sklad`.`id_product` = `product`.`id`", lite);
+
+    qint32 i=0;
+    while(lq.next()) {
+        qDebug() << i
+                 << "d:" << lq.value(0).toDate().toString(Qt::ISODate)
+                 << "n:" << lq.value(1).toString()
+                 << "a:" << lq.value(2).toInt()
+                 << "k:" << lq.value(3).toString();
+        ++i;
+    }
+
+    qDebug()<<lq.lastError();
 }

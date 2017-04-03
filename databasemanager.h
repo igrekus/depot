@@ -7,6 +7,7 @@
 #include <QSqlError>
 #include <QSqlQuery>
 #include <QTextCodec>
+#include <QDate>
 
 #include <categoryitem.h>
 #include <groupitem.h>
@@ -25,7 +26,7 @@ public:
     QSqlQuery execSimpleQuery(const QString &qry);
     QSqlQuery execParametrizedQuery(const QString &qry, const QVariantList &params);
 
-    // списки итемов из БД
+    // списки итемов
     CategoryItem::CategoryList getCategoryList();
     GroupItem::GroupList getGroupList(const qint32 catId);
     StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
@@ -35,6 +36,10 @@ public:
     HashDict getMapProjectTag();
     HashDict getMapMiscTag();
     HashDict getMapCategory();
+
+    // таблица транзакций
+    void getTransactList();
+
 signals:
 
 public slots:
