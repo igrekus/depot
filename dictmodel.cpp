@@ -5,7 +5,7 @@ DictModel::DictModel(DataBaseManager *dbman, QObject *parent) : QObject(parent)
     m_dbman = dbman;
 }
 
-void DictModel::initDicts()
+void DictModel::initModel()
 {
     qDebug()<< "loading dicts from db";
     m_mapLocation = m_dbman->getMapLocation();

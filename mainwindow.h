@@ -12,7 +12,8 @@
 #include <databasemanager.h>
 #include <dictmodel.h>
 #include <stockmodel.h>
-#include <productitem.h>
+#include <transactmodel.h>
+//#include <productitem.h>
 
 namespace Ui {
 class MainWindow;
@@ -67,6 +68,7 @@ private:
     // model instances
     DictModel  *m_dictModel;
     StockModel *m_stockModel;
+    TransactModel *m_transactModel;
 
     MapModel *m_categoryListModel;
     MapModel *m_projectTagListModel;

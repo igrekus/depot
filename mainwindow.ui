@@ -94,7 +94,7 @@
         </property>
         <layout class="QVBoxLayout" name="verticalLayout">
          <item>
-          <widget class="QTreeView" name="treeDispatch"/>
+          <widget class="QTableView" name="tableTransact"/>
          </item>
          <item>
           <layout class="QHBoxLayout" name="horizontalLayout">

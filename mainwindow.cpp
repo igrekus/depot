@@ -13,7 +13,6 @@
 
 */
 
-
 // TODO: убрать в общий класс настроек
 QImage MainWindow::iconOpenFolder = QImage(":/gfx/openfolder.ico");
 QImage MainWindow::iconClosedFolder = QImage(":/gfx/closedfolder.ico");
@@ -30,23 +29,31 @@ MainWindow::MainWindow(QWidget *parent) :
     m_dbman = new DataBaseManager(this);
     m_dictModel = new DictModel(m_dbman, this);
     m_stockModel = new StockModel(m_dbman, m_dictModel, this);
+    m_transactModel = new TransactModel(m_dbman, m_dictModel, this);
 
     m_categoryListModel = new MapModel(this);
     m_projectTagListModel = new MapModel(this);
 
     ui->treeStock->setModel(m_stockModel);
-
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->treeStock->setUniformRowHeights(true);
+    ui->treeStock->setUniformRowHeights(false);
 //    ui->treeStock->setAlternatingRowColors(true);
     ui->treeStock->setIndentation(0);
-
     ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(1, new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(2, new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(3, new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(4, new TextDelegate(ui->treeStock));
+
+    ui->tableTransact->setModel(m_transactModel);
+    ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableTransact->verticalHeader()->setVisible(false);
+    ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
+    ui->tableTransact->horizontalHeader()->setHighlightSections(false);
+    ui->tableTransact->horizontalHeader()->setFixedHeight(20);
 
     ui->comboCategory->setModel(m_categoryListModel);
     ui->comboProject->setModel(m_projectTagListModel);
@@ -67,7 +74,8 @@ void MainWindow::initApplication()
     }
 
     m_stockModel->initModel();
-    m_dictModel->initDicts();
+    m_dictModel->initModel();
+    m_transactModel->initModel();
 
     m_categoryListModel->initModel(m_dictModel->m_mapCategory);
     m_projectTagListModel->initModel(m_dictModel->m_mapProjectTag);
@@ -132,19 +140,28 @@ void MainWindow::createActions()
 
 void MainWindow::procActRefreshView()
 {
-    qint32 twidth = ui->treeStock->frameGeometry().width()-30;
+    qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
-    ui->treeStock->setColumnWidth(0, twidth*0.15);
-    ui->treeStock->setColumnWidth(1, twidth*0.55);
-    ui->treeStock->setColumnWidth(2, twidth*0.10);
-    ui->treeStock->setColumnWidth(3, twidth*0.10);
-    ui->treeStock->setColumnWidth(4, twidth*0.10);
+    ui->treeStock->setColumnWidth(0, trwidth*0.15);
+    ui->treeStock->setColumnWidth(1, trwidth*0.55);
+    ui->treeStock->setColumnWidth(2, trwidth*0.10);
+    ui->treeStock->setColumnWidth(3, trwidth*0.10);
+    ui->treeStock->setColumnWidth(4, trwidth*0.10);
     ui->treeStock->show();
+
+    qint32 tbwidth = ui->tableTransact->frameGeometry().width()-15;
+    ui->tableTransact->hide();
+    ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
+    ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
+    ui->tableTransact->setColumnWidth(2, tbwidth*0.10);
+    ui->tableTransact->setColumnWidth(3, tbwidth*0.20);
+    ui->tableTransact->setColumnWidth(4, tbwidth*0.20);
+    ui->tableTransact->show();
 }
 
 void MainWindow::on_btnCategory_clicked()
 {
-    m_dbman->getTransactList();
+    m_dbman->convertDB();
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)

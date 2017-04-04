@@ -29,7 +29,7 @@ public:
     qint32    itemAmount;
     QString   itemSerialn;
     QString   itemProjectTag;
-    qint32    itemLocationRef;
+    QString   itemLocation;
 
     StockItem():
         AbstractItem(),
@@ -38,9 +38,9 @@ public:
         itemAmount(),
         itemSerialn(),
         itemProjectTag(),
-        itemLocationRef()
+        itemLocation()
     {}
-    StockItem(qint32 id, const QString &name, ItemType type, ItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const qint32 loc):
+    StockItem(qint32 id, const QString &name, ItemType type, ItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const QString &loc):
         AbstractItem    (id,
                          name),
         itemType        (type),
@@ -48,7 +48,7 @@ public:
         itemAmount      (amount),
         itemSerialn     (serialn),
         itemProjectTag  (proj),
-        itemLocationRef (loc)
+        itemLocation    (loc)
     {}
     StockItem(const StockItem &copy):
         AbstractItem    (copy),
@@ -57,7 +57,7 @@ public:
         itemAmount      (copy.itemAmount),
         itemSerialn     (copy.itemSerialn),
         itemProjectTag  (copy.itemProjectTag),
-        itemLocationRef (copy.itemLocationRef)
+        itemLocation    (copy.itemLocation)
     {}
     ~StockItem(){}
 
@@ -70,7 +70,7 @@ public:
             itemAmount      = right.itemAmount;
             itemSerialn     = right.itemSerialn;
             itemProjectTag  = right.itemProjectTag;
-            itemLocationRef = right.itemLocationRef;
+            itemLocation    = right.itemLocation;
         }
         return *this;
     }
@@ -83,7 +83,7 @@ public:
                 itemAmount      == right.itemAmount     &&
                 itemSerialn     == right.itemSerialn    &&
                 itemProjectTag  == right.itemProjectTag &&
-                itemLocationRef == right.itemLocationRef);
+                itemLocation    == right.itemLocation);
     }
 
     friend QDebug operator<<(QDebug dbg, const StockItem &right) {
@@ -95,7 +95,7 @@ public:
                       << " amt:"  << right.itemAmount
                       << " sn:"   << right.itemSerialn
                       << " proj:" << right.itemProjectTag
-                      << " loc:"  << right.itemLocationRef
+                      << " loc:"  << right.itemLocation
                       << ")";
         return dbg.maybeSpace();
     }
@@ -104,52 +104,28 @@ public:
 
     class StockItemBuilder {
     public:
-        qint32    stockId = 0;
-        QString   stockName = QString();
-        ItemType  stockType = ItemProduct;
-        ItemLevel stockLevel = Level_2;
-        qint32    stockAmount = 0;
-        QString   stockSerialn = QString();
+        qint32    stockId         = 0;
+        QString   stockName       = QString();
+        ItemType  stockType       = ItemProduct;
+        ItemLevel stockLevel      = Level_2;
+        qint32    stockAmount     = 0;
+        QString   stockSerialn    = QString();
         QString   stockProjectTag = QString();
-        qint32    stockLocationRef = 0;
+        QString   stockLocation   = QString();
 
-        StockItemBuilder& setId(const qint32 id) {
-            this->stockId = id;
-            return *this;
-        }
-        StockItemBuilder& setName(const QString &name) {
-            this->stockName = name;
-            return *this;
-        }
-        StockItemBuilder& setType(const ItemType itemtype) {
-            this->stockType = itemtype;
-            return *this;
-        }
-        StockItemBuilder& setLevel(const ItemLevel itemlevel) {
-            this->stockLevel = itemlevel;
-            return *this;
-        }
-        StockItemBuilder& setAmount(const qint32 amout) {
-            this->stockAmount = amout;
-            return *this;
-        }
-        StockItemBuilder& setSerialn(const QString &serialn) {
-            this->stockSerialn = serialn;
-            return *this;
-        }
-        StockItemBuilder& setProjectTag(const QString &projtag) {
-            this->stockProjectTag = projtag;
-            return *this;
-        }
-        StockItemBuilder& setLocationRef(const qint32 loc) {
-            this->stockLocationRef = loc;
-            return *this;
-        }
-        StockItem buildStockItem() {
+        StockItemBuilder& setId        (const qint32    id)        { this->stockId         = id;        return *this; }
+        StockItemBuilder& setName      (const QString  &name)      { this->stockName       = name;      return *this; }
+        StockItemBuilder& setType      (const ItemType  itemtype)  { this->stockType       = itemtype;  return *this; }
+        StockItemBuilder& setLevel     (const ItemLevel itemlevel) { this->stockLevel      = itemlevel; return *this; }
+        StockItemBuilder& setAmount    (const qint32    amout)     { this->stockAmount     = amout;     return *this; }
+        StockItemBuilder& setSerialn   (const QString  &serialn)   { this->stockSerialn    = serialn;   return *this; }
+        StockItemBuilder& setProjectTag(const QString  &projtag)   { this->stockProjectTag = projtag;   return *this; }
+        StockItemBuilder& setLocation  (const QString  &loc)       { this->stockLocation   = loc;       return *this; }
+        StockItem build() {
             return StockItem(this->stockId,         this->stockName,
                              this->stockType,       this->stockLevel,
                              this->stockAmount,     this->stockSerialn,
-                             this->stockProjectTag, this->stockLocationRef);
+                             this->stockProjectTag, this->stockLocation);
         }
     };
 };

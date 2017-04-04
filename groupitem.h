@@ -50,22 +50,15 @@ public:
         qint32  groupId = 0;
         QString groupName = QString();
 
-        GroupItemBuilder& setId(const qint32 id) {
-            this->groupId = id;
-            return *this;
-        }
-
-        GroupItemBuilder& setName(const QString &name) {
-            this->groupName = name;
-            return *this;
-        }
+        GroupItemBuilder& setId  (const qint32   id)   { this->groupId   = id;   return *this; }
+        GroupItemBuilder& setName(const QString &name) { this->groupName = name; return *this; }
 //        Builder& setProductP(){          // pre-defined group, if needed
 //			this->i = 42;
 //			this->f = -1.0f/12.0f;
 //			this->c = '@';
 //			return *this;
 //		}
-        GroupItem buildGroupItem() {
+        GroupItem build() {
             return GroupItem(this->groupId, this->groupName);
         }
     };

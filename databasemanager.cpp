@@ -1,6 +1,6 @@
 #include "databasemanager.h"
 
-//#define AT_WORK
+#define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
@@ -80,7 +80,7 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
         b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
 #endif
 
-        tmplist.append(b.buildCategoryItem());
+        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -111,7 +111,7 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
         b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
 #endif
 
-        tmplist.append(b.buildGroupItem());
+        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -138,7 +138,7 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
         b.setAmount     (q.value(2).toInt());
         b.setSerialn    (q.value(3).toString());
         b.setProjectTag (q.value(4).toString());
-        b.setLocationRef(q.value(4).toInt());
+        b.setLocationRef(q.value(4).toString());
 #endif
 
 #ifdef AT_WORK
@@ -149,10 +149,48 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
         b.setAmount     (q.value(2).toInt());
         b.setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
         b.setProjectTag (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
-        b.setLocationRef(q.value(4).toInt());
+        b.setLocation   (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
 #endif
 
-        tmplist.append(b.buildStockItem());
+        tmplist.append(b.build());
+    }
+    return tmplist;
+}
+
+TransactItem::TransactList DataBaseManager::getTransactList()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    TransactItem::TransactList tmplist;
+    TransactItem::TransactItemBuilder b;
+
+    // TODO: неправильный запрос, запрашивать сток
+    QSqlQuery q = execSimpleQuery("CALL getTransactList1k()");
+
+    while (q.next()) {
+#ifndef AT_WORK
+        b.setId     (q.value(0).toInt());
+        b.setDate   (q.value(1).toDate());
+        b.setDiff   (q.value(2).toInt());
+        b.setNote   (q.value(3).toString());
+        b.setStaff  (q.value(4).toString());
+        b.setName   (q.value(5).toString());
+        b.setBillRef(q.value(6).toInt());
+#endif
+
+#ifdef AT_WORK
+        b.setId     (q.value(0).toInt());
+        b.setDate   (q.value(1).toDate());
+        b.setDiff   (q.value(2).toInt());
+        b.setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
+        b.setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
+        b.setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()));
+        b.setBillRef(q.value(6).toInt());
+#endif
+
+        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -261,10 +299,11 @@ HashDict DataBaseManager::getMapCategory()
     return tmphash;
 }
 
-void DataBaseManager::getTransactList()
+void DataBaseManager::convertDB()
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+    QTextCodec *encode = QTextCodec::codecForLocale();
 #endif
 
 #ifndef AT_WORK
@@ -272,7 +311,8 @@ void DataBaseManager::getTransactList()
 
 #ifdef AT_WORK
 #endif
-
+// ------------ read sqlite, write mysql --------------
+/*
     qDebug() << "connecting to db...";
 
     QSqlDatabase lite = QSqlDatabase::addDatabase("QSQLITE", "lite");
@@ -282,17 +322,46 @@ void DataBaseManager::getTransactList()
 
     QSqlQuery lq("     SELECT `sklad`.`date`, `product`.`productname`, `sklad`.`amount`, `sklad`.`kto_vz`"
                  "       FROM `sklad`"
-                 " INNER JOIN `product` ON `sklad`.`id_product` = `product`.`id`", lite);
+                 " INNER JOIN `product` ON `sklad`.`id_product` = `product`.`id`"
+                 "   ORDER BY `sklad`.`date` ASC", lite);
 
-    qint32 i=0;
+    QVector<QString> dates;
+    QVector<QString> names;
+    QVector<qint32> amounts;
+    QVector<QString> persons;
     while(lq.next()) {
-        qDebug() << i
-                 << "d:" << lq.value(0).toDate().toString(Qt::ISODate)
-                 << "n:" << lq.value(1).toString()
-                 << "a:" << lq.value(2).toInt()
-                 << "k:" << lq.value(3).toString();
-        ++i;
+        dates   << lq.value(0).toDate().toString(Qt::ISODate);
+        names   << lq.value(1).toString();
+        amounts << lq.value(2).toInt();
+        persons << lq.value(3).toString();
     }
 
-    qDebug()<<lq.lastError();
+    QSqlQuery mq(" SELECT `product`.`product_id`, `product`.`product_name`"
+                 "   FROM `product`");
+
+    QSqlQuery wq;
+    QMap<QString, qint32> mproduct;
+    while (mq.next()) {
+        mproduct.insert(decode->toUnicode(mq.value(1).toString().toLocal8Bit()),
+                        mq.value(0).toInt());
+    }
+
+    for (qint32 i=0; i<dates.size(); ++i) {
+        if (mproduct.contains(names.at(i))) {
+            wq.prepare(" INSERT INTO `transact` "
+                       " (`transact_id`, `transact_date`, `transact_diff`, `transact_note`, `transact_productRef`)"
+                       " VALUES (NULL, :date, :diff, :note, :prod) ");
+            wq.bindValue(":date", dates.at(i));
+            wq.bindValue(":diff", amounts.at(i));
+            wq.bindValue(":note", encode->toUnicode(persons.at(i).toUtf8()));
+            wq.bindValue(":prod", mproduct.value(names.at(i)));
+            wq.exec();
+//            qDebug() << i << dates.at(i) << mproduct.value(names.at(i)) << names.at(i) << amounts.at(i);
+        }
+    }
+    qDebug() << wq.lastError();
+    qDebug() << lq.lastError();
+/**/
+// ---------------------------------------
+// ------------ update mysql -------------
 }

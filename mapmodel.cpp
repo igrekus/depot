@@ -11,7 +11,6 @@ void MapModel::initModel(const HashDict &data)
     m_mapData = data;
     m_strList = data.id.values();
     std::sort(m_strList.begin(), m_strList.end());
-    qDebug() << m_strList;
 }
 
 void MapModel::clearModel()

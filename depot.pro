@@ -23,7 +23,9 @@ SOURCES += main.cpp\
     abstractitem.cpp \
     groupitem.cpp \
     mapmodel.cpp \
-    hashdict.cpp
+    hashdict.cpp \
+    transactitem.cpp \
+    transactmodel.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -36,7 +38,9 @@ HEADERS  += mainwindow.h \
     abstractitem.h \
     groupitem.h \
     mapmodel.h \
-    hashdict.h
+    hashdict.h \
+    transactitem.h \
+    transactmodel.h
 
 FORMS    += mainwindow.ui
 

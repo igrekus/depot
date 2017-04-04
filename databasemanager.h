@@ -14,6 +14,7 @@
 #include <productitem.h>
 #include <stockitem.h>
 #include <hashdict.h>
+#include <transactitem.h>
 
 class DataBaseManager : public QObject
 {
@@ -30,6 +31,7 @@ public:
     CategoryItem::CategoryList getCategoryList();
     GroupItem::GroupList getGroupList(const qint32 catId);
     StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
+    TransactItem::TransactList getTransactList();
 
     // словари
     HashDict getMapLocation();
@@ -38,7 +40,7 @@ public:
     HashDict getMapCategory();
 
     // таблица транзакций
-    void getTransactList();
+    void convertDB();
 
 signals:
 

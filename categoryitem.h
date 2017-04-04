@@ -49,22 +49,15 @@ public:
         qint32  catId = 0;
         QString catName = QString();
 
-        CategoryItemBuilder& setId(const qint32 id) {
-            this->catId = id;
-            return *this;
-        }
-
-        CategoryItemBuilder& setName(const QString &name) {
-            this->catName = name;
-            return *this;
-        }
+        CategoryItemBuilder& setId  (const qint32   id)   { this->catId   = id;   return *this; }
+        CategoryItemBuilder& setName(const QString &name) { this->catName = name; return *this; }
 //        Builder& setProductP(){          // pre-defined category, if needed
 //			this->i = 42;
 //			this->f = -1.0f/12.0f;
 //			this->c = '@';
 //			return *this;
 //		}
-        CategoryItem buildCategoryItem() {
+        CategoryItem build() {
             return CategoryItem(this->catId, this->catName);
         }
     };

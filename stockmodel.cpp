@@ -56,8 +56,8 @@ StockModel::StockNode StockModel::nodeFactoryCategory(const CategoryItem &item)
     b.setAmount     (DATA_INVALID);
     b.setSerialn    (QString());
     b.setProjectTag (QString());
-    b.setLocationRef(DATA_INVALID);
-    return StockModel::StockNode(b.buildStockItem());
+    b.setLocation   (QString());
+    return StockModel::StockNode(b.build());
 }
 
 StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockNode *parent)
@@ -70,8 +70,8 @@ StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockN
     b.setAmount     (DATA_INVALID);
     b.setSerialn    (QString());
     b.setProjectTag (QString());
-    b.setLocationRef(DATA_INVALID);
-    return StockModel::StockNode(b.buildStockItem(), parent);
+    b.setLocation   (QString());
+    return StockModel::StockNode(b.build(), parent);
 }
 
 StockModel::StockNode StockModel::nodeFactoryStock(const StockItem &item, StockNode *parent)
@@ -231,7 +231,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case LocationColumn: {
-            return tmpitem.itemLocationRef;
+            return tmpitem.itemLocation;
             break;
         }
         case ColumnCount:

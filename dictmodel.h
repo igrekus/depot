@@ -29,7 +29,7 @@ public:
 
     explicit DictModel(DataBaseManager *dbman, QObject *parent = 0);
 
-    void initDicts();       // throws SqlError exception
+    void initModel();       // throws SqlError exception
 
 signals:
 
