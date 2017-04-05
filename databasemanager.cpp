@@ -131,25 +131,26 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
     while (q.next()) {
 
 #ifndef AT_WORK
-        b.setId         (q.value(0).toInt());
-        b.setName       (q.value(1).toString());
-        b.setType       (StockItem::ItemProduct);
-        b.setLevel      (StockItem::Level_2);
-        b.setAmount     (q.value(2).toInt());
-        b.setSerialn    (q.value(3).toString());
-        b.setProjectTag (q.value(4).toString());
-        b.setLocationRef(q.value(4).toString());
+        b.setId       (q.value(0).toInt());
+        b.setName     (q.value(1).toString());
+        b.setType     (StockItem::ItemProduct);
+        b.setLevel    (StockItem::Level_2);
+        b.setAmount   (q.value(2).toInt());
+        b.setSerialn  (q.value(3).toString());
+        b.setProject  (q.value(4).toString());
+        b.setLocation (q.value(5).toString());
+
 #endif
 
 #ifdef AT_WORK
         b.setId         (q.value(0).toInt());
         b.setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        b.setType       (StockItem::ItemProduct);
+        b.setType       (StockItem::ItemStock);
         b.setLevel      (StockItem::Level_2);
         b.setAmount     (q.value(2).toInt());
         b.setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
-        b.setProjectTag (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
-        b.setLocation   (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
+        b.setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
+        b.setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit()));
 #endif
 
         tmplist.append(b.build());
@@ -167,7 +168,8 @@ TransactItem::TransactList DataBaseManager::getTransactList()
     TransactItem::TransactItemBuilder b;
 
     // TODO: неправильный запрос, запрашивать сток
-    QSqlQuery q = execSimpleQuery("CALL getTransactList1k()");
+//    QSqlQuery q = execSimpleQuery("CALL getTransactList1k()");
+    QSqlQuery q = execSimpleQuery("CALL getTransactListFull()");
 
     while (q.next()) {
 #ifndef AT_WORK

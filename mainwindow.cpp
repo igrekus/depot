@@ -40,11 +40,13 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->treeStock->setUniformRowHeights(false);
 //    ui->treeStock->setAlternatingRowColors(true);
     ui->treeStock->setIndentation(0);
+    ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(1, new TextDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(2, new TextDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(3, new TextDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(4, new TextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(1, new TextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(2, new TextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(3, new TextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(4, new TextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(5, new TextDelegate(ui->treeStock));
 
     ui->tableTransact->setModel(m_transactModel);
     ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -79,6 +81,9 @@ void MainWindow::initApplication()
 
     m_categoryListModel->initModel(m_dictModel->m_mapCategory);
     m_projectTagListModel->initModel(m_dictModel->m_mapProjectTag);
+
+    ui->comboCategory->setCurrentIndex(0);
+    ui->comboProject->setCurrentIndex(0);
 
     actRefreshView->trigger();
 }
@@ -127,29 +132,44 @@ void MainWindow::createActions()
     actRefreshView = new QAction(tr("Refresh View"), this);
     connect(actRefreshView, &QAction::triggered, this, &MainWindow::procActRefreshView);
 
-//    actAddRec = new QAction(tr("Add Record"), this);
-//    connect(actAddRec, &QAction::triggered, this, &MainWindow::procActAddRec);
+    actAddCategory = new QAction(tr("Add Category"), this);
+    connect(actAddCategory, &QAction::triggered, this, &MainWindow::procActAddCategory);
+    actEditCategory = new QAction(tr("Edit Category"), this);
+    connect(actEditCategory, &QAction::triggered, this, &MainWindow::procActEditCategory);
+    actDeleteCategory = new QAction(tr("Edit Category"), this);
+    connect(actDeleteCategory, &QAction::triggered, this, &MainWindow::procActDeleteCategory);
 
-//    actEditRec = new QAction(tr("EditRecord"), this);
-//    connect(actEditRec, &QAction::triggered, this, &MainWindow::procActEditRec);
+    actAddGroup = new QAction(tr("Add Group"), this);
+    connect(actAddGroup, &QAction::triggered, this, &MainWindow::procActAddGroup);
+    actEditGroup = new QAction(tr("Edit Group"), this);
+    connect(actEditGroup, &QAction::triggered, this, &MainWindow::procActEditGroup);
+    actDeleteGroup = new QAction(tr("Delete Group"), this);
+    connect(actDeleteGroup, &QAction::triggered, this, &MainWindow::procActDeleteGroup);
 
-//    actDelRec = new QAction(tr("DelRecord"), this);
-//    connect(actDelRec, &QAction::triggered, this, &MainWindow::procActDelRec);
+    actAddStock = new QAction(tr("Add Stock"), this);
+    connect(actAddStock, &QAction::triggered, this, &MainWindow::procActAddStock);
+    actEditStock = new QAction(tr("Edit Stock"), this);
+    connect(actEditStock, &QAction::triggered, this, &MainWindow::procActEditStock);
+    actDeleteStock = new QAction(tr("Delete Stock"), this);
+    connect(actDeleteStock, &QAction::triggered, this, &MainWindow::procActDeleteStock);
 }
 
+
+// -------------------- Action Processing -----------------------------
 
 void MainWindow::procActRefreshView()
 {
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
     ui->treeStock->setColumnWidth(0, trwidth*0.15);
-    ui->treeStock->setColumnWidth(1, trwidth*0.55);
+    ui->treeStock->setColumnWidth(1, trwidth*0.45);
     ui->treeStock->setColumnWidth(2, trwidth*0.10);
     ui->treeStock->setColumnWidth(3, trwidth*0.10);
-    ui->treeStock->setColumnWidth(4, trwidth*0.10);
+    ui->treeStock->setColumnWidth(4, trwidth*0.13);
+    ui->treeStock->setColumnWidth(5, trwidth*0.07);
     ui->treeStock->show();
 
-    qint32 tbwidth = ui->tableTransact->frameGeometry().width()-15;
+    qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
     ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
@@ -159,9 +179,175 @@ void MainWindow::procActRefreshView()
     ui->tableTransact->show();
 }
 
-void MainWindow::on_btnCategory_clicked()
+void MainWindow::procActAddCategory()
 {
-    m_dbman->convertDB();
+    bool ok;
+    QString catname = QInputDialog::getText(this, "Добавить категорию",
+                                         "Введите название:", QLineEdit::Normal,
+                                         QString(), &ok);
+    if (ok & !catname.isEmpty()) {
+        m_stockModel->addCategory(catname);
+    }
+}
+
+void MainWindow::procActEditCategory()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    bool ok;
+    QString text = QInputDialog::getText(this,
+                                         "Изменить категорию",
+                                         "Введите новое название",
+                                         QLineEdit::Normal,
+                                         indexes.first().data(Qt::DisplayRole).toString(),
+                                         &ok);
+    if (ok && !text.isEmpty())
+        qDebug() << text;
+}
+
+void MainWindow::procActDeleteCategory()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    qDebug() << "del cat:" << indexes.first().data(Qt::DisplayRole).toString()
+                           << indexes.first().data(ROLE_NODE_ID).toInt();
+}
+
+void MainWindow::procActAddGroup()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    QModelIndex pindex;
+    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
+        pindex = indexes.first();
+    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemGroup) {
+        pindex = indexes.first().parent();
+    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
+        pindex = indexes.first().parent().parent();
+    }
+    bool ok;
+    QString text = QInputDialog::getText(this, "Добавить группу",
+                                         "Введите название:", QLineEdit::Normal,
+                                         QString(), &ok);
+    if (ok & !text.isEmpty()) {
+        qDebug() << "add to:" << pindex.data(Qt::DisplayRole).toString() << text;
+    }
+}
+
+void MainWindow::procActEditGroup()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    bool ok;
+    QString text = QInputDialog::getText(this,
+                                         "Изменить группу",
+                                         "Введите новое название",
+                                         QLineEdit::Normal,
+                                         indexes.first().data(Qt::DisplayRole).toString(),
+                                         &ok);
+    if (ok && !text.isEmpty())
+        qDebug() << text;
+}
+
+void MainWindow::procActDeleteGroup()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    qDebug() << "del group" << indexes.first().data(Qt::DisplayRole).toString()
+                            << indexes.first().data(ROLE_NODE_ID).toInt();
+}
+
+void MainWindow::procActAddStock()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите группу для добавления позиции хранения.");
+        return;
+    }
+    QModelIndex pindex;
+    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemGroup) {
+        pindex = indexes.first();
+    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
+        pindex = indexes.first().parent();
+    }
+    qDebug() << "custom add stock item dialog: select product + project + amount (auto-register positive transact)";
+    qDebug() << "add to:" << pindex.data(Qt::DisplayRole).toString()
+                          << pindex.data(ROLE_NODE_ID).toInt();
+}
+
+void MainWindow::procActEditStock()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    qDebug() << "custom edit stock item dialog: deny select product, select project + amount (auto transact)";
+}
+
+void MainWindow::procActDeleteStock()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    qDebug() << "del stock item:" << indexes.first().data(Qt::DisplayRole).toString()
+                                  << indexes.first().data(ROLE_NODE_ID).toInt();
+}
+
+
+// -------------------- Control Events -----------------------------
+void MainWindow::on_btnAddCategory_clicked()
+{
+    actAddCategory->trigger();
+}
+
+void MainWindow::on_btnAddGroup_clicked()
+{
+    actAddGroup->trigger();
+}
+
+void MainWindow::on_btnAddStock_clicked()
+{
+    actAddStock->trigger();
+}
+
+void MainWindow::on_btnEditStockItem_clicked()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    if (indexes.isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись для редактирования.");
+        return;
+    }
+    switch (indexes.first().data(ROLE_NODE_TYPE).toInt()) {
+    case StockItem::ItemCategory:
+        actEditCategory->trigger();
+        break;
+    case StockItem::ItemGroup:
+        actEditGroup->trigger();
+        break;
+    case StockItem::ItemStock:
+        actEditStock->trigger();
+        break;
+    default:
+        break;
+    }
+}
+
+void MainWindow::on_btnDeleteStockItem_clicked()
+{
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    if (indexes.isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись для удаления.");
+        return;
+    }
+    switch (indexes.first().data(ROLE_NODE_TYPE).toInt()) {
+    case StockItem::ItemCategory:
+        actDeleteCategory->trigger();
+        break;
+    case StockItem::ItemGroup:
+        actDeleteGroup->trigger();
+        break;
+    case StockItem::ItemStock:
+        actDeleteStock->trigger();
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -187,9 +373,8 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
 //    0x00200000
 //    Used by item views to indicate if a vertical line needs to be drawn (for siblings).
 
-
-    switch (index.data(ROLE_LEVEL_ID).toInt()) {
-    case StockItem::LevelRoot: {
+    switch (index.data(ROLE_NODE_TYPE).toInt()) {
+    case StockItem::ItemCategory: {
         opt.rect.adjust(0, 0, opt.widget->frameGeometry().width(), 0);
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
@@ -210,21 +395,17 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
         painter->drawImage(iconPos, icon.scaled(iconSize, Qt::KeepAspectRatio, Qt::FastTransformation));
         if (cellSelected) {
             pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25, 0, 200, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25, 0, 200, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
+        option.widget->style()->drawItemText(painter, option.rect.adjusted(+25, 0, 200, 0),
+                                             1, pal, true,
+                                             index.data(Qt::DisplayRole).toString(),
+                                             QPalette::ButtonText);
         break;
     }
-    case StockItem::Level_1: {
+    case StockItem::ItemGroup: {
         opt.rect.adjust(0, 0, opt.widget->frameGeometry().width(), 0);
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
@@ -246,21 +427,17 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
 
         if (cellSelected) {
             pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 10, 0, 200, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 10, 0, 200, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
+        option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 10, 0, 200, 0),
+                                             1, pal, true,
+                                             index.data(Qt::DisplayRole).toString(),
+                                             QPalette::ButtonText);
         break;
     }
-    case StockItem::Level_2: {
+    case StockItem::ItemStock: {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPalette pal = option.palette;
@@ -288,7 +465,6 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
         break;
     }
     }
-
     painter->restore();
 }
 
@@ -299,10 +475,10 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
     painter->save();
 
     bool cellSelected = (option.state & QStyle::State_Selected);
-    bool hasChildren = (option.state & QStyle::State_Children);
-    bool branchOpen = (option.state & QStyle::State_Open);
+//    bool hasChildren = (option.state & QStyle::State_Children);
+//    bool branchOpen = (option.state & QStyle::State_Open);
 
-    if (index.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemProduct) {
+    if (index.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPen pen(QColor(Qt::lightGray));
@@ -314,18 +490,14 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
         QPalette pal = option.palette;
         if (cellSelected) {
             pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+5, 0, 0, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+5, 0, 0, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
+        option.widget->style()->drawItemText(painter, option.rect.adjusted(+5, 0, 0, 0),
+                                             1, pal, true,
+                                             index.data(Qt::DisplayRole).toString(),
+                                             QPalette::ButtonText);
     }
     painter->restore();
 }

@@ -30,8 +30,9 @@ QVariant TransactModel::headerData(int section, Qt::Orientation orientation, int
 
 int TransactModel::rowCount(const QModelIndex &parent) const
 {
-    if (parent.isValid())
+    if (parent.isValid()) {
         return 0;
+    }
     return m_nodeList.size();
 }
 
@@ -57,6 +58,7 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
             break;
         }
         case ColumnDiff: {
+//            return QVariant(std::abs(m_nodeList.at(index.row()).transactItem.itemDiff));
             return QVariant(m_nodeList.at(index.row()).transactItem.itemDiff);
             break;
         }
@@ -76,6 +78,34 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
     }
     case ROLE_NODE_ID: {
         break;
+    }
+    case Qt::TextAlignmentRole: {
+        switch (index.column()) {
+        case ColumnDate :{
+            return Qt::AlignCenter;
+            break;
+        }
+        case ColumnDiff: {
+            return Qt::AlignRight;
+            break;
+        }
+        case ColumnStaff: {
+            return Qt::AlignCenter;
+            break;
+        }
+        }
+    }
+    case Qt::BackgroundRole: {
+        switch (index.column()) {
+        case ColumnDiff: {
+            if (m_nodeList.at(index.row()).transactItem.itemDiff > 0) {
+                return QVariant(QBrush(QColor(QRgb(COLOR_RECEIPT))));
+            } else {
+                return QVariant(QBrush(QColor(QRgb(COLOR_EXPENSE))));
+            }
+            break;
+        }
+        }
     }
     default:
         break;

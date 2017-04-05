@@ -6,6 +6,9 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QImage>
+#include <QInputDialog>
+#include <QItemSelectionModel>
+#include <QMessageBox>
 
 #include <mapmodel.h>
 #include <linkeddict.h>
@@ -13,7 +16,6 @@
 #include <dictmodel.h>
 #include <stockmodel.h>
 #include <transactmodel.h>
-//#include <productitem.h>
 
 namespace Ui {
 class MainWindow;
@@ -54,11 +56,29 @@ public:
 
 private slots:
 
-    // action processing
+    // обработка action
     void procActRefreshView();
 
+    // редактировние категории
+    // TODO: объединить однотипные действия в один метод?
+    void procActAddCategory();
+    void procActEditCategory();
+    void procActDeleteCategory();
+
+    void procActAddGroup();
+    void procActEditGroup();
+    void procActDeleteGroup();
+
+    void procActAddStock();
+    void procActEditStock();
+    void procActDeleteStock();
+
     // control events
-    void on_btnCategory_clicked();
+    void on_btnAddCategory_clicked();
+    void on_btnAddGroup_clicked();
+    void on_btnAddStock_clicked();
+    void on_btnDeleteStockItem_clicked();
+    void on_btnEditStockItem_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -76,6 +96,18 @@ private:
 
     // actions
     QAction *actRefreshView;
+
+    QAction *actAddCategory;
+    QAction *actEditCategory;
+    QAction *actDeleteCategory;
+
+    QAction *actAddGroup;
+    QAction *actEditGroup;
+    QAction *actDeleteGroup;
+
+    QAction *actAddStock;
+    QAction *actEditStock;
+    QAction *actDeleteStock;
 
     // events
     void resizeEvent(QResizeEvent *event) override;

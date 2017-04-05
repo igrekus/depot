@@ -49,28 +49,28 @@ StockModel::~StockModel()
 StockModel::StockNode StockModel::nodeFactoryCategory(const CategoryItem &item)
 {
     StockItem::StockItemBuilder b;
-    b.setId         (item.itemId);
-    b.setName       (item.itemName);
-    b.setType       (StockItem::ItemCategory);
-    b.setLevel      (StockItem::LevelRoot);
-    b.setAmount     (DATA_INVALID);
-    b.setSerialn    (QString());
-    b.setProjectTag (QString());
-    b.setLocation   (QString());
+    b.setId       (item.itemId);
+    b.setName     (item.itemName);
+    b.setType     (StockItem::ItemCategory);
+    b.setLevel    (StockItem::LevelRoot);
+    b.setAmount   (DATA_INVALID);
+    b.setSerialn  (QString());
+    b.setProject  (QString());
+    b.setLocation (QString());
     return StockModel::StockNode(b.build());
 }
 
 StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockNode *parent)
 {
     StockItem::StockItemBuilder b;
-    b.setId         (item.itemId);
-    b.setName       (item.itemName);
-    b.setType       (StockItem::ItemGroup);
-    b.setLevel      (StockItem::Level_1);
-    b.setAmount     (DATA_INVALID);
-    b.setSerialn    (QString());
-    b.setProjectTag (QString());
-    b.setLocation   (QString());
+    b.setId       (item.itemId);
+    b.setName     (item.itemName);
+    b.setType     (StockItem::ItemGroup);
+    b.setLevel    (StockItem::Level_1);
+    b.setAmount   (DATA_INVALID);
+    b.setSerialn  (QString());
+    b.setProject  (QString());
+    b.setLocation (QString());
     return StockModel::StockNode(b.build(), parent);
 }
 
@@ -93,7 +93,7 @@ void StockModel::buildCategoryLevel()
 
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
     for (const CategoryItem &it : list) {
-        if (it.itemName.isEmpty()) {
+        if (it.itemId == 1) {
             continue;
         }
         _nodes.append(std::move(nodeFactoryCategory(it)));
@@ -128,7 +128,7 @@ void StockModel::buildStockLevel()
 
 QVariant StockModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"№", "Наименование", "Остаток", "№ партии", "Место хранения"};
+    const QStringList headers = {"№", "Наименование", "Остаток", "№ партии", "Тема", "Место хранения"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers[section];
     }
@@ -203,7 +203,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         switch (index.column()) {
         case NumberColumn: {
-            if (tmpitem.itemLevel == StockItem::Level_2) {
+            if (tmpitem.itemType == StockItem::ItemStock) {
                 return tmpitem.itemId;
             } else {
                 return tmpitem.itemName;
@@ -211,7 +211,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case NameColumn: {
-            if (tmpitem.itemLevel == StockItem::Level_2) {
+            if (tmpitem.itemType == StockItem::ItemStock) {
                 return tmpitem.itemName;
             } else {
                 return QVariant();
@@ -219,7 +219,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case AmountColumn: {
-            if (tmpitem.itemLevel == StockItem::Level_2) {
+            if (tmpitem.itemType == StockItem::ItemStock) {
                 return tmpitem.itemAmount;
             } else {
                 return QVariant();
@@ -228,6 +228,10 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         case SerialnColumn: {
             return tmpitem.itemSerialn;
+            break;
+        }
+        case ProjectColumn: {
+            return tmpitem.itemProject;
             break;
         }
         case LocationColumn: {
@@ -246,6 +250,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         case NameColumn:
         case AmountColumn:
         case SerialnColumn:
+        case ProjectColumn:
         case LocationColumn: {
             return tmpitem.itemLevel;
             break;
@@ -262,8 +267,26 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         case NameColumn:
         case AmountColumn:
         case SerialnColumn:
+        case ProjectColumn:
         case LocationColumn: {
             return tmpitem.itemType;
+            break;
+        }
+        case ColumnCount:
+        default:
+            break;
+        }
+        break;
+    }
+    case ROLE_NODE_ID: {
+        switch (index.column()) {
+        case NumberColumn:
+        case NameColumn:
+        case AmountColumn:
+        case SerialnColumn:
+        case ProjectColumn:
+        case LocationColumn: {
+            return tmpitem.itemId;
             break;
         }
         case ColumnCount:
@@ -285,4 +308,16 @@ int StockModel::findRow(const StockNode *stockNode) const
     StockNodeList::const_iterator position = qFind(parentNodeChildren, *stockNode);
     Q_ASSERT(position != parentNodeChildren.end());
     return std::distance(parentNodeChildren.begin(), position);
+}
+
+void StockModel::addCategory(const QString &catName)
+{
+    beginInsertRows(QModelIndex(), _nodes.size(), _nodes.size() + 1);
+
+    CategoryItem::CategoryItemBuilder b;
+    b.setName(catName);
+
+    _nodes.append(std::move(nodeFactoryCategory(b.build())));
+
+    endInsertRows();
 }
