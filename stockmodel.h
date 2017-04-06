@@ -11,6 +11,7 @@
 #define ROLE_LEVEL_ID  (Qt::UserRole+1)
 #define ROLE_NODE_TYPE (Qt::UserRole+2)
 #define ROLE_NODE_ID   (Qt::UserRole+3)
+#define ROLE_NODE_HAS_CHILDREN (Qt::UserRole+4)
 
 class StockItem;
 
@@ -41,8 +42,8 @@ public:
 
     // данные
     struct StockNode;
-    typedef QVector<StockNode> StockNodeList;
-    StockNodeList _nodes;                         // узлы дерева на данном уровне
+    typedef QList<StockNode> StockNodeList;
+    StockNodeList m_nodes;                         // узлы дерева на данном уровне
 
     // менеджеры
     DataBaseManager *m_dbman;
@@ -53,9 +54,9 @@ public:
     ~StockModel();
 
     // фабрики узлов дерева
-    StockNode nodeFactoryCategory(const CategoryItem &item);
-    StockNode nodeFactoryGroup(const GroupItem &item, StockNode *parent = nullptr);
-    StockNode nodeFactoryStock(const StockItem &item, StockNode *parent = nullptr);
+    StockNode makeCategoryNode(const CategoryItem &item);
+    StockNode makeGroupNode(const GroupItem &item, StockNode *parent = nullptr);
+    StockNode makeStockNode(const StockItem &item, StockNode *parent = nullptr);
 
     void initModel();
     void buildCategoryLevel();
@@ -71,7 +72,9 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     int findRow(const StockNode *stockNode) const;
 
-    void addCategory(const QString &catName);
+    QModelIndex addCategory(const QString &catName);
+    void editCategory(const QModelIndex &index, const QString &newName);
+    void deleteCategory(const QModelIndex &index);
 
 private:
 };

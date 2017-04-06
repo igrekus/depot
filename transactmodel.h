@@ -45,7 +45,7 @@ public:
         }
     };
     // данные
-    using TransactNodeList = QVector<TransactNode>;
+    using TransactNodeList = QList<TransactNode>;
     TransactNodeList m_nodeList;
 
     // менеджеры

@@ -27,6 +27,14 @@ struct StockModel::StockNode
         return r;
     }
 
+    friend QDebug operator<<(QDebug dbg, const StockNode &right) {
+        dbg.nospace() << "StockNode("
+                      << "data:"    << right.stockItem
+                      << " child:"  << right.children
+                      << " parent:" << right.parent
+                      << ")";
+        return dbg.maybeSpace();
+    }
     StockItem stockItem;                      // данные узла
     StockModel::StockNodeList children;       // массив ссылок на дочерние узлы
     StockNode *parent = nullptr;              // ссылка на родительский узел
@@ -46,7 +54,7 @@ StockModel::~StockModel()
 
 }
 
-StockModel::StockNode StockModel::nodeFactoryCategory(const CategoryItem &item)
+StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
 {
     StockItem::StockItemBuilder b;
     b.setId       (item.itemId);
@@ -60,7 +68,7 @@ StockModel::StockNode StockModel::nodeFactoryCategory(const CategoryItem &item)
     return StockModel::StockNode(b.build());
 }
 
-StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockNode *parent)
+StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode *parent)
 {
     StockItem::StockItemBuilder b;
     b.setId       (item.itemId);
@@ -74,7 +82,7 @@ StockModel::StockNode StockModel::nodeFactoryGroup(const GroupItem &item, StockN
     return StockModel::StockNode(b.build(), parent);
 }
 
-StockModel::StockNode StockModel::nodeFactoryStock(const StockItem &item, StockNode *parent)
+StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockNode *parent)
 {
     return StockModel::StockNode(item, parent);
 }
@@ -92,22 +100,24 @@ void StockModel::buildCategoryLevel()
     qDebug() << "building category level";
 
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
+    beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
         if (it.itemId == 1) {
             continue;
         }
-        _nodes.append(std::move(nodeFactoryCategory(it)));
+        m_nodes.append(std::move(makeCategoryNode(it)));
     }
+    endInsertRows();
 }
 
 void StockModel::buildGroupLevel()
 {
     qDebug() << "building group level";
-
-    for (StockNode &it : _nodes) {
+// TODO: begininsertorws;
+    for (StockNode &it : m_nodes) {
         GroupItem::GroupList list = m_dbman->getGroupList(it.stockItem.itemId);
         for (const GroupItem &jt : list) {
-            it.children.append(std::move(nodeFactoryGroup(jt, &it)));
+            it.children.append(std::move(makeGroupNode(jt, &it)));
         }
     }
 }
@@ -115,12 +125,12 @@ void StockModel::buildGroupLevel()
 void StockModel::buildStockLevel()
 {
     qDebug() << "building product level";
-
-    for (StockNode &it : _nodes) {
+// TODO: endinsertrows
+    for (StockNode &it : m_nodes) {
         for (StockNode &jt : it.children) {
             StockItem::StockList list = m_dbman->getStockList(it.stockItem.itemId, jt.stockItem.itemId);
             for (const StockItem &kt : list) {
-                jt.children.append(std::move(nodeFactoryStock(kt, &jt)));
+                jt.children.append(std::move(makeStockNode(kt, &jt)));
             }
         }
     }
@@ -142,12 +152,12 @@ QModelIndex StockModel::index(int row, int column, const QModelIndex &parent) co
     }
 
     if (!parent.isValid()) {
-        Q_ASSERT(_nodes.size() > row);
-        return createIndex(row, column, const_cast<StockNode*>(&_nodes[row]));
+        Q_ASSERT(m_nodes.size() > row);
+        return createIndex(row, column, const_cast<StockNode*>(&m_nodes.at(row)));
     }
 
     StockNode *parentNode = static_cast<StockNode *>(parent.internalPointer());
-    Q_ASSERT(parentNode!= 0);
+    Q_ASSERT(parentNode!=nullptr);
 //    Q_ASSERT(parentNode->mapped);
     Q_ASSERT(parentNode->children.size() > row);
     return createIndex(row, column, &parentNode->children[row]);
@@ -160,10 +170,10 @@ QModelIndex StockModel::parent(const QModelIndex &index) const
     }
 
     StockNode *currentNode = static_cast<StockNode *>(index.internalPointer());
-    Q_ASSERT(currentNode != 0);
+    Q_ASSERT(currentNode != nullptr);
 
     StockNode* parentNode = currentNode->parent;
-    if (parentNode != 0) {
+    if (parentNode != nullptr) {
         return createIndex(findRow(parentNode), RamificationColumn, parentNode);
     }
     else {
@@ -174,10 +184,10 @@ QModelIndex StockModel::parent(const QModelIndex &index) const
 int StockModel::rowCount(const QModelIndex &parent) const
 {
     if (!parent.isValid()) {
-        return _nodes.size();
+        return m_nodes.size();
     }
     const StockNode* parentNode = static_cast<const StockNode*>(parent.internalPointer());
-    Q_ASSERT(parentNode != 0);
+    Q_ASSERT(parentNode != nullptr);
 
     return parentNode->children.size();
 }
@@ -194,10 +204,10 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         return QVariant();
     }
 
-    const StockNode *stockNode = static_cast<StockNode *>(index.internalPointer());
-    const StockItem tmpitem = stockNode->stockItem;
+    const StockNode *tmpnode = static_cast<StockNode *>(index.internalPointer());
+    const StockItem tmpitem = tmpnode->stockItem;
 
-    Q_ASSERT(stockNode != 0);
+//    Q_ASSERT(stockNode != nullptr);
 
     switch (role) {
     case Qt::DisplayRole: {
@@ -295,6 +305,23 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
+    case ROLE_NODE_HAS_CHILDREN: {
+        switch (index.column()) {
+        case NumberColumn:
+        case NameColumn:
+        case AmountColumn:
+        case SerialnColumn:
+        case ProjectColumn:
+        case LocationColumn: {
+            return !tmpnode->children.isEmpty();
+            break;
+        }
+        case ColumnCount:
+        default:
+            break;
+        }
+        break;
+    }
     default:
         break;
     }
@@ -303,21 +330,60 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
 
 int StockModel::findRow(const StockNode *stockNode) const
 {
-    Q_ASSERT(stockNode != 0);
-    const StockNodeList &parentNodeChildren = stockNode->parent != 0 ? stockNode->parent->children: _nodes;
-    StockNodeList::const_iterator position = qFind(parentNodeChildren, *stockNode);
-    Q_ASSERT(position != parentNodeChildren.end());
-    return std::distance(parentNodeChildren.begin(), position);
+    Q_ASSERT(stockNode != nullptr);
+    const StockNodeList &searchList = stockNode->parent != nullptr ? stockNode->parent->children : m_nodes;
+    return searchList.indexOf(*stockNode);
+//    StockNodeList::const_iterator position = std::find(searchList.begin(), searchList.end(), *stockNode);
+//    Q_ASSERT(position != searchList.end());
+//    return std::distance(searchList.begin(), position);
 }
 
-void StockModel::addCategory(const QString &catName)
+QModelIndex StockModel::addCategory(const QString &catName)
 {
-    beginInsertRows(QModelIndex(), _nodes.size(), _nodes.size() + 1);
+    auto row_iterator = std::find_if(std::begin(m_nodes), std::end(m_nodes), [&catName](const StockNode &it){
+        return it.stockItem.itemName > catName;
+    });
+
+    qint32 row = std::distance(std::begin(m_nodes), row_iterator);
+
+//    qint32 newId = m_dbman->insertCategory(catName);
 
     CategoryItem::CategoryItemBuilder b;
+//    b.setId(newId);
     b.setName(catName);
 
-    _nodes.append(std::move(nodeFactoryCategory(b.build())));
-
+    beginInsertRows(QModelIndex(), row, row + 1);
+    m_nodes.insert(row, std::move(makeCategoryNode(b.build())));
     endInsertRows();
+
+    return index(row, 0, QModelIndex());
+}
+
+void StockModel::editCategory(const QModelIndex &index, const QString &newName)
+{
+    StockItem &editItem = static_cast<StockNode *>(index.internalPointer())->stockItem;
+    editItem.itemName = newName;
+
+    CategoryItem::CategoryItemBuilder b;
+    b.setId(editItem.itemId);
+    b.setName(editItem.itemName);
+
+//    m_dbman->updateCategory(b.build());
+
+    emit dataChanged(index, index);
+}
+
+void StockModel::deleteCategory(const QModelIndex &index)
+{
+    StockNode *delNode = static_cast<StockNode *>(index.internalPointer());
+
+    qint32 row = findRow(delNode);
+//    m_dbman->deleteCategory(b.build);
+
+    beginRemoveRows(QModelIndex(), index.row(), index.row());
+    m_nodes.removeAt(row);
+//    m_nodes.removeOne(*delNode);
+    endRemoveRows();
+
+    qDebug() << "row:" << index.row() << "list pos:" << row << "name:" << index.data(Qt::DisplayRole).toString();
 }

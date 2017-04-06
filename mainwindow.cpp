@@ -5,6 +5,7 @@
  TODO:
       - обработчик ошибок через throw, сделать в одном месте -- где?;
       - singleton для констант типа DATA_INVALID
+      - переписать определение позиции для вставки из свитча на лямбды
 
 создание объектов:
       - https://ru.wikipedia.org/wiki/%D0%A4%D0%B0%D0%B1%D1%80%D0%B8%D1%87%D0%BD%D1%8B%D0%B9_%D0%BC%D0%B5%D1%82%D0%BE%D0%B4_(%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
@@ -13,7 +14,7 @@
 
 */
 
-// TODO: убрать в общий класс настроек
+// TODO: убрать в общий класс настроек, не использовать .qrc
 QImage MainWindow::iconOpenFolder = QImage(":/gfx/openfolder.ico");
 QImage MainWindow::iconClosedFolder = QImage(":/gfx/closedfolder.ico");
 QImage MainWindow::iconDisabledFolder = QImage(":/gfx/disabledfolder.ico");
@@ -154,9 +155,7 @@ void MainWindow::createActions()
     connect(actDeleteStock, &QAction::triggered, this, &MainWindow::procActDeleteStock);
 }
 
-
 // -------------------- Action Processing -----------------------------
-
 void MainWindow::procActRefreshView()
 {
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
@@ -186,7 +185,10 @@ void MainWindow::procActAddCategory()
                                          "Введите название:", QLineEdit::Normal,
                                          QString(), &ok);
     if (ok & !catname.isEmpty()) {
-        m_stockModel->addCategory(catname);
+        catname.replace(0, 1, catname.at(0).toUpper());
+        QModelIndex ind = m_stockModel->addCategory(catname);
+        ui->treeStock->selectionModel()->clear();
+        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 }
 
@@ -194,25 +196,44 @@ void MainWindow::procActEditCategory()
 {
     QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
     bool ok;
-    QString text = QInputDialog::getText(this,
-                                         "Изменить категорию",
-                                         "Введите новое название",
-                                         QLineEdit::Normal,
-                                         indexes.first().data(Qt::DisplayRole).toString(),
-                                         &ok);
-    if (ok && !text.isEmpty())
-        qDebug() << text;
+    QString catName = indexes.first().data(Qt::DisplayRole).toString();
+    QString newName = QInputDialog::getText(this,
+                                            "Изменить категорию",
+                                            "Введите новое название",
+                                            QLineEdit::Normal,
+                                            indexes.first().data(Qt::DisplayRole).toString(),
+                                            &ok);
+    if (ok && !catName.isEmpty() && catName != newName) {
+        m_stockModel->editCategory(indexes.first(), newName);
+    }
 }
 
 void MainWindow::procActDeleteCategory()
 {
     QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    qDebug() << "del cat:" << indexes.first().data(Qt::DisplayRole).toString()
-                           << indexes.first().data(ROLE_NODE_ID).toInt();
+    if (indexes.first().data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя удалить непустую категорию. "
+                             "Сначала удалите все группы.");
+        return;
+    } else {
+        qint32 res = QMessageBox::question(this,
+                                           "Внимание!",
+                                           "Вы действительно хотите удалить выбранную категорию?",
+                                           QMessageBox::Yes,
+                                           QMessageBox::No | QMessageBox::Default);
+        if (res == QMessageBox::Yes) {
+            m_stockModel->deleteCategory(indexes.first());
+        } else {
+            return;
+        }
+    }
 }
 
 void MainWindow::procActAddGroup()
 {
+    // TODO: перенести отсюда логику запроса выделения категории, индекс получать лямбдой
     QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
     QModelIndex pindex;
     if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
@@ -285,7 +306,6 @@ void MainWindow::procActDeleteStock()
                                   << indexes.first().data(ROLE_NODE_ID).toInt();
 }
 
-
 // -------------------- Control Events -----------------------------
 void MainWindow::on_btnAddCategory_clicked()
 {
@@ -294,6 +314,7 @@ void MainWindow::on_btnAddCategory_clicked()
 
 void MainWindow::on_btnAddGroup_clicked()
 {
+    // TODO: Перенести сюда логику запроса выделения категории
     actAddGroup->trigger();
 }
 

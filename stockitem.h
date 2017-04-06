@@ -100,7 +100,7 @@ public:
         return dbg.maybeSpace();
     }
 
-    using StockList = QVector<StockItem>;
+    using StockList = QList<StockItem>;
 
     class StockItemBuilder {
     public:

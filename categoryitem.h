@@ -42,7 +42,7 @@ public:
                       << ")";
         return dbg.maybeSpace();
     }
-    using CategoryList = QVector<CategoryItem>;
+    using CategoryList = QList<CategoryItem>;
 
     class CategoryItemBuilder {
     public:

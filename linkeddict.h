@@ -11,9 +11,9 @@ class LinkedDict : public QObject
     Q_OBJECT
 public:
 
-    using DictIdList    = QVector<qint32>;
-    using DictMapList   = QVector<DictIdList>;
-    using DictChildList = QVector<LinkedDict *>;
+    using DictIdList    = QList<qint32>;
+    using DictMapList   = QList<DictIdList>;
+    using DictChildList = QList<LinkedDict *>;
 
     // data members
     DictIdList    m_dictData;             // список id словаря

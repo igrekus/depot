@@ -85,7 +85,7 @@ public:
                       << ")";
         return dbg.maybeSpace();
     }
-    using TransactList = QVector<TransactItem>;
+    using TransactList = QList<TransactItem>;
 
     class TransactItemBuilder {
     public:
