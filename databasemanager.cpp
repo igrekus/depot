@@ -1,6 +1,6 @@
 #include "databasemanager.h"
 
-#define AT_WORK
+//#define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
@@ -131,14 +131,14 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
     while (q.next()) {
 
 #ifndef AT_WORK
-        b.setId       (q.value(0).toInt());
-        b.setName     (q.value(1).toString());
-        b.setType     (StockItem::ItemProduct);
-        b.setLevel    (StockItem::Level_2);
-        b.setAmount   (q.value(2).toInt());
-        b.setSerialn  (q.value(3).toString());
-        b.setProject  (q.value(4).toString());
-        b.setLocation (q.value(5).toString());
+        b.setId         (q.value(0).toInt());
+        b.setName       (q.value(1).toString());
+        b.setType       (StockItem::ItemStock);
+        b.setLevel      (StockItem::Level_2);
+        b.setAmount     (q.value(2).toInt());
+        b.setSerialn    (q.value(3).toString());
+        b.setProject    (q.value(4).toString());
+        b.setLocation   (q.value(5).toString());
 
 #endif
 

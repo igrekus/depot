@@ -151,7 +151,7 @@
            <item>
             <widget class="QPushButton" name="btnAddCategory">
              <property name="text">
-              <string>+ Кат</string>
+              <string>+ Кат &amp;A</string>
              </property>
             </widget>
            </item>
