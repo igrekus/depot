@@ -40,6 +40,9 @@ method chain:
                 .priorityRush();
     }
 
+data validation:
+http://rlacovara.blogspot.ru/2009/03/what-is-difference-between-dto-and-poco.html
+
 tests:
 https://sourceforge.net/p/cxxmock/wiki/Home/
 https://github.com/eranpeer/FakeIt
