@@ -61,10 +61,10 @@ StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
     b.setName     (item.itemName);
     b.setType     (StockItem::ItemCategory);
     b.setLevel    (StockItem::LevelRoot);
-    b.setAmount   (DATA_INVALID);
-    b.setSerialn  (QString());
-    b.setProject  (QString());
-    b.setLocation (QString());
+//    b.setAmount   (DATA_INVALID);
+//    b.setSerialn  (QString());
+//    b.setProject  (QString());
+//    b.setLocation (QString());
     return StockModel::StockNode(b.build());
 }
 
@@ -75,10 +75,10 @@ StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode
     b.setName     (item.itemName);
     b.setType     (StockItem::ItemGroup);
     b.setLevel    (StockItem::Level_1);
-    b.setAmount   (DATA_INVALID);
-    b.setSerialn  (QString());
-    b.setProject  (QString());
-    b.setLocation (QString());
+//    b.setAmount   (DATA_INVALID);
+//    b.setSerialn  (QString());
+//    b.setProject  (QString());
+//    b.setLocation (QString());
     return StockModel::StockNode(b.build(), parent);
 }
 

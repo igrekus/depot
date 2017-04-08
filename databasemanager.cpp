@@ -65,22 +65,22 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 #endif
 
     CategoryItem::CategoryList tmplist;
-    CategoryItem::CategoryItemBuilder b;
-
     QSqlQuery q = execSimpleQuery("CALL getCategoryList()");
 
     while (q.next()) {
 #ifndef AT_WORK
-        b.setId  (q.value(0).toInt());
-        b.setName(q.value(1).toString());
+        tmplist.append(CategoryItem::CategoryItemBuilder()
+                       .setId  (q.value(0).toInt())
+                       .setName(q.value(1).toString())
+                       .build());
 #endif
 
 #ifdef AT_WORK
-        b.setId  (q.value(0).toInt());
-        b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmplist.append(CategoryItem::CategoryItemBuilder()
+                       .setId  (                  q.value(0).toInt())
+                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .build());
 #endif
-
-        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -92,26 +92,27 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
 #endif
     GroupItem::GroupList tmplist;
-    GroupItem::GroupItemBuilder b;
-    QVariantList params;
+//    QVariantList params;
 
-    params.append(QVariant(catId));
+//    params.append(QVariant(catId));
 
 //    QSqlQuery q = execParametrizedQuery("CALL getGroupListByCategory(?)", params);
     QSqlQuery q = execSimpleQuery("CALL getGroupListByCategory("+QString::number(catId)+");");
 
     while (q.next()) {
 #ifndef AT_WORK
-        b.setId  (q.value(0).toInt());
-        b.setName(q.value(1).toString());
+        tmplist.append(GroupItem::GroupItemBuilder()
+                       .setId  (q.value(0).toInt())
+                       .setName(q.value(1).toString())
+                       .build());
 #endif
 
 #ifdef AT_WORK
-        b.setId  (q.value(0).toInt());
-        b.setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmplist.append(GroupItem::GroupItemBuilder()
+                       .setId  (                  q.value(0).toInt())
+                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .build());
 #endif
-
-        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -123,37 +124,36 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
 #endif
 
     StockItem::StockList tmplist;
-    StockItem::StockItemBuilder b;
 
-    // TODO: неправильный запрос, запрашивать сток
     QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
 
     while (q.next()) {
 
 #ifndef AT_WORK
-        b.setId         (q.value(0).toInt());
-        b.setName       (q.value(1).toString());
-        b.setType       (StockItem::ItemStock);
-        b.setLevel      (StockItem::Level_2);
-        b.setAmount     (q.value(2).toInt());
-        b.setSerialn    (q.value(3).toString());
-        b.setProject    (q.value(4).toString());
-        b.setLocation   (q.value(5).toString());
-
+        tmplist.append(StockItem::StockItemBuilder()
+                       .setId         (q.value(0).toInt())
+                       .setName       (q.value(1).toString())
+                       .setType       (StockItem::ItemStock)
+                       .setLevel      (StockItem::Level_2)
+                       .setAmount     (q.value(2).toInt())
+                       .setSerialn    (q.value(3).toString())
+                       .setProject    (q.value(4).toString())
+                       .setLocation   (q.value(5).toString())
+                       .build());
 #endif
 
 #ifdef AT_WORK
-        b.setId         (q.value(0).toInt());
-        b.setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        b.setType       (StockItem::ItemStock);
-        b.setLevel      (StockItem::Level_2);
-        b.setAmount     (q.value(2).toInt());
-        b.setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
-        b.setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
-        b.setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit()));
+        tmplist.append(StockItem::StockItemBuilder()
+                       .setId         (                  q.value(0).toInt())
+                       .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .setType       (                  StockItem::ItemStock)
+                       .setLevel      (                  StockItem::Level_2)
+                       .setAmount     (                  q.value(2).toInt())
+                       .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit())
+                       .setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit())
+                       .setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit())
+                       .build());
 #endif
-
-        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -165,7 +165,6 @@ TransactItem::TransactList DataBaseManager::getTransactList()
 #endif
 
     TransactItem::TransactList tmplist;
-    TransactItem::TransactItemBuilder b;
 
     // TODO: неправильный запрос, запрашивать сток
 //    QSqlQuery q = execSimpleQuery("CALL getTransactList1k()");
@@ -173,26 +172,28 @@ TransactItem::TransactList DataBaseManager::getTransactList()
 
     while (q.next()) {
 #ifndef AT_WORK
-        b.setId     (q.value(0).toInt());
-        b.setDate   (q.value(1).toDate());
-        b.setDiff   (q.value(2).toInt());
-        b.setNote   (q.value(3).toString());
-        b.setStaff  (q.value(4).toString());
-        b.setName   (q.value(5).toString());
-        b.setBillRef(q.value(6).toInt());
+        tmplist.append(TransactItem::TransactItemBuilder()
+                       .setId     (q.value(0).toInt())
+                       .setDate   (q.value(1).toDate())
+                       .setDiff   (q.value(2).toInt())
+                       .setNote   (q.value(3).toString())
+                       .setStaff  (q.value(4).toString())
+                       .setName   (q.value(5).toString())
+                       .setBillRef(q.value(6).toInt())
+                       .build());
 #endif
 
 #ifdef AT_WORK
-        b.setId     (q.value(0).toInt());
-        b.setDate   (q.value(1).toDate());
-        b.setDiff   (q.value(2).toInt());
-        b.setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()));
-        b.setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit()));
-        b.setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()));
-        b.setBillRef(q.value(6).toInt());
+        tmplist.append(TransactItem::TransactItemBuilder()
+                       .setId     (                  q.value(0).toInt())
+                       .setDate   (                  q.value(1).toDate())
+                       .setDiff   (                  q.value(2).toInt())
+                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit())
+                       .setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit())
+                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit())
+                       .setBillRef(                  q.value(6).toInt())
+                       .build());
 #endif
-
-        tmplist.append(b.build());
     }
     return tmplist;
 }
@@ -214,10 +215,10 @@ HashDict DataBaseManager::getMapLocation()
 #endif
 
 #ifdef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
+        tmphash.id.insert(                  q.value(0).toInt(),
                           decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                          q.value(0).toInt());
+                                            q.value(0).toInt());
 #endif
     }
     return tmphash;
@@ -240,10 +241,10 @@ HashDict DataBaseManager::getMapProjectTag()
 #endif
 
 #ifdef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
+        tmphash.id.insert(                  q.value(0).toInt(),
                           decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                          q.value(0).toInt());
+                                            q.value(0).toInt());
 #endif
     }
     return tmphash;
@@ -266,10 +267,10 @@ HashDict DataBaseManager::getMapMiscTag()
 #endif
 
 #ifdef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
+        tmphash.id.insert(                  q.value(0).toInt(),
                           decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                          q.value(0).toInt());
+                                            q.value(0).toInt());
 #endif
     }
     return tmphash;
@@ -292,10 +293,10 @@ HashDict DataBaseManager::getMapCategory()
 #endif
 
 #ifdef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
+        tmphash.id.insert(                  q.value(0).toInt(),
                           decode->toUnicode(q.value(1).toString().toLocal8Bit()));
         tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                          q.value(0).toInt());
+                                            q.value(0).toInt());
 #endif
     }
     return tmphash;

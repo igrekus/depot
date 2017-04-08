@@ -79,6 +79,7 @@ private slots:
     void on_btnAddStock_clicked();
     void on_btnDeleteStockItem_clicked();
     void on_btnEditStockItem_clicked();
+    void on_btnReloadData_clicked();
 
 private:
     Ui::MainWindow *ui;

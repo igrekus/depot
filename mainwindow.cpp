@@ -8,10 +8,43 @@
       - переписать определение позиции для вставки из свитча на лямбды
 
 создание объектов:
-      - https://ru.wikipedia.org/wiki/%D0%A4%D0%B0%D0%B1%D1%80%D0%B8%D1%87%D0%BD%D1%8B%D0%B9_%D0%BC%D0%B5%D1%82%D0%BE%D0%B4_(%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
-      - https://ru.wikipedia.org/wiki/%D0%A1%D1%82%D1%80%D0%BE%D0%B8%D1%82%D0%B5%D0%BB%D1%8C_(%D1%88%D0%B0%D0%B1%D0%BB%D0%BE%D0%BD_%D0%BF%D1%80%D0%BE%D0%B5%D0%BA%D1%82%D0%B8%D1%80%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F)
 
+      - при создании объектов через билдер, делать запрос в БД при вызове конструктора? (автоматизация, но намного больше вызовов)
+        при инициализации приложения можно получать из БД список, а при получении данных о записи по ИД - через вызов в конструкторе?
+Option 3: Variation of Builder Pattern
+You can also use the builder pattern by simply making your current setters return the same Offer object.
+It's exactly the same, except without the extra OfferBuilder class.
 
+data for dialog: QMapper
+
+Order, Bill, Transact:
+constructors:
+    private void makeNormal(Customer customer) {
+        Order o1 = new Order();
+        customer.addOrder(o1);
+        OrderLine line1 = new OrderLine(6, Product.find("TAL"));
+        o1.addLine(line1);
+        OrderLine line2 = new OrderLine(5, Product.find("HPK"));
+        o1.addLine(line2);
+        OrderLine line3 = new OrderLine(3, Product.find("LGV"));
+        o1.addLine(line3);
+        line2.setSkippable(true);
+        o1.setRush(true);
+    }
+method chain:
+   private void makeFluent(Customer customer) {
+        customer.newOrder()
+                .with(6, "TAL")
+                .with(5, "HPK").skippable()
+                .with(3, "LGV")
+                .priorityRush();
+    }
+
+tests:
+https://sourceforge.net/p/cxxmock/wiki/Home/
+https://github.com/eranpeer/FakeIt
+https://github.com/google/googletest
+http://artlang.net/article/view/14/
 */
 
 // TODO: убрать в общий класс настроек, не использовать .qrc
@@ -368,6 +401,14 @@ void MainWindow::on_btnDeleteStockItem_clicked()
         break;
     default:
         break;
+    }
+}
+
+void MainWindow::on_btnReloadData_clicked()
+{
+    qDebug() << "run test";
+    for (int i=0; i<100; ++i) {
+
     }
 }
 

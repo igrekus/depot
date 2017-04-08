@@ -6,6 +6,8 @@
 
 #include <abstractitem.h>
 
+#define DATA_INVALID -1
+
 class StockItem : public AbstractItem
 {
 public:
@@ -108,7 +110,7 @@ public:
         QString   stockName       = QString();
         ItemType  stockType       = ItemStock;
         ItemLevel stockLevel      = Level_2;
-        qint32    stockAmount     = 0;
+        qint32    stockAmount     = DATA_INVALID;
         QString   stockSerialn    = QString();
         QString   stockProject    = QString();
         QString   stockLocation   = QString();

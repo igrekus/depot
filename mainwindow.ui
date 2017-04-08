@@ -240,7 +240,7 @@
           <item>
            <widget class="QPushButton" name="btnReloadData">
             <property name="text">
-             <string>Обновить</string>
+             <string>Обновить &amp;q</string>
             </property>
            </widget>
           </item>
