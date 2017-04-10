@@ -1,6 +1,6 @@
 #include "databasemanager.h"
 
-//#define AT_WORK
+#define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
 {
@@ -78,7 +78,7 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 #ifdef AT_WORK
         tmplist.append(CategoryItem::CategoryItemBuilder()
                        .setId  (                  q.value(0).toInt())
-                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .build());
 #endif
     }
@@ -110,7 +110,7 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
 #ifdef AT_WORK
         tmplist.append(GroupItem::GroupItemBuilder()
                        .setId  (                  q.value(0).toInt())
-                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .build());
 #endif
     }
@@ -145,13 +145,13 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
 #ifdef AT_WORK
         tmplist.append(StockItem::StockItemBuilder()
                        .setId         (                  q.value(0).toInt())
-                       .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit())
+                       .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .setType       (                  StockItem::ItemStock)
                        .setLevel      (                  StockItem::Level_2)
                        .setAmount     (                  q.value(2).toInt())
-                       .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit())
-                       .setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit())
-                       .setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit())
+                       .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+                       .setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
+                       .setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
                        .build());
 #endif
     }
@@ -188,9 +188,9 @@ TransactItem::TransactList DataBaseManager::getTransactList()
                        .setId     (                  q.value(0).toInt())
                        .setDate   (                  q.value(1).toDate())
                        .setDiff   (                  q.value(2).toInt())
-                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit())
-                       .setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit())
-                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit())
+                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+                       .setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
+                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
                        .setBillRef(                  q.value(6).toInt())
                        .build());
 #endif
@@ -300,6 +300,44 @@ HashDict DataBaseManager::getMapCategory()
 #endif
     }
     return tmphash;
+}
+
+qint32 DataBaseManager::insertCategory(const QString &name)
+{
+    // TODO: FIXME
+    qDebug()<<"insert cat:" << name;
+    return 0;
+}
+
+void DataBaseManager::updateCategory(const CategoryItem &item)
+{
+    // TODO: FIXME
+    qDebug() << "update cat:" << item;
+}
+
+void DataBaseManager::deleteCategory(const CategoryItem &item)
+{
+    // TODO: FIXME
+    qDebug() << "delete cat:" << item;
+}
+
+qint32 DataBaseManager::insertGroup(const QString &name)
+{
+    // TODO: FIXME
+    qDebug()<<"insert group:" << name;
+    return 0;
+}
+
+void DataBaseManager::updateGroup(const GroupItem &item)
+{
+    // TODO: FIXME
+    qDebug() << "update group:" << item;
+}
+
+void DataBaseManager::deleteGroup(const GroupItem &item)
+{
+    // TODO: FIXME
+    qDebug() << "delete group:" << item;
 }
 
 void DataBaseManager::convertDB()

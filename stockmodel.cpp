@@ -40,6 +40,8 @@ struct StockModel::StockNode
     StockNode *parent = nullptr;              // ссылка на родительский узел
     bool mapped = false;                      // проводился ли поиск дочерних узлов?
     bool m_isExpanded = false;                // раскрыт ли узел в view?
+
+    StockModel::StockNodeList siblings(){return children;}
 };
 
 StockModel::StockModel(DataBaseManager *dbman, DictModel *dictModel, QObject *parent)
@@ -82,7 +84,7 @@ StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode
     return StockModel::StockNode(b.build(), parent);
 }
 
-StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockNode *parent)
+StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockModel::StockNode *parent)
 {
     return StockModel::StockNode(item, parent);
 }
@@ -340,20 +342,19 @@ int StockModel::findRow(const StockNode *stockNode) const
 
 QModelIndex StockModel::addCategory(const QString &catName)
 {
-    auto row_iterator = std::find_if(std::begin(m_nodes), std::end(m_nodes), [&catName](const StockNode &it){
+    auto row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&catName](const StockNode &it){
         return it.stockItem.itemName > catName;
     });
 
     qint32 row = std::distance(std::begin(m_nodes), row_iterator);
 
-//    qint32 newId = m_dbman->insertCategory(catName);
-
-    CategoryItem::CategoryItemBuilder b;
-//    b.setId(newId);
-    b.setName(catName);
+    qint32 newId = m_dbman->insertCategory(catName);
 
     beginInsertRows(QModelIndex(), row, row + 1);
-    m_nodes.insert(row, std::move(makeCategoryNode(b.build())));
+    m_nodes.insert(row, std::move(makeCategoryNode(CategoryItem::CategoryItemBuilder()
+                                                   .setId(newId)
+                                                   .setName(catName)
+                                                   .build())));
     endInsertRows();
 
     return index(row, 0, QModelIndex());
@@ -363,27 +364,89 @@ void StockModel::editCategory(const QModelIndex &index, const QString &newName)
 {
     StockItem &editItem = static_cast<StockNode *>(index.internalPointer())->stockItem;
     editItem.itemName = newName;
-
-    CategoryItem::CategoryItemBuilder b;
-    b.setId(editItem.itemId);
-    b.setName(editItem.itemName);
-
-//    m_dbman->updateCategory(b.build());
-
+    m_dbman->updateCategory(CategoryItem::CategoryItemBuilder()
+                            .setId  (editItem.itemId)
+                            .setName(editItem.itemName)
+                            .build());
     emit dataChanged(index, index);
 }
 
 void StockModel::deleteCategory(const QModelIndex &index)
 {
     StockNode *delNode = static_cast<StockNode *>(index.internalPointer());
-
     qint32 row = findRow(delNode);
-//    m_dbman->deleteCategory(b.build);
 
-    beginRemoveRows(QModelIndex(), index.row(), index.row());
+    m_dbman->deleteCategory(CategoryItem::CategoryItemBuilder()
+                            .setId  (delNode->stockItem.itemId)
+                            .setName(delNode->stockItem.itemName)
+                            .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
     m_nodes.removeAt(row);
-//    m_nodes.removeOne(*delNode);
     endRemoveRows();
+}
 
-    qDebug() << "row:" << index.row() << "list pos:" << row << "name:" << index.data(Qt::DisplayRole).toString();
+QModelIndex StockModel::addGroup(const QModelIndex &pindex, const QString &grpName)
+{
+    // TODO: соединить метод с методом добавки категории?
+    StockNode *pnode = static_cast<StockNode *>(pindex.internalPointer());
+
+    auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
+                                     [&grpName](const StockNode &it){return it.stockItem.itemName > grpName;});
+
+    qint32 row = std::distance(pnode->children.begin(), row_iterator);
+
+    qint32 newId = m_dbman->insertGroup(grpName);
+
+    qDebug() << "ins data:" << pnode->stockItem.itemName << grpName << row << pnode->children.size();
+
+    pnode->children.reserve(1);
+    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+    pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
+                                                        .setId  (newId)
+                                                        .setName(grpName)
+                                                        .build(), pnode)));
+    endInsertRows();
+
+    qDebug() << pnode->children.size();
+    return index(row, 0, pindex);
+}
+
+void StockModel::editGroup(const QModelIndex &index, const QString &newName)
+{
+    StockItem &editItem = static_cast<StockNode *>(index.internalPointer())->stockItem;
+    editItem.itemName = newName;
+
+    m_dbman->updateGroup(GroupItem::GroupItemBuilder()
+                         .setId  (editItem.itemId)
+                         .setName(editItem.itemName)
+                         .build());
+
+    emit dataChanged(index, index);
+}
+
+void StockModel::deleteGroup(const QModelIndex &index)
+{
+    // TODO: fix
+    StockNode *delNode = static_cast<StockNode *>(index.internalPointer());
+    qint32 row = findRow(delNode);
+
+    m_dbman->deleteGroup(GroupItem::GroupItemBuilder()
+                         .setId  (delNode->stockItem.itemId)
+                         .setName(delNode->stockItem.itemName)
+                         .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    delNode->siblings().removeAt(row);
+    endRemoveRows();
+}
+
+void StockModel::debugInfo(const QModelIndex &index)
+{
+    StockNode *node = static_cast<StockNode *>(index.internalPointer());
+    qint32 row = findRow(node);
+
+    qDebug() << "node: row:" << row << "parent:" << node->parent
+             << "child:" << node->children.size()
+             << "data:" << node->stockItem;
 }

@@ -9,6 +9,7 @@
 #include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QMessageBox>
+#include <QUuid>
 
 #include <mapmodel.h>
 #include <linkeddict.h>
@@ -19,6 +20,10 @@
 
 namespace Ui {
 class MainWindow;
+}
+
+namespace Depot {
+QString rndString(qint32 len);
 }
 
 class MainWindow : public QMainWindow
@@ -80,6 +85,12 @@ private slots:
     void on_btnDeleteStockItem_clicked();
     void on_btnEditStockItem_clicked();
     void on_btnReloadData_clicked();
+    void on_btnReport_clicked();
+
+    void on_treeStock_doubleClicked(const QModelIndex &index);
+
+    // events
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     Ui::MainWindow *ui;
@@ -110,8 +121,8 @@ private:
     QAction *actEditStock;
     QAction *actDeleteStock;
 
-    // events
-    void resizeEvent(QResizeEvent *event) override;
+    void testAddCat();
+    void testRemCat();
 };
 
 #endif // MAINWINDOW_H

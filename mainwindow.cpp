@@ -11,9 +11,9 @@
 
       - при создании объектов через билдер, делать запрос в БД при вызове конструктора? (автоматизация, но намного больше вызовов)
         при инициализации приложения можно получать из БД список, а при получении данных о записи по ИД - через вызов в конструкторе?
-Option 3: Variation of Builder Pattern
-You can also use the builder pattern by simply making your current setters return the same Offer object.
-It's exactly the same, except without the extra OfferBuilder class.
+
+данные на запись:
+writeDBrecord("record :param").addparam(1).addparam(2)
 
 data for dialog: QMapper
 
@@ -217,12 +217,12 @@ void MainWindow::procActRefreshView()
 void MainWindow::procActAddCategory()
 {
     bool ok;
-    QString catname = QInputDialog::getText(this, "Добавить категорию",
+    QString newName = QInputDialog::getText(this, "Добавить категорию",
                                          "Введите название:", QLineEdit::Normal,
                                          QString(), &ok);
-    if (ok & !catname.isEmpty()) {
-        catname.replace(0, 1, catname.at(0).toUpper());
-        QModelIndex ind = m_stockModel->addCategory(catname);
+    if (ok & !newName.isEmpty()) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        QModelIndex ind = m_stockModel->addCategory(newName);
         ui->treeStock->selectionModel()->clear();
         ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
@@ -230,24 +230,26 @@ void MainWindow::procActAddCategory()
 
 void MainWindow::procActEditCategory()
 {
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    // TODO: вынести одинаковые с editgroup участки в отдельный метод
+    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
     bool ok;
-    QString catName = indexes.first().data(Qt::DisplayRole).toString();
+    QString oldName = index.data(Qt::DisplayRole).toString();
     QString newName = QInputDialog::getText(this,
                                             "Изменить категорию",
                                             "Введите новое название",
                                             QLineEdit::Normal,
-                                            indexes.first().data(Qt::DisplayRole).toString(),
+                                            index.data(Qt::DisplayRole).toString(),
                                             &ok);
-    if (ok && !catName.isEmpty() && catName != newName) {
-        m_stockModel->editCategory(indexes.first(), newName);
+    if (ok && !oldName.isEmpty() && oldName != newName) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        m_stockModel->editCategory(index, newName);
     }
 }
 
 void MainWindow::procActDeleteCategory()
 {
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    if (indexes.first().data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
+    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Нельзя удалить непустую категорию. "
@@ -260,7 +262,7 @@ void MainWindow::procActDeleteCategory()
                                            QMessageBox::Yes,
                                            QMessageBox::No | QMessageBox::Default);
         if (res == QMessageBox::Yes) {
-            m_stockModel->deleteCategory(indexes.first());
+            m_stockModel->deleteCategory(index);
         } else {
             return;
         }
@@ -269,44 +271,67 @@ void MainWindow::procActDeleteCategory()
 
 void MainWindow::procActAddGroup()
 {
-    // TODO: перенести отсюда логику запроса выделения категории, индекс получать лямбдой
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    QModelIndex pindex;
-    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
-        pindex = indexes.first();
-    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemGroup) {
-        pindex = indexes.first().parent();
-    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
-        pindex = indexes.first().parent().parent();
-    }
+    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
+        case StockItem::ItemCategory:
+            return cur;
+        case StockItem::ItemGroup:
+            return cur.parent();
+        case StockItem::ItemStock:
+            return cur.parent().parent();
+        }
+    }();
     bool ok;
-    QString text = QInputDialog::getText(this, "Добавить группу",
+    QString newName = QInputDialog::getText(this, "Добавить группу",
                                          "Введите название:", QLineEdit::Normal,
                                          QString(), &ok);
-    if (ok & !text.isEmpty()) {
-        qDebug() << "add to:" << pindex.data(Qt::DisplayRole).toString() << text;
+    if (ok & !newName.isEmpty()) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        QModelIndex ind = m_stockModel->addGroup(pindex, newName);
+        ui->treeStock->selectionModel()->clear();
+        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
 }
 
 void MainWindow::procActEditGroup()
 {
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
     bool ok;
-    QString text = QInputDialog::getText(this,
-                                         "Изменить группу",
-                                         "Введите новое название",
-                                         QLineEdit::Normal,
-                                         indexes.first().data(Qt::DisplayRole).toString(),
-                                         &ok);
-    if (ok && !text.isEmpty())
-        qDebug() << text;
+    QString oldName = index.data(Qt::DisplayRole).toString();
+    QString newName = QInputDialog::getText(this,
+                                            "Изменить группу",
+                                            "Введите новое название",
+                                            QLineEdit::Normal,
+                                            index.data(Qt::DisplayRole).toString(),
+                                            &ok);
+    if (ok && !oldName.isEmpty() && oldName != newName) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        m_stockModel->editGroup(index, newName);
+    }
 }
 
 void MainWindow::procActDeleteGroup()
 {
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    qDebug() << "del group" << indexes.first().data(Qt::DisplayRole).toString()
-                            << indexes.first().data(ROLE_NODE_ID).toInt();
+    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
+    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя удалить непустую группу. "
+                             "Сначала удалите все позиции хранения.");
+        return;
+    } else {
+        qint32 res = QMessageBox::question(this,
+                                           "Внимание!",
+                                           "Вы действительно хотите удалить выбранную группу?",
+                                           QMessageBox::Yes,
+                                           QMessageBox::No | QMessageBox::Default);
+        if (res == QMessageBox::Yes) {
+            m_stockModel->deleteGroup(index);
+        } else {
+            return;
+        }
+    }
 }
 
 void MainWindow::procActAddStock()
@@ -350,8 +375,15 @@ void MainWindow::on_btnAddCategory_clicked()
 
 void MainWindow::on_btnAddGroup_clicked()
 {
-    // TODO: Перенести сюда логику запроса выделения категории
-    actAddGroup->trigger();
+    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
+    if (indexes.isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите категорию для добавления группы.");
+        return;
+    } else {
+        actAddGroup->trigger();
+    }
 }
 
 void MainWindow::on_btnAddStock_clicked()
@@ -409,10 +441,20 @@ void MainWindow::on_btnDeleteStockItem_clicked()
 
 void MainWindow::on_btnReloadData_clicked()
 {
-    qDebug() << "run test";
-    for (int i=0; i<100; ++i) {
+    qDebug() << "add test";
+    testAddCat();
+}
 
-    }
+void MainWindow::on_btnReport_clicked()
+{
+    qDebug() << "rem test";
+    testRemCat();
+}
+
+void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
+{
+    qDebug() << "r:" << index.row() << "id:" << index.data(ROLE_NODE_ID).toInt() << "name:" << index.data(Qt::DisplayRole).toString();
+    m_stockModel->debugInfo(index);
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -565,4 +607,44 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
                                              QPalette::ButtonText);
     }
     painter->restore();
+}
+
+void MainWindow::testAddCat()
+{
+    for (int i=0; i<10; ++i) {
+        QString id = Depot::rndString(12);
+        id.replace(0, 1, id.at(0).toUpper());
+        QModelIndex ind = MainWindow::m_stockModel->addCategory(id);
+        ui->treeStock->selectionModel()->clear();
+        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//        qDebug() << id;
+    }
+}
+
+void MainWindow::testRemCat()
+{
+    qint32 count = m_stockModel->rowCount(QModelIndex());
+    for (qint32 i=0; i<count; ++i) {
+        QModelIndex ind = m_stockModel->index(i, 0);
+        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+            m_stockModel->deleteCategory(ind);
+            --i;
+            --count;
+        }
+    }
+}
+
+QString Depot::rndString(qint32 len)
+{
+    static const QString charset =
+    "0123456789"
+//        "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧшщЪЫЬЭЮЯ"
+    "абвгдеёжзиклмнопрстуфхцчшщъыьэюя";
+    QString out;
+    while (len>0) {
+        qint32 chr = qrand() % (charset.size() - 1);
+        out.append(charset.at(chr));
+        --len;
+    }
+    return out;
 }

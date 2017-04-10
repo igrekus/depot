@@ -55,8 +55,8 @@ public:
 
     // фабрики узлов дерева
     StockNode makeCategoryNode(const CategoryItem &item);
-    StockNode makeGroupNode(const GroupItem &item, StockNode *parent = nullptr);
-    StockNode makeStockNode(const StockItem &item, StockNode *parent = nullptr);
+    StockNode makeGroupNode(const GroupItem &item, StockNode *parent);
+    StockNode makeStockNode(const StockItem &item, StockNode *parent);
 
     void initModel();
     void buildCategoryLevel();
@@ -75,6 +75,12 @@ public:
     QModelIndex addCategory(const QString &catName);
     void editCategory(const QModelIndex &index, const QString &newName);
     void deleteCategory(const QModelIndex &index);
+
+    QModelIndex addGroup(const QModelIndex &index, const QString &grpName);
+    void editGroup(const QModelIndex &index, const QString &newName);
+    void deleteGroup(const QModelIndex &index);
+
+    void debugInfo(const QModelIndex &index);
 
 private:
 };

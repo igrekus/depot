@@ -39,7 +39,16 @@ public:
     HashDict getMapMiscTag();
     HashDict getMapCategory();
 
-    // таблица транзакций
+    // запись данных в БД
+    qint32 insertCategory(const QString &name);
+    void updateCategory(const CategoryItem &item);
+    void deleteCategory(const CategoryItem &item);
+
+    qint32 insertGroup(const QString &name);
+    void updateGroup(const GroupItem &item);
+    void deleteGroup(const GroupItem &item);
+
+    // utility
     void convertDB();
 
 signals:
