@@ -17,6 +17,7 @@
 #include <dictmodel.h>
 #include <stockmodel.h>
 #include <transactmodel.h>
+#include <inventorydialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -84,6 +85,9 @@ private slots:
     void on_btnAddStock_clicked();
     void on_btnDeleteStockItem_clicked();
     void on_btnEditStockItem_clicked();
+
+    void on_btnInventoryEditor_clicked();
+
     void on_btnReloadData_clicked();
     void on_btnReport_clicked();
 
@@ -123,6 +127,9 @@ private:
 
     void testAddCat();
     void testRemCat();
+
+    void testAddGrp();
+    void testRemGrp();
 };
 
 #endif // MAINWINDOW_H

@@ -41,7 +41,7 @@ struct StockModel::StockNode
     bool mapped = false;                      // проводился ли поиск дочерних узлов?
     bool m_isExpanded = false;                // раскрыт ли узел в view?
 
-    StockModel::StockNodeList siblings(){return children;}
+    StockModel::StockNodeList *siblings(){return &parent->children;}
 };
 
 StockModel::StockModel(DataBaseManager *dbman, DictModel *dictModel, QObject *parent)
@@ -58,30 +58,23 @@ StockModel::~StockModel()
 
 StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
 {
-    StockItem::StockItemBuilder b;
-    b.setId       (item.itemId);
-    b.setName     (item.itemName);
-    b.setType     (StockItem::ItemCategory);
-    b.setLevel    (StockItem::LevelRoot);
-//    b.setAmount   (DATA_INVALID);
-//    b.setSerialn  (QString());
-//    b.setProject  (QString());
-//    b.setLocation (QString());
-    return StockModel::StockNode(b.build());
+    return StockModel::StockNode(StockItem::StockItemBuilder()
+                                 .setId   (item.itemId)
+                                 .setName (item.itemName)
+                                 .setType (StockItem::ItemCategory)
+                                 .setLevel(StockItem::LevelRoot)
+                                 .build());
 }
 
 StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode *parent)
 {
-    StockItem::StockItemBuilder b;
-    b.setId       (item.itemId);
-    b.setName     (item.itemName);
-    b.setType     (StockItem::ItemGroup);
-    b.setLevel    (StockItem::Level_1);
-//    b.setAmount   (DATA_INVALID);
-//    b.setSerialn  (QString());
-//    b.setProject  (QString());
-//    b.setLocation (QString());
-    return StockModel::StockNode(b.build(), parent);
+    return StockModel::StockNode(StockItem::StockItemBuilder()
+                                 .setId   (item.itemId)
+                                 .setName (item.itemName)
+                                 .setType (StockItem::ItemGroup)
+                                 .setLevel(StockItem::Level_1)
+                                 .build(),
+                                 parent);
 }
 
 StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockModel::StockNode *parent)
@@ -89,18 +82,9 @@ StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockMode
     return StockModel::StockNode(item, parent);
 }
 
-void StockModel::initModel()
-{
-    // TODO: формировать уровни одновременно - надо ли?
-    buildCategoryLevel();
-    buildGroupLevel();
-    buildStockLevel();
-}
-
 void StockModel::buildCategoryLevel()
 {
-    qDebug() << "building category level";
-
+    qDebug() << "stock: building category level";
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
     beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
@@ -114,7 +98,7 @@ void StockModel::buildCategoryLevel()
 
 void StockModel::buildGroupLevel()
 {
-    qDebug() << "building group level";
+    qDebug() << "stock: building group level";
 // TODO: begininsertorws;
     for (StockNode &it : m_nodes) {
         GroupItem::GroupList list = m_dbman->getGroupList(it.stockItem.itemId);
@@ -126,7 +110,7 @@ void StockModel::buildGroupLevel()
 
 void StockModel::buildStockLevel()
 {
-    qDebug() << "building product level";
+    qDebug() << "stock: building product level";
 // TODO: endinsertrows
     for (StockNode &it : m_nodes) {
         for (StockNode &jt : it.children) {
@@ -136,6 +120,14 @@ void StockModel::buildStockLevel()
             }
         }
     }
+}
+
+void StockModel::initModel()
+{
+    // TODO: формировать уровни одновременно - надо ли?
+    buildCategoryLevel();
+    buildGroupLevel();
+    buildStockLevel();
 }
 
 QVariant StockModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -215,7 +207,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         switch (index.column()) {
         case NumberColumn: {
-            if (tmpitem.itemType == StockItem::ItemStock) {
+            if (tmpitem.itemType == StockItem::ItemItem) {
                 return tmpitem.itemId;
             } else {
                 return tmpitem.itemName;
@@ -223,7 +215,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case NameColumn: {
-            if (tmpitem.itemType == StockItem::ItemStock) {
+            if (tmpitem.itemType == StockItem::ItemItem) {
                 return tmpitem.itemName;
             } else {
                 return QVariant();
@@ -231,7 +223,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case AmountColumn: {
-            if (tmpitem.itemType == StockItem::ItemStock) {
+            if (tmpitem.itemType == StockItem::ItemItem) {
                 return tmpitem.itemAmount;
             } else {
                 return QVariant();
@@ -437,7 +429,8 @@ void StockModel::deleteGroup(const QModelIndex &index)
                          .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    delNode->siblings().removeAt(row);
+//    delNode->parent->children.removeAt(row);
+    delNode->siblings()->removeAt(row);
     endRemoveRows();
 }
 

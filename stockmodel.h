@@ -58,10 +58,11 @@ public:
     StockNode makeGroupNode(const GroupItem &item, StockNode *parent);
     StockNode makeStockNode(const StockItem &item, StockNode *parent);
 
-    void initModel();
+    // инициализация модели
     void buildCategoryLevel();
     void buildGroupLevel();
     void buildStockLevel();
+    void initModel();
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column,

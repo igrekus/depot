@@ -11,21 +11,21 @@ public:
     QString itemName;
 
     explicit AbstractItem():
-        itemId(),
+        itemId  (),
         itemName()
     {}
 
     explicit AbstractItem(const qint32 id, const QString &name):
-        itemId(id),
+        itemId  (id),
         itemName(name)
     {}
 
     explicit AbstractItem(const AbstractItem &copy):
-        itemId(copy.itemId),
+        itemId  (copy.itemId),
         itemName(copy.itemName)
     {}
 
-    virtual ~AbstractItem() {}
+    virtual ~AbstractItem(){}
 };
 
 #endif // ABSTRACTITEM_H

@@ -125,8 +125,9 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
 
     StockItem::StockList tmplist;
 
-    QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
-
+//    QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
+    Q_UNUSED(catId)
+    QSqlQuery q = execSimpleQuery("CALL getStockByGroup("+QString::number(groupId)+")");
     while (q.next()) {
 
 #ifndef AT_WORK
@@ -146,12 +147,42 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
         tmplist.append(StockItem::StockItemBuilder()
                        .setId         (                  q.value(0).toInt())
                        .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-                       .setType       (                  StockItem::ItemStock)
+                       .setType       (                  StockItem::ItemItem)
                        .setLevel      (                  StockItem::Level_2)
                        .setAmount     (                  q.value(2).toInt())
                        .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
                        .setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
                        .setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .build());
+#endif
+    }
+    return tmplist;
+}
+
+ProductItem::ProductList DataBaseManager::getProductList(const qint32 catId, const qint32 groupId)
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    ProductItem::ProductList tmplist;
+
+    Q_UNUSED(catId)
+    QSqlQuery q = execSimpleQuery("CALL getProductByGroup("+QString::number(groupId)+")");
+    while (q.next()) {
+
+#ifndef AT_WORK
+#endif
+
+#ifdef AT_WORK
+        tmplist.append(ProductItem::ProductItemBuilder()
+                       .setId      (                  q.value(0).toInt())
+                       .setName    (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
+                       .setFullname(decode->toUnicode(q.value(2).toString().toLocal8Bit()))
+                       .setSerialn (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+                       .setUnit    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
+                       .setMiscTag (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setProjetId(0)
                        .build());
 #endif
     }
@@ -343,8 +374,8 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 void DataBaseManager::convertDB()
 {
 #ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-    QTextCodec *encode = QTextCodec::codecForLocale();
+//    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+//    QTextCodec *encode = QTextCodec::codecForLocale();
 #endif
 
 #ifndef AT_WORK

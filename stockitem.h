@@ -4,62 +4,44 @@
 #include <QObject>
 #include <QDebug>
 
-#include <abstractitem.h>
+#include <abstracttreeitem.h>
 
 #define DATA_INVALID -1
 
-class StockItem : public AbstractItem
+class StockItem : public AbstractTreeItem
 {
 public:
 
     // TODO: move&swap idiom constructors;
-    enum ItemType {
-        ItemCategory = 0,
-        ItemGroup,
-        ItemStock
-    };
-
-    enum ItemLevel {
-        LevelRoot = 0,
-        Level_1,
-        Level_2
-    };
-
     // данные
-    ItemType  itemType;
-    ItemLevel itemLevel;
     qint32    itemAmount;
     QString   itemSerialn;
     QString   itemProject;
     QString   itemLocation;
 
     StockItem():
-        AbstractItem(),
-        itemType(),
-        itemLevel(),
+        AbstractTreeItem(),
         itemAmount(),
         itemSerialn(),
         itemProject(),
         itemLocation()
     {}
-    StockItem(qint32 id, const QString &name, ItemType type, ItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const QString &loc):
-        AbstractItem (id,
-                      name),
-        itemType     (type),
-        itemLevel    (level),
-        itemAmount   (amount),
-        itemSerialn  (serialn),
-        itemProject  (proj),
-        itemLocation (loc)
+    StockItem(qint32 id, const QString &name, TreeItemType type, TreeItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const QString &loc):
+        AbstractTreeItem(id,
+                         name,
+                         type,
+                         level),
+        itemAmount      (amount),
+        itemSerialn     (serialn),
+        itemProject     (proj),
+        itemLocation    (loc)
     {}
     StockItem(const StockItem &copy):
-        AbstractItem (copy),
-        itemType     (copy.itemType),
-        itemLevel    (copy.itemLevel),
-        itemAmount   (copy.itemAmount),
-        itemSerialn  (copy.itemSerialn),
-        itemProject  (copy.itemProject),
-        itemLocation (copy.itemLocation)
+        AbstractTreeItem(copy),
+        itemAmount      (copy.itemAmount),
+        itemSerialn     (copy.itemSerialn),
+        itemProject     (copy.itemProject),
+        itemLocation    (copy.itemLocation)
     {}
     ~StockItem(){}
 
@@ -106,19 +88,19 @@ public:
 
     class StockItemBuilder {
     public:
-        qint32    stockId         = 0;
-        QString   stockName       = QString();
-        ItemType  stockType       = ItemStock;
-        ItemLevel stockLevel      = Level_2;
-        qint32    stockAmount     = DATA_INVALID;
-        QString   stockSerialn    = QString();
-        QString   stockProject    = QString();
-        QString   stockLocation   = QString();
+        qint32        stockId         = 0;
+        QString       stockName       = QString();
+        TreeItemType  stockType       = ItemItem;
+        TreeItemLevel stockLevel      = Level_2;
+        qint32        stockAmount     = DATA_INVALID;
+        QString       stockSerialn    = QString();
+        QString       stockProject    = QString();
+        QString       stockLocation   = QString();
 
         StockItemBuilder& setId       (const qint32    id)        { this->stockId       = id;        return *this; }
         StockItemBuilder& setName     (const QString  &name)      { this->stockName     = name;      return *this; }
-        StockItemBuilder& setType     (const ItemType  itemtype)  { this->stockType     = itemtype;  return *this; }
-        StockItemBuilder& setLevel    (const ItemLevel itemlevel) { this->stockLevel    = itemlevel; return *this; }
+        StockItemBuilder& setType     (const TreeItemType  itemtype) { this->stockType  = itemtype;  return *this; }
+        StockItemBuilder& setLevel    (const TreeItemLevel itemlevel){ this->stockLevel = itemlevel; return *this; }
         StockItemBuilder& setAmount   (const qint32    amout)     { this->stockAmount   = amout;     return *this; }
         StockItemBuilder& setSerialn  (const QString  &serialn)   { this->stockSerialn  = serialn;   return *this; }
         StockItemBuilder& setProject  (const QString  &project)   { this->stockProject  = project;   return *this; }

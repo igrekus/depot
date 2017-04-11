@@ -12,6 +12,9 @@
       - при создании объектов через билдер, делать запрос в БД при вызове конструктора? (автоматизация, но намного больше вызовов)
         при инициализации приложения можно получать из БД список, а при получении данных о записи по ИД - через вызов в конструкторе?
 
+persistence layer:
+    persistCategory(CatItem); - database manager(s) as a pluging for persistence layer
+
 данные на запись:
 writeDBrecord("record :param").addparam(1).addparam(2)
 
@@ -255,17 +258,14 @@ void MainWindow::procActDeleteCategory()
                              "Нельзя удалить непустую категорию. "
                              "Сначала удалите все группы.");
         return;
-    } else {
-        qint32 res = QMessageBox::question(this,
-                                           "Внимание!",
-                                           "Вы действительно хотите удалить выбранную категорию?",
-                                           QMessageBox::Yes,
-                                           QMessageBox::No | QMessageBox::Default);
-        if (res == QMessageBox::Yes) {
-            m_stockModel->deleteCategory(index);
-        } else {
-            return;
-        }
+    }
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную категорию?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_stockModel->deleteCategory(index);
     }
 }
 
@@ -278,9 +278,10 @@ void MainWindow::procActAddGroup()
             return cur;
         case StockItem::ItemGroup:
             return cur.parent();
-        case StockItem::ItemStock:
-            return cur.parent().parent();
+        case StockItem::ItemItem:
+            return cur.parent().parent();   // TODO: FIX parent search
         }
+            return QModelIndex();
     }();
     bool ok;
     QString newName = QInputDialog::getText(this, "Добавить группу",
@@ -320,35 +321,34 @@ void MainWindow::procActDeleteGroup()
                              "Нельзя удалить непустую группу. "
                              "Сначала удалите все позиции хранения.");
         return;
-    } else {
-        qint32 res = QMessageBox::question(this,
-                                           "Внимание!",
-                                           "Вы действительно хотите удалить выбранную группу?",
-                                           QMessageBox::Yes,
-                                           QMessageBox::No | QMessageBox::Default);
-        if (res == QMessageBox::Yes) {
-            m_stockModel->deleteGroup(index);
-        } else {
-            return;
-        }
+    }
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную группу?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_stockModel->deleteGroup(index);
     }
 }
 
 void MainWindow::procActAddStock()
 {
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
+    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+    if (cur.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите группу для добавления позиции хранения.");
         return;
     }
-    QModelIndex pindex;
-    if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemGroup) {
-        pindex = indexes.first();
-    } else if (indexes.first().data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
-        pindex = indexes.first().parent();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
+        case StockItem::ItemGroup:
+            return cur;
+        case StockItem::ItemItem:
+            return cur.parent();
     }
+    }();
     qDebug() << "custom add stock item dialog: select product + project + amount (auto-register positive transact)";
     qDebug() << "add to:" << pindex.data(Qt::DisplayRole).toString()
                           << pindex.data(ROLE_NODE_ID).toInt();
@@ -381,9 +381,8 @@ void MainWindow::on_btnAddGroup_clicked()
                              "Ошибка!",
                              "Выберите категорию для добавления группы.");
         return;
-    } else {
-        actAddGroup->trigger();
     }
+    actAddGroup->trigger();
 }
 
 void MainWindow::on_btnAddStock_clicked()
@@ -407,7 +406,7 @@ void MainWindow::on_btnEditStockItem_clicked()
     case StockItem::ItemGroup:
         actEditGroup->trigger();
         break;
-    case StockItem::ItemStock:
+    case StockItem::ItemItem:
         actEditStock->trigger();
         break;
     default:
@@ -431,7 +430,7 @@ void MainWindow::on_btnDeleteStockItem_clicked()
     case StockItem::ItemGroup:
         actDeleteGroup->trigger();
         break;
-    case StockItem::ItemStock:
+    case StockItem::ItemItem:
         actDeleteStock->trigger();
         break;
     default:
@@ -439,16 +438,27 @@ void MainWindow::on_btnDeleteStockItem_clicked()
     }
 }
 
+void MainWindow::on_btnInventoryEditor_clicked()
+{
+    InventoryDialog dialog(m_dbman, this);
+
+    dialog.initDialog();
+
+    dialog.exec();
+}
+
 void MainWindow::on_btnReloadData_clicked()
 {
     qDebug() << "add test";
-    testAddCat();
+//    testAddCat();
+    testAddGrp();
 }
 
 void MainWindow::on_btnReport_clicked()
 {
     qDebug() << "rem test";
-    testRemCat();
+//    testRemCat();
+    testRemGrp();
 }
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
@@ -459,6 +469,7 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
+    Q_UNUSED(event);
     actRefreshView->trigger();
 }
 
@@ -544,7 +555,7 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
                                              QPalette::ButtonText);
         break;
     }
-    case StockItem::ItemStock: {
+    case StockItem::ItemItem: {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPalette pal = option.palette;
@@ -585,7 +596,7 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
 //    bool hasChildren = (option.state & QStyle::State_Children);
 //    bool branchOpen = (option.state & QStyle::State_Open);
 
-    if (index.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemStock) {
+    if (index.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemItem) {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPen pen(QColor(Qt::lightGray));
@@ -634,6 +645,33 @@ void MainWindow::testRemCat()
     }
 }
 
+void MainWindow::testAddGrp()
+{
+    QModelIndex catind = ui->treeStock->selectionModel()->selectedIndexes().first();
+    for (int i=0; i<10; ++i) {
+        QString id = Depot::rndString(12);
+        id.replace(0, 1, id.at(0).toUpper());
+        QModelIndex ind = MainWindow::m_stockModel->addGroup(catind, id);
+        ui->treeStock->selectionModel()->clear();
+        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//        qDebug() << id;
+    }
+}
+
+void MainWindow::testRemGrp()
+{
+    QModelIndex catind = ui->treeStock->selectionModel()->selectedIndexes().first();
+    qint32 count = m_stockModel->rowCount(catind);
+    for (qint32 i=0; i<count; ++i) {
+        QModelIndex ind = m_stockModel->index(i, 0, catind);
+        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+            m_stockModel->deleteGroup(ind);
+            --i;
+            --count;
+        }
+    }
+}
+
 QString Depot::rndString(qint32 len)
 {
     static const QString charset =
@@ -648,3 +686,4 @@ QString Depot::rndString(qint32 len)
     }
     return out;
 }
+

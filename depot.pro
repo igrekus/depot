@@ -25,7 +25,12 @@ SOURCES += main.cpp\
     mapmodel.cpp \
     hashdict.cpp \
     transactitem.cpp \
-    transactmodel.cpp
+    transactmodel.cpp \
+    inventorydialog.cpp \
+    inventorydatadialog.cpp \
+    inventorymodel.cpp \
+    inventoryitem.cpp \
+    abstracttreeitem.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -40,9 +45,16 @@ HEADERS  += mainwindow.h \
     mapmodel.h \
     hashdict.h \
     transactitem.h \
-    transactmodel.h
+    transactmodel.h \
+    inventorydialog.h \
+    inventorydatadialog.h \
+    inventorymodel.h \
+    inventoryitem.h \
+    abstracttreeitem.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    inventorydialog.ui \
+    inventorydatadialog.ui
 
 RESOURCES += \
     resource.qrc

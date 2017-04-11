@@ -13,7 +13,7 @@ public:
     QString itemFullname;
     QString itemSerialn;
     QString itemUnit;
-    QString itemProjecTag;
+    qint32  itemProjectId;
     QString itemMiscTag;
     qint32  itemCode;
 
@@ -22,24 +22,24 @@ public:
         itemFullname(),
         itemSerialn(),
         itemUnit(),
-        itemProjecTag(),
+        itemProjectId(),
         itemMiscTag(),
         itemCode()
     {}
 
-    explicit ProductItem(qint32 id,
+    explicit ProductItem(qint32         id,
                          const QString &name,
                          const QString &fullname,
                          const QString &serialn,
                          const QString &unit,
-                         const QString &projTag,
+                         qint32         projTag,
                          const QString &miscTag,
                          qint32 code):
         AbstractItem (id, name),
         itemFullname (fullname),
         itemSerialn  (serialn),
         itemUnit     (unit),
-        itemProjecTag(projTag),
+        itemProjectId(projTag),
         itemMiscTag  (miscTag),
         itemCode     (code)
     {}
@@ -49,7 +49,7 @@ public:
         itemFullname (copy.itemFullname),
         itemSerialn  (copy.itemSerialn),
         itemUnit     (copy.itemUnit),
-        itemProjecTag(copy.itemProjecTag),
+        itemProjectId(copy.itemProjectId),
         itemMiscTag  (copy.itemMiscTag),
         itemCode     (copy.itemCode)
     {}
@@ -62,7 +62,7 @@ public:
             itemFullname  = right.itemFullname;
             itemSerialn   = right.itemSerialn;
             itemUnit      = right.itemUnit;
-            itemProjecTag = right.itemProjecTag;
+            itemProjectId = right.itemProjectId;
             itemMiscTag   = right.itemMiscTag;
             itemCode      = right.itemCode;
         }
@@ -75,7 +75,7 @@ public:
                 itemFullname  == right.itemFullname  &&
                 itemSerialn   == right.itemSerialn   &&
                 itemUnit      == right.itemUnit      &&
-                itemProjecTag == right.itemProjecTag &&
+                itemProjectId == right.itemProjectId &&
                 itemMiscTag   == right.itemMiscTag   &&
                 itemCode      == right.itemCode);
     }
@@ -87,7 +87,7 @@ public:
                       << " fname:"   << right.itemFullname
                       << " serialn:" << right.itemSerialn
                       << " unit:"    << right.itemUnit
-                      << " projtag:" << right.itemProjecTag
+                      << " proj:"    << right.itemProjectId
                       << " micstag:" << right.itemMiscTag
                       << " code:"    << right.itemCode
                       << ")";
@@ -103,7 +103,7 @@ public:
         QString prodFullname  = QString();
         QString prodSerialn   = QString();
         QString prodUnit      = QString();
-        QString prodProjecTag = QString();
+        qint32  prodProjectId = 0;
         QString prodMiscTag   = QString();
         qint32  prodCode      = 0;
 
@@ -112,13 +112,13 @@ public:
         ProductItemBuilder& setFullname (const QString &fullname) { this->prodFullname  = fullname; return *this; }
         ProductItemBuilder& setSerialn  (const QString &serialn)  { this->prodSerialn   = serialn;  return *this; }
         ProductItemBuilder& setUnit     (const QString &unit)     { this->prodUnit      = unit;     return *this; }
-        ProductItemBuilder& setProjetTag(const QString &projTag)  { this->prodProjecTag = projTag;  return *this; }
+        ProductItemBuilder& setProjetId (const qint32   projId)   { this->prodProjectId = projId;   return *this; }
         ProductItemBuilder& setMiscTag  (const QString &miscTag)  { this->prodMiscTag   = miscTag;  return *this; }
         ProductItemBuilder& setCode     (const qint32   code)     { this->prodCode      = code;     return *this; }
         ProductItem build() {
             return ProductItem(this->prodId,       this->prodName,
                                this->prodFullname, this->prodSerialn,
-                               this->prodUnit,     this->prodProjecTag,
+                               this->prodUnit,     this->prodProjectId,
                                this->prodMiscTag,  this->prodCode);
         }
     };
