@@ -71,12 +71,16 @@ public:
     int findRow(const InventoryNode *invNode) const;
 
     QModelIndex addCategory(const QString &catName);
-    void editCategory(const QModelIndex &index, const QString &newName);
+    QModelIndex editCategory(const QModelIndex &index, const QString &newName);
     void deleteCategory(const QModelIndex &index);
 
-    QModelIndex addGroup(const QModelIndex &index, const QString &grpName);
-    void editGroup(const QModelIndex &index, const QString &newName);
+    QModelIndex addGroup(const QModelIndex &pindex, const QString &grpName);
+    QModelIndex editGroup(const QModelIndex &index, const QString &newName);
     void deleteGroup(const QModelIndex &index);
+
+    QModelIndex addInventory(const QModelIndex &pindex, const QString &grpName);
+    QModelIndex editInventory(const QModelIndex &index, const QString &newName);
+    void deleteInventory(const QModelIndex &index);
 
 private:
 };

@@ -182,7 +182,8 @@ ProductItem::ProductList DataBaseManager::getProductList(const qint32 catId, con
                        .setSerialn (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
                        .setUnit    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
                        .setMiscTag (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
-                       .setProjetId(0)
+                       .setGroup   (                  q.value(6).toInt())
+                       .setCategory(                  q.value(7).toInt())
                        .build());
 #endif
     }
@@ -255,7 +256,7 @@ HashDict DataBaseManager::getMapLocation()
     return tmphash;
 }
 
-HashDict DataBaseManager::getMapProjectTag()
+HashDict DataBaseManager::getMapProject()
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
@@ -333,6 +334,16 @@ HashDict DataBaseManager::getMapCategory()
     return tmphash;
 }
 
+LinkedDict DataBaseManager::getLinkGroupToCategory()
+{
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+    LinkedDict tmpdict;
+
+    QSqlQuery q = execSimpleQuery("CALL getLinkGroupToCategory()");
+
+    return tmpdict;
+}
+
 qint32 DataBaseManager::insertCategory(const QString &name)
 {
     // TODO: FIXME
@@ -370,6 +381,22 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
     // TODO: FIXME
     qDebug() << "db: delete group:" << item;
 }
+
+qint32 DataBaseManager::insertProduct(const ProductItem &item)
+{
+    qDebug()<<"db: insert product:"<<item;
+}
+
+void DataBaseManager::updateProduct(const ProductItem &item)
+{
+    qDebug()<<"db update product:"<<item;
+}
+
+void DataBaseManager::deleteProduct(const ProductItem &item)
+{
+    qDebug()<<"db delete prodcut:"<<item;
+}
+
 
 void DataBaseManager::convertDB()
 {

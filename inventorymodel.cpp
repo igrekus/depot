@@ -347,10 +347,11 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
         return it.inventoryItem.itemName > catName;
     });
 
-    qint32 row = std::distance(std::begin(m_nodes), row_iterator);
+    qint32 row = std::distance(m_nodes.begin(), row_iterator);
 
     qint32 newId = m_dbman->insertCategory(catName);
 
+    m_nodes.reserve(1);
     beginInsertRows(QModelIndex(), row, row + 1);
     m_nodes.insert(row, std::move(makeCategoryNode(CategoryItem::CategoryItemBuilder()
                                                    .setId(newId)
@@ -359,4 +360,120 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
     endInsertRows();
 
     return index(row, 0, QModelIndex());
+}
+
+QModelIndex InventoryModel::editCategory(const QModelIndex &index, const QString &newName)
+{
+
+    InventoryNode *editNode = static_cast<InventoryNode *>(index.internalPointer());
+    InventoryItem &editItem = editNode->inventoryItem;
+    editItem.itemName = newName;
+
+    m_dbman->updateCategory(CategoryItem::CategoryItemBuilder()
+                            .setId  (editItem.itemId)
+                            .setName(editItem.itemName)
+                            .build());
+
+    emit dataChanged(index, index);
+
+    //TODO: сортировка при переименовании
+//    auto dest_row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&newName](const InventoryNode &it){
+//        return it.inventoryItem.itemName > newName;
+//    });
+//    qint32 dest_row = std::distance(m_nodes.begin(), dest_row_iterator);
+//    qint32 row = index.row();
+
+//    beginMoveRows(index.parent(), row, row, index.parent(), dest_row);
+//    m_nodes.move(row, dest_row);
+//    endMoveRows();
+
+//    return this->index(dest_row, 0, index.parent());
+    return this->index(index.row(), 0, index.parent());
+}
+
+void InventoryModel::deleteCategory(const QModelIndex &index)
+{
+    InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
+//    qint32 row = findRow(delNode);
+
+    m_dbman->deleteCategory(CategoryItem::CategoryItemBuilder()
+                            .setId  (delNode->inventoryItem.itemId)
+                            .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    m_nodes.removeAt(index.row());
+    endRemoveRows();
+}
+
+QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &grpName)
+{
+    // TODO: соединить метод с методом добавки категории?
+    InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
+
+    auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
+                                     [&grpName](const InventoryNode &it){return it.inventoryItem.itemName > grpName;});
+
+    qint32 row = std::distance(pnode->children.begin(), row_iterator);
+
+    qint32 newId = m_dbman->insertGroup(grpName);
+
+    pnode->children.reserve(1);
+    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+    pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
+                                                        .setId  (newId)
+                                                        .setName(grpName)
+                                                        .build(), pnode)));
+    endInsertRows();
+
+    return index(row, 0, pindex);
+}
+
+QModelIndex InventoryModel::editGroup(const QModelIndex &index, const QString &newName)
+{
+    // TODO: сортировака при добавлении группы
+    InventoryItem &editItem = static_cast<InventoryNode *>(index.internalPointer())->inventoryItem;
+    editItem.itemName = newName;
+
+    m_dbman->updateGroup(GroupItem::GroupItemBuilder()
+                         .setId  (editItem.itemId)
+                         .setName(editItem.itemName)
+                         .build());
+
+    emit dataChanged(index, index);
+}
+
+void InventoryModel::deleteGroup(const QModelIndex &index)
+{
+    InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
+
+    m_dbman->deleteGroup(GroupItem::GroupItemBuilder()
+                         .setId  (delNode->inventoryItem.itemId)
+                         .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    delNode->siblings()->removeAt(index.row());
+    endRemoveRows();
+}
+
+QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const QString &grpName)
+{
+
+}
+
+QModelIndex InventoryModel::editInventory(const QModelIndex &index, const QString &newName)
+{
+
+}
+
+void InventoryModel::deleteInventory(const QModelIndex &index)
+{
+    InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
+
+    m_dbman->deleteProduct(ProductItem::ProductItemBuilder()
+                           .setId  (delNode->inventoryItem.itemId)
+                           .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    delNode->siblings()->removeAt(index.row());
+    endRemoveRows();
 }

@@ -124,7 +124,7 @@ void MainWindow::initApplication()
     m_projectListModel->initModel(m_dictModel->m_mapProject);
 
     ui->comboCategory->setCurrentIndex(0);
-    ui->comboProject->setCurrentIndex(0);
+    ui->comboProject->setCurrentText("Общее");
 
     actRefreshView->trigger();
 }
@@ -170,29 +170,8 @@ void MainWindow::createActions()
 //    actReFetchRootData = new QAction(tr("Fetch Data"), this);
 //    connect(actReFetchRootData, &QAction::triggered, this, &MainWindow::procActReFetchRootData);
 
-    actRefreshView = new QAction(tr("Refresh View"), this);
+    actRefreshView = new QAction("Обновить", this);
     connect(actRefreshView, &QAction::triggered, this, &MainWindow::procActRefreshView);
-
-    actAddCategory = new QAction(tr("Add Category"), this);
-    connect(actAddCategory, &QAction::triggered, this, &MainWindow::procActAddCategory);
-    actEditCategory = new QAction(tr("Edit Category"), this);
-    connect(actEditCategory, &QAction::triggered, this, &MainWindow::procActEditCategory);
-    actDeleteCategory = new QAction(tr("Edit Category"), this);
-    connect(actDeleteCategory, &QAction::triggered, this, &MainWindow::procActDeleteCategory);
-
-    actAddGroup = new QAction(tr("Add Group"), this);
-    connect(actAddGroup, &QAction::triggered, this, &MainWindow::procActAddGroup);
-    actEditGroup = new QAction(tr("Edit Group"), this);
-    connect(actEditGroup, &QAction::triggered, this, &MainWindow::procActEditGroup);
-    actDeleteGroup = new QAction(tr("Delete Group"), this);
-    connect(actDeleteGroup, &QAction::triggered, this, &MainWindow::procActDeleteGroup);
-
-    actAddStock = new QAction(tr("Add Stock"), this);
-    connect(actAddStock, &QAction::triggered, this, &MainWindow::procActAddStock);
-    actEditStock = new QAction(tr("Edit Stock"), this);
-    connect(actEditStock, &QAction::triggered, this, &MainWindow::procActEditStock);
-    actDeleteStock = new QAction(tr("Delete Stock"), this);
-    connect(actDeleteStock, &QAction::triggered, this, &MainWindow::procActDeleteStock);
 }
 
 // -------------------- Action Processing -----------------------------
@@ -218,228 +197,7 @@ void MainWindow::procActRefreshView()
     ui->tableTransact->show();
 }
 
-// === to remove ===
-void MainWindow::procActAddCategory()
-{
-    bool ok;
-    QString newName = QInputDialog::getText(this, "Добавить категорию",
-                                         "Введите название:", QLineEdit::Normal,
-                                         QString(), &ok);
-    if (ok & !newName.isEmpty()) {
-        newName.replace(0, 1, newName.at(0).toUpper());
-        QModelIndex ind = m_stockModel->addCategory(newName);
-        ui->treeStock->selectionModel()->clear();
-        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
-}
-
-void MainWindow::procActEditCategory()
-{
-    // TODO: вынести одинаковые с editgroup участки в отдельный метод
-    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
-    bool ok;
-    QString oldName = index.data(Qt::DisplayRole).toString();
-    QString newName = QInputDialog::getText(this,
-                                            "Изменить категорию",
-                                            "Введите новое название",
-                                            QLineEdit::Normal,
-                                            index.data(Qt::DisplayRole).toString(),
-                                            &ok);
-    if (ok && !oldName.isEmpty() && oldName != newName) {
-        newName.replace(0, 1, newName.at(0).toUpper());
-        m_stockModel->editCategory(index, newName);
-    }
-}
-
-void MainWindow::procActDeleteCategory()
-{
-    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
-    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Нельзя удалить непустую категорию. "
-                             "Сначала удалите все группы.");
-        return;
-    }
-    qint32 res = QMessageBox::question(this,
-                                       "Внимание!",
-                                       "Вы действительно хотите удалить выбранную категорию?",
-                                       QMessageBox::Yes,
-                                       QMessageBox::No | QMessageBox::Default);
-    if (res == QMessageBox::Yes) {
-        m_stockModel->deleteCategory(index);
-    }
-}
-
-void MainWindow::procActAddGroup()
-{
-    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
-        case StockItem::ItemCategory:
-            return cur;
-        case StockItem::ItemGroup:
-            return cur.parent();
-        case StockItem::ItemItem:
-            return cur.parent().parent();   // TODO: FIX parent search
-        }
-            return QModelIndex();
-    }();
-    bool ok;
-    QString newName = QInputDialog::getText(this, "Добавить группу",
-                                         "Введите название:", QLineEdit::Normal,
-                                         QString(), &ok);
-    if (ok & !newName.isEmpty()) {
-        newName.replace(0, 1, newName.at(0).toUpper());
-        QModelIndex ind = m_stockModel->addGroup(pindex, newName);
-        ui->treeStock->selectionModel()->clear();
-        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
-}
-
-void MainWindow::procActEditGroup()
-{
-    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
-    bool ok;
-    QString oldName = index.data(Qt::DisplayRole).toString();
-    QString newName = QInputDialog::getText(this,
-                                            "Изменить группу",
-                                            "Введите новое название",
-                                            QLineEdit::Normal,
-                                            index.data(Qt::DisplayRole).toString(),
-                                            &ok);
-    if (ok && !oldName.isEmpty() && oldName != newName) {
-        newName.replace(0, 1, newName.at(0).toUpper());
-        m_stockModel->editGroup(index, newName);
-    }
-}
-
-void MainWindow::procActDeleteGroup()
-{
-    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
-    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Нельзя удалить непустую группу. "
-                             "Сначала удалите все позиции хранения.");
-        return;
-    }
-    qint32 res = QMessageBox::question(this,
-                                       "Внимание!",
-                                       "Вы действительно хотите удалить выбранную группу?",
-                                       QMessageBox::Yes,
-                                       QMessageBox::No | QMessageBox::Default);
-    if (res == QMessageBox::Yes) {
-        m_stockModel->deleteGroup(index);
-    }
-}
-
-void MainWindow::procActAddStock()
-{
-    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
-    if (cur.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemCategory) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите группу для добавления позиции хранения.");
-        return;
-    }
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
-        case StockItem::ItemGroup:
-            return cur;
-        case StockItem::ItemItem:
-            return cur.parent();
-    }
-    }();
-    qDebug() << "custom add stock item dialog: select product + project + amount (auto-register positive transact)";
-    qDebug() << "add to:" << pindex.data(Qt::DisplayRole).toString()
-                          << pindex.data(ROLE_NODE_ID).toInt();
-}
-
-void MainWindow::procActEditStock()
-{
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    qDebug() << "custom edit stock item dialog: deny select product, select project + amount (auto transact)";
-}
-
-void MainWindow::procActDeleteStock()
-{
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    qDebug() << "del stock item:" << indexes.first().data(Qt::DisplayRole).toString()
-                                  << indexes.first().data(ROLE_NODE_ID).toInt();
-}
-
-// -------------------- Control Events -----------------------------
-void MainWindow::on_btnAddCategory_clicked()
-{
-    actAddCategory->trigger();
-}
-
-void MainWindow::on_btnAddGroup_clicked()
-{
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    if (indexes.isEmpty()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите категорию для добавления группы.");
-        return;
-    }
-    actAddGroup->trigger();
-}
-
-void MainWindow::on_btnAddStock_clicked()
-{
-    actAddStock->trigger();
-}
-
-void MainWindow::on_btnEditStockItem_clicked()
-{
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    if (indexes.isEmpty()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите запись для редактирования.");
-        return;
-    }
-    switch (indexes.first().data(ROLE_NODE_TYPE).toInt()) {
-    case StockItem::ItemCategory:
-        actEditCategory->trigger();
-        break;
-    case StockItem::ItemGroup:
-        actEditGroup->trigger();
-        break;
-    case StockItem::ItemItem:
-        actEditStock->trigger();
-        break;
-    default:
-        break;
-    }
-}
-
-void MainWindow::on_btnDeleteStockItem_clicked()
-{
-    QModelIndexList indexes = ui->treeStock->selectionModel()->selectedIndexes();
-    if (indexes.isEmpty()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите запись для удаления.");
-        return;
-    }
-    switch (indexes.first().data(ROLE_NODE_TYPE).toInt()) {
-    case StockItem::ItemCategory:
-        actDeleteCategory->trigger();
-        break;
-    case StockItem::ItemGroup:
-        actDeleteGroup->trigger();
-        break;
-    case StockItem::ItemItem:
-        actDeleteStock->trigger();
-        break;
-    default:
-        break;
-    }
-}
-
+// -------------------- Control Events --------------------------------
 void MainWindow::on_btnInventoryEditor_clicked()
 {
     InventoryDialog dialog(m_dbman, this);
@@ -453,14 +211,14 @@ void MainWindow::on_btnReloadData_clicked()
 {
     qDebug() << "add test";
 //    testAddCat();
-    testAddGrp();
+//    testAddGrp();
 }
 
 void MainWindow::on_btnReport_clicked()
 {
     qDebug() << "rem test";
 //    testRemCat();
-    testRemGrp();
+//    testRemGrp();
 }
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
@@ -469,12 +227,14 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
     m_stockModel->debugInfo(index);
 }
 
+// -------------------- Misc Events -----------------------------------
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
     actRefreshView->trigger();
 }
 
+// -------------------- Delegates -------------------------------------
 void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyleOptionViewItem opt = option;
@@ -622,70 +382,6 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
     painter->restore();
 }
 
-void MainWindow::testAddCat()
-{
-    for (int i=0; i<10; ++i) {
-        QString id = Depot::rndString(12);
-        id.replace(0, 1, id.at(0).toUpper());
-        QModelIndex ind = MainWindow::m_stockModel->addCategory(id);
-        ui->treeStock->selectionModel()->clear();
-        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-//        qDebug() << id;
-    }
-}
+// -------------------- Testing routines ------------------------------
 
-void MainWindow::testRemCat()
-{
-    qint32 count = m_stockModel->rowCount(QModelIndex());
-    for (qint32 i=0; i<count; ++i) {
-        QModelIndex ind = m_stockModel->index(i, 0);
-        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
-            m_stockModel->deleteCategory(ind);
-            --i;
-            --count;
-        }
-    }
-}
-
-void MainWindow::testAddGrp()
-{
-    QModelIndex catind = ui->treeStock->selectionModel()->selectedIndexes().first();
-    for (int i=0; i<10; ++i) {
-        QString id = Depot::rndString(12);
-        id.replace(0, 1, id.at(0).toUpper());
-        QModelIndex ind = MainWindow::m_stockModel->addGroup(catind, id);
-        ui->treeStock->selectionModel()->clear();
-        ui->treeStock->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-//        qDebug() << id;
-    }
-}
-
-void MainWindow::testRemGrp()
-{
-    QModelIndex catind = ui->treeStock->selectionModel()->selectedIndexes().first();
-    qint32 count = m_stockModel->rowCount(catind);
-    for (qint32 i=0; i<count; ++i) {
-        QModelIndex ind = m_stockModel->index(i, 0, catind);
-        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
-            m_stockModel->deleteGroup(ind);
-            --i;
-            --count;
-        }
-    }
-}
-
-QString Depot::rndString(qint32 len)
-{
-    static const QString charset =
-    "0123456789"
-//        "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧшщЪЫЬЭЮЯ"
-    "абвгдеёжзиклмнопрстуфхцчшщъыьэюя";
-    QString out;
-    while (len>0) {
-        qint32 chr = qrand() % (charset.size() - 1);
-        out.append(charset.at(chr));
-        --len;
-    }
-    return out;
-}
-
+// -------------------- Utility ---------------------------------------

@@ -2,16 +2,28 @@
 <ui version="4.0">
  <class>InventoryDataDialog</class>
  <widget class="QDialog" name="InventoryDataDialog">
+  <property name="windowModality">
+   <enum>Qt::ApplicationModal</enum>
+  </property>
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>414</width>
-    <height>211</height>
+    <width>496</width>
+    <height>236</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Maximum" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string>Dialog</string>
+  </property>
+  <property name="modal">
+   <bool>true</bool>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="sizeConstraint">
@@ -27,7 +39,14 @@
       </widget>
      </item>
      <item row="0" column="1">
-      <widget class="QComboBox" name="comboCategory"/>
+      <widget class="QComboBox" name="comboCategory">
+       <property name="minimumSize">
+        <size>
+         <width>300</width>
+         <height>0</height>
+        </size>
+       </property>
+      </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="lblGroup">
@@ -80,6 +99,20 @@
       <widget class="QLineEdit" name="editUnit">
        <property name="text">
         <string>шт.</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="0">
+      <widget class="QLabel" name="lblMiscTag">
+       <property name="text">
+        <string>Теги:</string>
+       </property>
+      </widget>
+     </item>
+     <item row="6" column="1">
+      <widget class="QLineEdit" name="editMiscTag">
+       <property name="enabled">
+        <bool>false</bool>
        </property>
       </widget>
      </item>

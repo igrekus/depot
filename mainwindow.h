@@ -23,10 +23,6 @@ namespace Ui {
 class MainWindow;
 }
 
-namespace Depot {
-QString rndString(qint32 len);
-}
-
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -65,27 +61,7 @@ private slots:
     // обработка action
     void procActRefreshView();
 
-    // редактировние категории
-    // TODO: объединить однотипные действия в один метод?
-    void procActAddCategory();
-    void procActEditCategory();
-    void procActDeleteCategory();
-
-    void procActAddGroup();
-    void procActEditGroup();
-    void procActDeleteGroup();
-
-    void procActAddStock();
-    void procActEditStock();
-    void procActDeleteStock();
-
     // control events
-    void on_btnAddCategory_clicked();
-    void on_btnAddGroup_clicked();
-    void on_btnAddStock_clicked();
-    void on_btnDeleteStockItem_clicked();
-    void on_btnEditStockItem_clicked();
-
     void on_btnInventoryEditor_clicked();
 
     void on_btnReloadData_clicked();
@@ -112,24 +88,6 @@ private:
 
     // actions
     QAction *actRefreshView;
-
-    QAction *actAddCategory;
-    QAction *actEditCategory;
-    QAction *actDeleteCategory;
-
-    QAction *actAddGroup;
-    QAction *actEditGroup;
-    QAction *actDeleteGroup;
-
-    QAction *actAddStock;
-    QAction *actEditStock;
-    QAction *actDeleteStock;
-
-    void testAddCat();
-    void testRemCat();
-
-    void testAddGrp();
-    void testRemGrp();
 };
 
 #endif // MAINWINDOW_H

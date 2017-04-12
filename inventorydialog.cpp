@@ -18,8 +18,6 @@ InventoryDialog::InventoryDialog(DataBaseManager *dbman, QWidget *parent) :
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
     ui->treeInventory->setAlternatingRowColors(true);
-
-    actRefreshView->trigger();
 }
 
 InventoryDialog::~InventoryDialog()
@@ -81,12 +79,38 @@ void InventoryDialog::procActRefreshView()
 
 void InventoryDialog::procActEdit()
 {
-    qDebug() << "edit press";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    switch (index.data(ROLE_NODE_TYPE).toInt()) {
+    case StockItem::ItemCategory:
+        actEditCategory->trigger();
+        break;
+    case StockItem::ItemGroup:
+        actEditGroup->trigger();
+        break;
+    case StockItem::ItemItem:
+        actEditInventory->trigger();
+        break;
+    default:
+        break;
+    }
 }
 
 void InventoryDialog::procActDelete()
 {
-    qDebug() << "delete press";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    switch (index.data(ROLE_NODE_TYPE).toInt()) {
+    case StockItem::ItemCategory:
+        actDeleteCategory->trigger();
+        break;
+    case StockItem::ItemGroup:
+        actDeleteGroup->trigger();
+        break;
+    case StockItem::ItemItem:
+        actDeleteInventory->trigger();
+        break;
+    default:
+        break;
+    }
 }
 
 void InventoryDialog::procActAddCategory()
@@ -105,42 +129,145 @@ void InventoryDialog::procActAddCategory()
 
 void InventoryDialog::procActEditCategory()
 {
-    qDebug() << "edit cat";
+    // TODO: вынести одинаковые с editgroup участки в отдельный метод
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    bool ok;
+    QString oldName = index.data(Qt::DisplayRole).toString();
+    QString newName = QInputDialog::getText(this,
+                                            "Изменить категорию",
+                                            "Введите новое название",
+                                            QLineEdit::Normal,
+                                            oldName,
+                                            &ok);
+    if (ok && !oldName.isEmpty() && oldName != newName) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        m_inventoryModel->editCategory(index, newName);
+    }
 }
 
 void InventoryDialog::procActDeleteCategory()
 {
-    qDebug() << "del cat";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя удалить непустую категорию. "
+                             "Сначала удалите все группы.");
+        return;
+    }
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную категорию?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_inventoryModel->deleteCategory(index);
+    }
 }
 
 void InventoryDialog::procActAddGroup()
 {
-    qDebug() << "add grp";
+    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
+        case StockItem::ItemCategory:
+            return cur;
+        case StockItem::ItemGroup:
+            return cur.parent();
+        case StockItem::ItemItem:
+            return cur.parent().parent();   // TODO: FIX parent search model->getparentroot
+        }
+            return QModelIndex();
+    }();
+    bool ok;
+    QString newName = QInputDialog::getText(this, "Добавить группу",
+                                         "Введите название:", QLineEdit::Normal,
+                                         QString(), &ok);
+    if (ok & !newName.isEmpty()) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        QModelIndex ind = m_inventoryModel->addGroup(pindex, newName);
+        ui->treeInventory->selectionModel()->clear();
+        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
 }
 
 void InventoryDialog::procActEditGroup()
 {
-    qDebug() << "edit grp";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    bool ok;
+    QString oldName = index.data(Qt::DisplayRole).toString();
+    QString newName = QInputDialog::getText(this,
+                                            "Изменить группу",
+                                            "Введите новое название",
+                                            QLineEdit::Normal,
+                                            oldName,
+                                            &ok);
+    if (ok && !oldName.isEmpty() && oldName != newName) {
+        newName.replace(0, 1, newName.at(0).toUpper());
+        m_inventoryModel->editGroup(index, newName);
+    }
 }
 
 void InventoryDialog::procActDeleteGroup()
 {
-    qDebug() << "del grp";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя удалить непустую группу. "
+                             "Сначала удалите все позиции хранения.");
+        return;
+    }
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную группу?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_inventoryModel->deleteGroup(index);
+    }
 }
 
 void InventoryDialog::procActAddInventory()
 {
-    qDebug() << "add inv";
+    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
+        case StockItem::ItemGroup:
+            return cur;
+        case StockItem::ItemItem:
+            return cur.parent();
+    }
+    }();
+
+    InventoryDataDialog dialog(ProductItem::ProductItemBuilder().build(),
+                               m_dbman->getLinkGroupToCategory(),
+                               this);
+
+    dialog.initDialog();
+
+    qDebug() << "add inv to:" << pindex.data(Qt::DisplayRole).toString()
+                              << pindex.data(ROLE_NODE_ID).toInt();
+    dialog.exec();
 }
 
 void InventoryDialog::procActEditInventory()
 {
-    qDebug() << "edit inv";
+    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    qDebug() << "edit inv:" << cur.sibling(cur.row(), 2).data(Qt::DisplayRole);
 }
 
 void InventoryDialog::procActDeleteInventory()
 {
-    qDebug() << "del inv";
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную группу?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_inventoryModel->deleteInventory(index);
+    }
 }
 
 void InventoryDialog::resizeEvent(QResizeEvent *event)
@@ -148,7 +275,6 @@ void InventoryDialog::resizeEvent(QResizeEvent *event)
     Q_UNUSED(event);
     actRefreshView->trigger();
 }
-
 
 void InventoryDialog::changeEvent(QEvent *e)
 {
@@ -172,20 +298,114 @@ void InventoryDialog::on_btnAddCategory_clicked()
 
 void InventoryDialog::on_btnAddGroup_clicked()
 {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите категорию для добавления группы.");
+        return;
+    }
     actAddGroup->trigger();
 }
 
 void InventoryDialog::on_btnAddInventory_clicked()
 {
+    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
+         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(ROLE_NODE_TYPE) == InventoryItem::ItemCategory)) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите группу для добавления номенклатуры.");
+        return;
+    }
     actAddInventory->trigger();
 }
 
 void InventoryDialog::on_btnEdit_clicked()
 {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись для редактирования.");
+        return;
+    }
     actEdit->trigger();
 }
 
 void InventoryDialog::on_btnDelete_clicked()
 {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись для удаления.");
+        return;
+    }
     actDelete->trigger();
 }
+
+// ------------------------- Testing routines ----------------
+void InventoryDialog::testAddCat()
+{
+    for (int i=0; i<10; ++i) {
+        QString id = Utility::rndString(12);
+        id.replace(0, 1, id.at(0).toUpper());
+        QModelIndex ind = m_inventoryModel->addCategory(id);
+        ui->treeInventory->selectionModel()->clear();
+        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
+}
+
+void InventoryDialog::testRemCat()
+{
+    qint32 count = m_inventoryModel->rowCount(QModelIndex());
+    for (qint32 i=0; i<count; ++i) {
+        QModelIndex ind = m_inventoryModel->index(i, 0);
+        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+            m_inventoryModel->deleteCategory(ind);
+            --i;
+            --count;
+        }
+    }
+}
+
+void InventoryDialog::testAddGrp()
+{
+    QModelIndex catind = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    for (int i=0; i<10; ++i) {
+        QString id = Utility::rndString(12);
+        id.replace(0, 1, id.at(0).toUpper());
+        QModelIndex ind = m_inventoryModel->addGroup(catind, id);
+        ui->treeInventory->selectionModel()->clear();
+        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//        qDebug() << id;
+    }
+}
+
+void InventoryDialog::testRemGrp()
+{
+    QModelIndex catind = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    qint32 count = m_inventoryModel->rowCount(catind);
+    for (qint32 i=0; i<count; ++i) {
+        QModelIndex ind = m_inventoryModel->index(i, 0, catind);
+        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+            m_inventoryModel->deleteGroup(ind);
+            --i;
+            --count;
+        }
+    }
+}
+
+// ------------------------------ utility routines ------------------
+QString Utility::rndString(qint32 len)
+{
+    static const QString charset =
+    "0123456789"
+//        "АБВГДЕЁЖЗИКЛМНОПРСТУФХЦЧшщЪЫЬЭЮЯ"
+    "абвгдеёжзиклмнопрстуфхцчшщъыьэюя";
+    QString out;
+    while (len>0) {
+        qint32 chr = qrand() % (charset.size() - 1);
+        out.append(charset.at(chr));
+        --len;
+    }
+    return out;
+}
+

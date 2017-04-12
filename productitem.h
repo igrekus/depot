@@ -13,18 +13,18 @@ public:
     QString itemFullname;
     QString itemSerialn;
     QString itemUnit;
-    qint32  itemProjectId;
     QString itemMiscTag;
-    qint32  itemCode;
+    qint32  itemGroupRef;
+    qint32  itemCategoryRef;
 
     explicit ProductItem():
         AbstractItem(),
         itemFullname(),
         itemSerialn(),
         itemUnit(),
-        itemProjectId(),
         itemMiscTag(),
-        itemCode()
+        itemGroupRef(),
+        itemCategoryRef()
     {}
 
     explicit ProductItem(qint32         id,
@@ -32,64 +32,64 @@ public:
                          const QString &fullname,
                          const QString &serialn,
                          const QString &unit,
-                         qint32         projTag,
                          const QString &miscTag,
-                         qint32 code):
-        AbstractItem (id, name),
-        itemFullname (fullname),
-        itemSerialn  (serialn),
-        itemUnit     (unit),
-        itemProjectId(projTag),
-        itemMiscTag  (miscTag),
-        itemCode     (code)
+                         qint32         group,
+                         qint32         category):
+        AbstractItem   (id, name),
+        itemFullname   (fullname),
+        itemSerialn    (serialn),
+        itemUnit       (unit),
+        itemMiscTag    (miscTag),
+        itemGroupRef   (group),
+        itemCategoryRef(category)
     {}
 
      ProductItem(const ProductItem &copy):
-        AbstractItem (copy),
-        itemFullname (copy.itemFullname),
-        itemSerialn  (copy.itemSerialn),
-        itemUnit     (copy.itemUnit),
-        itemProjectId(copy.itemProjectId),
-        itemMiscTag  (copy.itemMiscTag),
-        itemCode     (copy.itemCode)
+        AbstractItem   (copy),
+        itemFullname   (copy.itemFullname),
+        itemSerialn    (copy.itemSerialn),
+        itemUnit       (copy.itemUnit),
+        itemMiscTag    (copy.itemMiscTag),
+        itemGroupRef   (copy.itemGroupRef),
+        itemCategoryRef(copy.itemCategoryRef)
     {}
 
 
     ProductItem &operator=(const ProductItem &right) {
         if (this != &right) {
-            itemId        = right.itemId;
-            itemName      = right.itemName;
-            itemFullname  = right.itemFullname;
-            itemSerialn   = right.itemSerialn;
-            itemUnit      = right.itemUnit;
-            itemProjectId = right.itemProjectId;
-            itemMiscTag   = right.itemMiscTag;
-            itemCode      = right.itemCode;
+            itemId          = right.itemId;
+            itemName        = right.itemName;
+            itemFullname    = right.itemFullname;
+            itemSerialn     = right.itemSerialn;
+            itemUnit        = right.itemUnit;
+            itemMiscTag     = right.itemMiscTag;
+            itemGroupRef    = right.itemGroupRef;
+            itemCategoryRef = right.itemCategoryRef;
         }
         return *this;
     }
 
     bool operator==(const ProductItem &right) const {
-        return (itemId        == right.itemId        &&
-                itemName      == right.itemName      &&
-                itemFullname  == right.itemFullname  &&
-                itemSerialn   == right.itemSerialn   &&
-                itemUnit      == right.itemUnit      &&
-                itemProjectId == right.itemProjectId &&
-                itemMiscTag   == right.itemMiscTag   &&
-                itemCode      == right.itemCode);
+        return (itemId          == right.itemId        &&
+                itemName        == right.itemName      &&
+                itemFullname    == right.itemFullname  &&
+                itemSerialn     == right.itemSerialn   &&
+                itemUnit        == right.itemUnit      &&
+                itemMiscTag     == right.itemMiscTag   &&
+                itemGroupRef    == right.itemGroupRef  &&
+                itemCategoryRef == right.itemCategoryRef);
     }
 
     friend QDebug operator<<(QDebug dbg, const ProductItem &right) {
         dbg.nospace() << "Product("
-                      << "id:"       << right.itemId
-                      << " name:"    << right.itemName
-                      << " fname:"   << right.itemFullname
-                      << " serialn:" << right.itemSerialn
-                      << " unit:"    << right.itemUnit
-                      << " proj:"    << right.itemProjectId
-                      << " micstag:" << right.itemMiscTag
-                      << " code:"    << right.itemCode
+                      << "id:"      << right.itemId
+                      << " name:"   << right.itemName
+                      << " fname:"  << right.itemFullname
+                      << " serial:" << right.itemSerialn
+                      << " unit:"   << right.itemUnit
+                      << " tag:"    << right.itemMiscTag
+                      << " grp:"    << right.itemGroupRef
+                      << " cat:"    << right.itemCategoryRef
                       << ")";
         return dbg.maybeSpace();
     }
@@ -103,23 +103,23 @@ public:
         QString prodFullname  = QString();
         QString prodSerialn   = QString();
         QString prodUnit      = QString();
-        qint32  prodProjectId = 0;
         QString prodMiscTag   = QString();
-        qint32  prodCode      = 0;
+        qint32  prodGroupRef  = 0;
+        qint32  prodCatRef    = 0;
 
-        ProductItemBuilder& setId       (const qint32   id)       { this->prodId        = id;       return *this; }
-        ProductItemBuilder& setName     (const QString &name)     { this->prodName      = name;     return *this; }
-        ProductItemBuilder& setFullname (const QString &fullname) { this->prodFullname  = fullname; return *this; }
-        ProductItemBuilder& setSerialn  (const QString &serialn)  { this->prodSerialn   = serialn;  return *this; }
-        ProductItemBuilder& setUnit     (const QString &unit)     { this->prodUnit      = unit;     return *this; }
-        ProductItemBuilder& setProjetId (const qint32   projId)   { this->prodProjectId = projId;   return *this; }
-        ProductItemBuilder& setMiscTag  (const QString &miscTag)  { this->prodMiscTag   = miscTag;  return *this; }
-        ProductItemBuilder& setCode     (const qint32   code)     { this->prodCode      = code;     return *this; }
+        ProductItemBuilder& setId       (const qint32   id)      { this->prodId       = id;       return *this; }
+        ProductItemBuilder& setName     (const QString &name)    { this->prodName     = name;     return *this; }
+        ProductItemBuilder& setFullname (const QString &fullname){ this->prodFullname = fullname; return *this; }
+        ProductItemBuilder& setSerialn  (const QString &serialn) { this->prodSerialn  = serialn;  return *this; }
+        ProductItemBuilder& setUnit     (const QString &unit)    { this->prodUnit     = unit;     return *this; }
+        ProductItemBuilder& setMiscTag  (const QString &miscTag) { this->prodMiscTag  = miscTag;  return *this; }
+        ProductItemBuilder& setGroup    (const qint32   group)   { this->prodGroupRef = group;    return *this; }
+        ProductItemBuilder& setCategory (const qint32   cat)     { this->prodCatRef   = cat;      return *this; }
         ProductItem build() {
             return ProductItem(this->prodId,       this->prodName,
                                this->prodFullname, this->prodSerialn,
-                               this->prodUnit,     this->prodProjectId,
-                               this->prodMiscTag,  this->prodCode);
+                               this->prodUnit,     this->prodMiscTag,
+                               this->prodGroupRef, this->prodCatRef);
         }
     };
 };

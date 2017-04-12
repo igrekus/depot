@@ -416,7 +416,6 @@ void StockModel::editGroup(const QModelIndex &index, const QString &newName)
 
 void StockModel::deleteGroup(const QModelIndex &index)
 {
-    // TODO: fix
     StockNode *delNode = static_cast<StockNode *>(index.internalPointer());
     qint32 row = findRow(delNode);
 

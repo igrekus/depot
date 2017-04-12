@@ -9,9 +9,14 @@
 #include <databasemanager.h>
 #include <inventorymodel.h>
 #include <inventorydatadialog.h>
+#include <linkeddict.h>
 
 namespace Ui {
 class InventoryDialog;
+}
+
+namespace Utility {
+QString rndString(qint32 len);
 }
 
 class InventoryDialog : public QDialog
@@ -82,6 +87,12 @@ private slots:
 
 private:
     Ui::InventoryDialog *ui;
+
+    void testAddCat();
+    void testRemCat();
+
+    void testAddGrp();
+    void testRemGrp();
 };
 
 #endif // INVENTORYDIALOG_H

@@ -21,7 +21,7 @@ public:
     DictMapList   m_dictMapList;          // список зависимостей parent id <- [childid... n]
     LinkedDict   *m_dictParent;           // указатель на словарь-предок
 
-    explicit LinkedDict(QObject *parent = 0):
+    explicit LinkedDict(QObject *parent = nullptr):
         QObject(parent),
         m_dictData(),
         m_dictChildList(),
@@ -29,7 +29,7 @@ public:
         m_dictParent(nullptr)
     {}
 
-    explicit LinkedDict(const LinkedDict &copy, QObject *parent = 0):
+    explicit LinkedDict(const LinkedDict &copy, QObject *parent = nullptr):
         QObject(parent),
         m_dictData     (copy.m_dictData),
         m_dictChildList(copy.m_dictChildList),

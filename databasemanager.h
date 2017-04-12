@@ -15,6 +15,7 @@
 #include <stockitem.h>
 #include <hashdict.h>
 #include <transactitem.h>
+#include <linkeddict.h>
 
 class DataBaseManager : public QObject
 {
@@ -36,9 +37,12 @@ public:
 
     // словари
     HashDict getMapLocation();
-    HashDict getMapProjectTag();
+    HashDict getMapProject();
     HashDict getMapMiscTag();
     HashDict getMapCategory();
+
+    // связи между словарями
+    LinkedDict getLinkGroupToCategory();
 
     // запись данных в БД
     qint32 insertCategory(const QString &name);
@@ -48,6 +52,10 @@ public:
     qint32 insertGroup(const QString &name);
     void updateGroup(const GroupItem &item);
     void deleteGroup(const GroupItem &item);
+
+    qint32 insertProduct(const ProductItem &item);
+    void updateProduct(const ProductItem &item);
+    void deleteProduct(const ProductItem &item);
 
     // utility
     void convertDB();
