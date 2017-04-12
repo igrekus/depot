@@ -390,8 +390,6 @@ QModelIndex StockModel::addGroup(const QModelIndex &pindex, const QString &grpNa
 
     qint32 newId = m_dbman->insertGroup(grpName);
 
-    qDebug() << "ins data:" << pnode->stockItem.itemName << grpName << row << pnode->children.size();
-
     pnode->children.reserve(1);
     beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
     pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
@@ -400,7 +398,6 @@ QModelIndex StockModel::addGroup(const QModelIndex &pindex, const QString &grpNa
                                                         .build(), pnode)));
     endInsertRows();
 
-    qDebug() << pnode->children.size();
     return index(row, 0, pindex);
 }
 

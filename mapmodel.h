@@ -20,6 +20,8 @@ public:
     void initModel(const HashDict &data);
     void clearModel();
 
+    void addItem(const qint32 pos, const qint32 id, const QString &str);
+
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 

@@ -70,6 +70,14 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     int findRow(const InventoryNode *invNode) const;
 
+    QModelIndex addCategory(const QString &catName);
+    void editCategory(const QModelIndex &index, const QString &newName);
+    void deleteCategory(const QModelIndex &index);
+
+    QModelIndex addGroup(const QModelIndex &index, const QString &grpName);
+    void editGroup(const QModelIndex &index, const QString &newName);
+    void deleteGroup(const QModelIndex &index);
+
 private:
 };
 

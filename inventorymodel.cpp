@@ -216,7 +216,8 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case CategoryColumn: {
             if (tmpitem.itemType == InventoryItem::ItemItem) {
-                return tmpitem.itemId;
+//                return tmpitem.itemId;
+                return QVariant(QString(""));
             } else {
                 return tmpitem.itemName;
             }
@@ -338,4 +339,24 @@ int InventoryModel::findRow(const InventoryNode *invNode) const
 //    StockNodeList::const_iterator position = std::find(searchList.begin(), searchList.end(), *stockNode);
 //    Q_ASSERT(position != searchList.end());
 //    return std::distance(searchList.begin(), position);
+}
+
+QModelIndex InventoryModel::addCategory(const QString &catName)
+{
+    auto row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&catName](const InventoryNode &it){
+        return it.inventoryItem.itemName > catName;
+    });
+
+    qint32 row = std::distance(std::begin(m_nodes), row_iterator);
+
+    qint32 newId = m_dbman->insertCategory(catName);
+
+    beginInsertRows(QModelIndex(), row, row + 1);
+    m_nodes.insert(row, std::move(makeCategoryNode(CategoryItem::CategoryItemBuilder()
+                                                   .setId(newId)
+                                                   .setName(catName)
+                                                   .build())));
+    endInsertRows();
+
+    return index(row, 0, QModelIndex());
 }

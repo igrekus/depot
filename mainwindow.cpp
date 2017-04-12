@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_transactModel = new TransactModel(m_dbman, m_dictModel, this);
 
     m_categoryListModel = new MapModel(this);
-    m_projectTagListModel = new MapModel(this);
+    m_projectListModel = new MapModel(this);
 
     ui->treeStock->setModel(m_stockModel);
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -98,7 +98,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->tableTransact->horizontalHeader()->setFixedHeight(20);
 
     ui->comboCategory->setModel(m_categoryListModel);
-    ui->comboProject->setModel(m_projectTagListModel);
+    ui->comboProject->setModel(m_projectListModel);
 }
 
 MainWindow::~MainWindow()
@@ -120,7 +120,8 @@ void MainWindow::initApplication()
     m_transactModel->initModel();
 
     m_categoryListModel->initModel(m_dictModel->m_mapCategory);
-    m_projectTagListModel->initModel(m_dictModel->m_mapProjectTag);
+    m_categoryListModel->addItem(0, 0, "Все");
+    m_projectListModel->initModel(m_dictModel->m_mapProject);
 
     ui->comboCategory->setCurrentIndex(0);
     ui->comboProject->setCurrentIndex(0);
@@ -217,6 +218,7 @@ void MainWindow::procActRefreshView()
     ui->tableTransact->show();
 }
 
+// === to remove ===
 void MainWindow::procActAddCategory()
 {
     bool ok;

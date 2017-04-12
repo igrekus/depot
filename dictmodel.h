@@ -22,7 +22,7 @@ public:
 
     HashDict m_mapCategory;    // списко категорий
     HashDict m_mapLocation;    // список мест хранения на складе
-    HashDict m_mapProjectTag;  // теги проектов
+    HashDict m_mapProject;  // теги проектов
 //    HashDict m_mapMisc;        // разные теги
 
     DataBaseManager *m_dbman;

@@ -336,39 +336,39 @@ HashDict DataBaseManager::getMapCategory()
 qint32 DataBaseManager::insertCategory(const QString &name)
 {
     // TODO: FIXME
-    qDebug()<<"insert cat:" << name;
+    qDebug()<<"db: insert cat:" << name;
     return 0;
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)
 {
     // TODO: FIXME
-    qDebug() << "update cat:" << item;
+    qDebug() << "db: update cat:" << item;
 }
 
 void DataBaseManager::deleteCategory(const CategoryItem &item)
 {
     // TODO: FIXME
-    qDebug() << "delete cat:" << item;
+    qDebug() << "db: delete cat:" << item;
 }
 
 qint32 DataBaseManager::insertGroup(const QString &name)
 {
     // TODO: FIXME
-    qDebug()<<"insert group:" << name;
+    qDebug()<<"db: insert group:" << name;
     return 0;
 }
 
 void DataBaseManager::updateGroup(const GroupItem &item)
 {
     // TODO: FIXME
-    qDebug() << "update group:" << item;
+    qDebug() << "db: update group:" << item;
 }
 
 void DataBaseManager::deleteGroup(const GroupItem &item)
 {
     // TODO: FIXME
-    qDebug() << "delete group:" << item;
+    qDebug() << "db: delete group:" << item;
 }
 
 void DataBaseManager::convertDB()

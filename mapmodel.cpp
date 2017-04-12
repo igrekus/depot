@@ -20,6 +20,13 @@ void MapModel::clearModel()
     m_strList.clear();
 }
 
+void MapModel::addItem(const qint32 pos, const qint32 id, const QString &str)
+{
+    m_strList.insert(pos, str);
+    m_mapData.id.insert(id, str);
+    m_mapData.di.insert(str, id);
+}
+
 QVariant MapModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     const QStringList headers = {"Название"};

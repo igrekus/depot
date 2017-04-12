@@ -107,7 +107,7 @@ private:
     TransactModel *m_transactModel;
 
     MapModel *m_categoryListModel;
-    MapModel *m_projectTagListModel;
+    MapModel *m_projectListModel;
 //    MapModel *m_miscTagListModel;
 
     // actions
