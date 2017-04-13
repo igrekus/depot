@@ -413,6 +413,7 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 qint32 DataBaseManager::insertProduct(const ProductItem &item)
 {
     qDebug()<<"db: insert product:"<<item;
+    return 0;
 }
 
 void DataBaseManager::updateProduct(const ProductItem &item)

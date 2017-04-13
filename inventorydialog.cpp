@@ -241,34 +241,47 @@ void InventoryDialog::procActAddInventory()
     }
     }();
 
+    ProductItem dummyProduct = ProductItem::ProductItemBuilder()
+                               .setGroup(pindex.data(ROLE_NODE_ID).toInt())
+                               .setCategory(pindex.parent().data(ROLE_NODE_ID).toInt())
+                               .build();
+
     InventoryDataDialog dialog(this);
 
-    dialog.setData(ProductItem::ProductItemBuilder().build())
+    dialog.setData(dummyProduct)
           .setCategoryMap(m_dictModel->m_mapCategory)
           .setGropMap(m_dictModel->m_mapGroup)
           .setComboLink(m_dictModel->m_mapGroupToCategory)
           .initDialog();
 
-    dialog.exec();
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    QModelIndex ind = m_inventoryModel->addInventory(pindex, dialog.getData());
+    ui->treeInventory->selectionModel()->clear();
+    ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 void InventoryDialog::procActEditInventory()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
-    // TODO: сделать простую короткую функцию, заполняющую структуру ProductItem для передачи в диалог
-    ProductItem oldProduct = convertInventoryToProduct(m_inventoryModel->getInventoryItem(cur));
-    oldProduct.
+    ProductItem oldProduct = m_inventoryModel->getProductItemByIndex(cur);
 
     InventoryDataDialog dialog(this);
 
-    dialog.setData(ProductItem::ProductItemBuilder().build())
+    dialog.setData(oldProduct)
           .setCategoryMap(m_dictModel->m_mapCategory)
           .setGropMap(m_dictModel->m_mapGroup)
           .setComboLink(m_dictModel->m_mapGroupToCategory)
           .initDialog();
 
-    dialog.exec();
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    m_inventoryModel->editInventory(cur, dialog.getData());
 }
 
 void InventoryDialog::procActDeleteInventory()
@@ -355,18 +368,7 @@ void InventoryDialog::on_btnDelete_clicked()
     actDelete->trigger();
 }
 
-// ------------------------- utility routines ------------------
-ProductItem convertInventoryToProduct(const InventoryItem &in)
-{
-    return (ProductItem::ProductItemBuilder()
-            .setId(in.itemId)
-            .setName(in.itemName)
-            .setFullname(in.itemFullname)
-            .setSerialn(in.itemSerialn)
-            .setUnit(in.itemUnit)
-            .setMiscTag(in.itemMiscTag)
-            .build());
-}
+// ------------------------- utility routines -----------------
 
 // ------------------------- Testing routines ----------------
 void InventoryDialog::testAddCat()

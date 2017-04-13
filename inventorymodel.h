@@ -78,11 +78,11 @@ public:
     QModelIndex editGroup(const QModelIndex &index, const QString &newName);
     void deleteGroup(const QModelIndex &index);
 
-    QModelIndex addInventory(const QModelIndex &pindex, const QString &grpName);
-    QModelIndex editInventory(const QModelIndex &index, const QString &newName);
+    QModelIndex addInventory(const QModelIndex &pindex, const ProductItem &item);
+    QModelIndex editInventory(const QModelIndex &index, const ProductItem &item);
     void deleteInventory(const QModelIndex &index);
 
-    InventoryItem getInventoryItem(const QModelIndex &index);
+    ProductItem getProductItemByIndex(const QModelIndex &index);
 
 private:
 };

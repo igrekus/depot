@@ -82,7 +82,7 @@
        <item>
         <widget class="QPushButton" name="btnEdit">
          <property name="text">
-          <string>Изменить</string>
+          <string>Изменить &amp;E</string>
          </property>
         </widget>
        </item>

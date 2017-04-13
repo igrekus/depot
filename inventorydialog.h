@@ -90,8 +90,6 @@ private slots:
 private:
     Ui::InventoryDialog *ui;
 
-    ProductItem convertInventoryToProduct(const InventoryItem &inItem);
-
     void testAddCat();
     void testRemCat();
 

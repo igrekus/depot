@@ -107,6 +107,19 @@ public:
         qint32  prodGroupRef  = 0;
         qint32  prodCatRef    = 0;
 
+        ProductItemBuilder(){}
+
+        ProductItemBuilder(const ProductItem &item):
+            prodId      (item.itemId),
+            prodName    (item.itemName),
+            prodFullname(item.itemFullname),
+            prodSerialn (item.itemSerialn),
+            prodUnit    (item.itemUnit),
+            prodMiscTag (item.itemMiscTag),
+            prodGroupRef(item.itemGroupRef),
+            prodCatRef  (item.itemCategoryRef)
+        {}
+
         ProductItemBuilder& setId       (const qint32   id)      { this->prodId       = id;       return *this; }
         ProductItemBuilder& setName     (const QString &name)    { this->prodName     = name;     return *this; }
         ProductItemBuilder& setFullname (const QString &fullname){ this->prodFullname = fullname; return *this; }

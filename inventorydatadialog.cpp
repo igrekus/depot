@@ -45,15 +45,26 @@ void InventoryDataDialog::initDialog()
         m_newRecord = false;
     }
 
-    m_categoryListModel->initModel(m_catMap);
-    ui->comboCategory->setCurrentIndex(0);
-
     ui->editFullname->setText(m_data.itemFullname);
     ui->editMiscTag->setText("");
     ui->editName->setText(m_data.itemName);
     ui->editSerialn->setText(m_data.itemSerialn);
     ui->editUnit->setText(m_data.itemUnit);
+
+    m_categoryListModel->initModel(m_catMap);
+    ui->comboCategory->setCurrentIndex(0);
+
+    ui->comboCategory->setCurrentText(m_categoryListModel->getData(m_data.itemCategoryRef));
+    ui->comboGroup->setCurrentText(m_groupListModel->getData(m_data.itemGroupRef));
+
+    m_oldData = m_data;
 }
+
+ProductItem InventoryDataDialog::getData()
+{
+    return m_data;
+}
+
 
 void InventoryDataDialog::changeEvent(QEvent *e)
 {
@@ -65,6 +76,20 @@ void InventoryDataDialog::changeEvent(QEvent *e)
     default:
         break;
     }
+}
+
+ProductItem InventoryDataDialog::collectData()
+{
+    return (ProductItem::ProductItemBuilder()
+            .setId(m_data.itemId)
+            .setName(ui->editName->text())
+            .setFullname(ui->editFullname->text())
+            .setSerialn(ui->editSerialn->text())
+            .setUnit(ui->editUnit->text())
+            .setMiscTag(ui->editMiscTag->text())
+            .setGroup(ui->comboGroup->currentData(ROLE_NODE_ID).toInt())
+            .setCategory(ui->comboCategory->currentData(ROLE_NODE_ID).toInt())
+            .build());
 }
 
 void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)
@@ -88,5 +113,24 @@ void InventoryDataDialog::on_comboGroup_currentTextChanged(const QString &arg1)
         ui->editName->setDisabled(false);
         ui->editSerialn->setDisabled(false);
         ui->editUnit->setDisabled(false);
+    }
+}
+
+void InventoryDataDialog::on_btnOk_clicked()
+{
+    if (ui->editName->text().isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Поле наименования категории не должно быть пустым!");
+        return;
+    }
+    m_data = collectData();
+
+    if (!(m_data == m_oldData)) {
+        m_dataModified = true;
+        accept();
+    } else {
+        m_dataModified = false;
+        reject();
     }
 }

@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QDebug>
 #include <QDataWidgetMapper>
+#include <QMessageBox>
 
 #include <inventorydatadialog.h>
 #include <productitem.h>
@@ -23,6 +24,7 @@ class InventoryDataDialog : public QDialog
 public:
 
     ProductItem m_data;
+    ProductItem m_oldData;
     HashDict m_catMap;
     HashDict m_grpMap;
     IdMap m_comboMap;
@@ -30,7 +32,7 @@ public:
     MapModel *m_categoryListModel;
     MapModel *m_groupListModel;
 
-    bool m_dataChanged = false;
+    bool m_dataModified = false;
     bool m_newRecord = false;
 
     explicit InventoryDataDialog(QWidget *parent = nullptr);
@@ -46,12 +48,19 @@ public:
     // init widgets with data
     void initDialog();
 
+    ProductItem getData();
+
 protected:
     void changeEvent(QEvent *e);
 
 private slots:
+
+    ProductItem collectData();
+
     void on_comboCategory_currentIndexChanged(int index);
     void on_comboGroup_currentTextChanged(const QString &arg1);
+
+    void on_btnOk_clicked();
 
 private:
     Ui::InventoryDataDialog *ui;
