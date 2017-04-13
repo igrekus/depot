@@ -8,8 +8,8 @@ class HashDict
 {
 
 public:
-    using MapIdToData = QHash<qint32, QString>;
-    using MapDataToId = QHash<QString, qint32>;
+    using MapIdToData = QMultiHash<qint32, QString>;
+    using MapDataToId = QMultiHash<QString, qint32>;
 
     MapIdToData id;
     MapDataToId di;

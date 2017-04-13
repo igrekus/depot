@@ -263,7 +263,7 @@ HashDict DataBaseManager::getMapProject()
 #endif
 
     HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getProjectTagList()");
+    QSqlQuery q = execSimpleQuery("CALL getProjectList()");
     while (q.next()) {
 #ifndef AT_WORK
         tmphash.id.insert(q.value(0).toInt(),
@@ -334,14 +334,42 @@ HashDict DataBaseManager::getMapCategory()
     return tmphash;
 }
 
-LinkedDict DataBaseManager::getLinkGroupToCategory()
+HashDict DataBaseManager::getMapGroup()
 {
+#ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-    LinkedDict tmpdict;
+#endif
 
-    QSqlQuery q = execSimpleQuery("CALL getLinkGroupToCategory()");
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getGroupList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
 
-    return tmpdict;
+#ifdef AT_WORK
+        tmphash.id.insert(                  q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                                            q.value(0).toInt());
+#endif
+    }
+    return tmphash;
+}
+
+IdMap DataBaseManager::getMapGroupToCategory()
+{
+    IdMap tmpmap;
+
+    QSqlQuery q = execSimpleQuery("CALL getGroupToCategoryMap()");
+
+    while (q.next()) {
+        tmpmap.insert(q.value(1).toInt(), q.value(0).toInt());
+    }
+    return tmpmap;
 }
 
 qint32 DataBaseManager::insertCategory(const QString &name)

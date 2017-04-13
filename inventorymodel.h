@@ -82,6 +82,8 @@ public:
     QModelIndex editInventory(const QModelIndex &index, const QString &newName);
     void deleteInventory(const QModelIndex &index);
 
+    InventoryItem getInventoryItem(const QModelIndex &index);
+
 private:
 };
 

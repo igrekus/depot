@@ -10,6 +10,7 @@
 #include <inventorymodel.h>
 #include <inventorydatadialog.h>
 #include <linkeddict.h>
+#include <dictmodel.h>
 
 namespace Ui {
 class InventoryDialog;
@@ -28,6 +29,7 @@ public:
     InventoryModel *m_inventoryModel;
 
     DataBaseManager *m_dbman;
+    DictModel *m_dictModel;
 
     // edit actions
     QAction *actRefreshView;
@@ -47,7 +49,7 @@ public:
     QAction *actEditInventory;
     QAction *actDeleteInventory;
 
-    explicit InventoryDialog(DataBaseManager *dbman, QWidget *parent = 0);
+    explicit InventoryDialog(DataBaseManager *dbman, DictModel *dict, QWidget *parent = 0);
     ~InventoryDialog();
 
     void createActions();
@@ -87,6 +89,8 @@ private slots:
 
 private:
     Ui::InventoryDialog *ui;
+
+    ProductItem convertInventoryToProduct(const InventoryItem &inItem);
 
     void testAddCat();
     void testRemCat();

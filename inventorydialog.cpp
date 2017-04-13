@@ -1,7 +1,7 @@
 #include "inventorydialog.h"
 #include "ui_inventorydialog.h"
 
-InventoryDialog::InventoryDialog(DataBaseManager *dbman, QWidget *parent) :
+InventoryDialog::InventoryDialog(DataBaseManager *dbman, DictModel *dict, QWidget *parent) :
     QDialog(parent, Qt::WindowFlags() | Qt::Window),
     ui(new Ui::InventoryDialog)
 {
@@ -10,6 +10,7 @@ InventoryDialog::InventoryDialog(DataBaseManager *dbman, QWidget *parent) :
     createActions();
 
     m_dbman = dbman;
+    m_dictModel = dict;
 
     m_inventoryModel = new InventoryModel(m_dbman, this);
 
@@ -240,21 +241,34 @@ void InventoryDialog::procActAddInventory()
     }
     }();
 
-    InventoryDataDialog dialog(ProductItem::ProductItemBuilder().build(),
-                               m_dbman->getLinkGroupToCategory(),
-                               this);
+    InventoryDataDialog dialog(this);
 
-    dialog.initDialog();
+    dialog.setData(ProductItem::ProductItemBuilder().build())
+          .setCategoryMap(m_dictModel->m_mapCategory)
+          .setGropMap(m_dictModel->m_mapGroup)
+          .setComboLink(m_dictModel->m_mapGroupToCategory)
+          .initDialog();
 
-    qDebug() << "add inv to:" << pindex.data(Qt::DisplayRole).toString()
-                              << pindex.data(ROLE_NODE_ID).toInt();
     dialog.exec();
 }
 
 void InventoryDialog::procActEditInventory()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    qDebug() << "edit inv:" << cur.sibling(cur.row(), 2).data(Qt::DisplayRole);
+
+    // TODO: сделать простую короткую функцию, заполняющую структуру ProductItem для передачи в диалог
+    ProductItem oldProduct = convertInventoryToProduct(m_inventoryModel->getInventoryItem(cur));
+    oldProduct.
+
+    InventoryDataDialog dialog(this);
+
+    dialog.setData(ProductItem::ProductItemBuilder().build())
+          .setCategoryMap(m_dictModel->m_mapCategory)
+          .setGropMap(m_dictModel->m_mapGroup)
+          .setComboLink(m_dictModel->m_mapGroupToCategory)
+          .initDialog();
+
+    dialog.exec();
 }
 
 void InventoryDialog::procActDeleteInventory()
@@ -341,6 +355,19 @@ void InventoryDialog::on_btnDelete_clicked()
     actDelete->trigger();
 }
 
+// ------------------------- utility routines ------------------
+ProductItem convertInventoryToProduct(const InventoryItem &in)
+{
+    return (ProductItem::ProductItemBuilder()
+            .setId(in.itemId)
+            .setName(in.itemName)
+            .setFullname(in.itemFullname)
+            .setSerialn(in.itemSerialn)
+            .setUnit(in.itemUnit)
+            .setMiscTag(in.itemMiscTag)
+            .build());
+}
+
 // ------------------------- Testing routines ----------------
 void InventoryDialog::testAddCat()
 {
@@ -393,7 +420,6 @@ void InventoryDialog::testRemGrp()
     }
 }
 
-// ------------------------------ utility routines ------------------
 QString Utility::rndString(qint32 len)
 {
     static const QString charset =

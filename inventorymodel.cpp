@@ -477,3 +477,8 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
     delNode->siblings()->removeAt(index.row());
     endRemoveRows();
 }
+
+InventoryItem InventoryModel::getInventoryItem(const QModelIndex &index)
+{
+    return static_cast<InventoryNode *>(index.internalPointer())->inventoryItem;
+}

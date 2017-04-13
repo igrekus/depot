@@ -50,7 +50,8 @@ HEADERS  += mainwindow.h \
     inventorydatadialog.h \
     inventorymodel.h \
     inventoryitem.h \
-    abstracttreeitem.h
+    abstracttreeitem.h \
+    constants.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

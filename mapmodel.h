@@ -18,10 +18,14 @@ public:
     explicit MapModel(QObject *parent = nullptr);
 
     void initModel(const HashDict &data);
-    void clearModel();
+    void clear();
+
+    bool isEmpty();
 
     void addItem(const qint32 pos, const qint32 id, const QString &str);
 
+    QString getData(const qint32 id);
+    qint32 getId(const QString &data);
     // Header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 

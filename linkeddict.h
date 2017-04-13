@@ -29,7 +29,7 @@ public:
         m_dictParent(nullptr)
     {}
 
-    explicit LinkedDict(const LinkedDict &copy, QObject *parent = nullptr):
+    LinkedDict(const LinkedDict &copy, QObject *parent = nullptr):
         QObject(parent),
         m_dictData     (copy.m_dictData),
         m_dictChildList(copy.m_dictChildList),

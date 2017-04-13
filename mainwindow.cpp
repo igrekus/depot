@@ -4,8 +4,11 @@
 /*
  TODO:
       - обработчик ошибок через throw, сделать в одном месте -- где?;
-      - singleton для констант типа DATA_INVALID
-      - переписать определение позиции для вставки из свитча на лямбды
+      - const + typedef class
+
+rework model:
+      - store navigational data in the nodes (self row, parent row, etc.):
+      https://www.hardcoded.net/articles/using_qtreeview_with_qabstractitemmodel.htm
 
 создание объектов:
 
@@ -200,7 +203,7 @@ void MainWindow::procActRefreshView()
 // -------------------- Control Events --------------------------------
 void MainWindow::on_btnInventoryEditor_clicked()
 {
-    InventoryDialog dialog(m_dbman, this);
+    InventoryDialog dialog(m_dbman, m_dictModel, this);
 
     dialog.initDialog();
 

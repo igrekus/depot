@@ -12,4 +12,7 @@ void DictModel::initModel()
     m_mapProject  = m_dbman->getMapProject();
 //    m_mapMisc     = m_dbman->getMapMiscTag();
     m_mapCategory = m_dbman->getMapCategory();
+    m_mapGroup    = m_dbman->getMapGroup();
+
+    m_mapGroupToCategory = m_dbman->getMapGroupToCategory();
 }

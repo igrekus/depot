@@ -10,6 +10,7 @@
 #include <linkeddict.h>
 #include <databasemanager.h>
 #include <hashdict.h>
+#include <constants.h>
 
 class DictModel : public QObject
 {
@@ -20,9 +21,13 @@ public:
     LinkedDict m_dictGroup;
     LinkedDict m_dictProduct;
 
-    HashDict m_mapCategory;    // списко категорий
+    HashDict m_mapCategory;    // список категорий
+    HashDict m_mapGroup;       // список групп
     HashDict m_mapLocation;    // список мест хранения на складе
-    HashDict m_mapProject;  // теги проектов
+    HashDict m_mapProject;     // список проектов
+
+    IdMap m_mapGroupToCategory;
+
 //    HashDict m_mapMisc;        // разные теги
 
     DataBaseManager *m_dbman;
