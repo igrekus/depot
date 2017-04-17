@@ -5,13 +5,12 @@ InventoryDataDialog::InventoryDataDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InventoryDataDialog)
 {
+//    m_filteredGroupModel = new MapModel(this);
+
     ui->setupUi(this);
 
-    m_categoryListModel = new MapModel(this);
-    m_groupListModel    = new MapModel(this);
-
-    ui->comboCategory->setModel(m_categoryListModel);
-    ui->comboGroup->setModel(m_groupListModel);
+    ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
+    ui->comboGroup->setModel(m_dictModel->m_groupListModel);
 }
 
 InventoryDataDialog::~InventoryDataDialog()
@@ -21,28 +20,26 @@ InventoryDataDialog::~InventoryDataDialog()
 
 void InventoryDataDialog::filterGroupCombo(const qint32 catId)
 {
-    if (!m_groupListModel->isEmpty()) {
-        m_groupListModel->clear();
-    }
+//    if (!m_filteredGroupModel->isEmpty()) {
+//        m_filteredGroupModel->clear();
+//    }
 
-    HashDict tmpdict;
-    for (const auto &it : m_comboMap.values(catId)) {
-        QString str = m_grpMap.id.value(it);
-        tmpdict.id.insert(it, str);
-        tmpdict.di.insert(str, it);
-    }
+//    HashDict tmpdict;
+//    for (const auto &it : m_dictModel->m_mapGroupToCategory.values(catId)) {
+//        QString str = m_dictModel->m_groupListModel->getData(it);
+//        tmpdict.id.insert(it, str);
+//        tmpdict.di.insert(str, it);
+//    }
 
-    m_groupListModel->initModel(tmpdict);
+//    m_filteredGroupModel->initModel(tmpdict);
 }
 
 void InventoryDataDialog::initDialog()
 {
     if (m_data.itemId == 0) {
         setWindowTitle("Добавить номенклатуру:");
-        m_newRecord = true;
     } else {
         setWindowTitle("Изменить номенклатуру:");
-        m_newRecord = false;
     }
 
     ui->editFullname->setText(m_data.itemFullname);
@@ -51,11 +48,10 @@ void InventoryDataDialog::initDialog()
     ui->editSerialn->setText(m_data.itemSerialn);
     ui->editUnit->setText(m_data.itemUnit);
 
-    m_categoryListModel->initModel(m_catMap);
-    ui->comboCategory->setCurrentIndex(0);
+//    ui->comboCategory->setCurrentIndex(0);
 
-    ui->comboCategory->setCurrentText(m_categoryListModel->getData(m_data.itemCategoryRef));
-    ui->comboGroup->setCurrentText(m_groupListModel->getData(m_data.itemGroupRef));
+    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
+    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
 
     m_oldData = m_data;
 }

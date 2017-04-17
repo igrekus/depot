@@ -37,26 +37,26 @@ void InventoryDialog::createActions()
     actDelete= new QAction("Удалить", this);
     connect(actDelete, &QAction::triggered, this, &InventoryDialog::procActDelete);
 
-    actAddCategory = new QAction("Добавить категорию", this);
-    connect(actAddCategory, &QAction::triggered, this, &InventoryDialog::procActAddCategory);
-    actEditCategory = new QAction("Редактировать категорию", this);
-    connect(actEditCategory, &QAction::triggered, this, &InventoryDialog::procActEditCategory);
-    actDeleteCategory = new QAction("Удалить категорию", this);
-    connect(actDeleteCategory, &QAction::triggered, this, &InventoryDialog::procActDeleteCategory);
+    actCategoryAdd = new QAction("Добавить категорию", this);
+    connect(actCategoryAdd, &QAction::triggered, this, &InventoryDialog::procActCategoryAdd);
+    actCategoryEdit = new QAction("Редактировать категорию", this);
+    connect(actCategoryEdit, &QAction::triggered, this, &InventoryDialog::procActCategoryEdit);
+    actCategoryDelete = new QAction("Удалить категорию", this);
+    connect(actCategoryDelete, &QAction::triggered, this, &InventoryDialog::procActCategoryDelete);
 
-    actAddGroup = new QAction("Добавить группу", this);
-    connect(actAddGroup, &QAction::triggered, this, &InventoryDialog::procActAddGroup);
-    actEditGroup = new QAction("Редактировать группу", this);
-    connect(actEditGroup, &QAction::triggered, this, &InventoryDialog::procActEditGroup);
-    actDeleteGroup = new QAction("Удалить группу", this);
-    connect(actDeleteGroup, &QAction::triggered, this, &InventoryDialog::procActDeleteGroup);
+    actGroupAdd = new QAction("Добавить группу", this);
+    connect(actGroupAdd, &QAction::triggered, this, &InventoryDialog::procActGroupAdd);
+    actGroupEdit = new QAction("Редактировать группу", this);
+    connect(actGroupEdit, &QAction::triggered, this, &InventoryDialog::procActGroupEdit);
+    actGroupDelete = new QAction("Удалить группу", this);
+    connect(actGroupDelete, &QAction::triggered, this, &InventoryDialog::procActGroupDelete);
 
-    actAddInventory = new QAction("Добавить номенклатуру", this);
-    connect(actAddInventory, &QAction::triggered, this, &InventoryDialog::procActAddInventory);
-    actEditInventory = new QAction("Редактировать номеклатуру", this);
-    connect(actEditInventory, &QAction::triggered, this, &InventoryDialog::procActEditInventory);
-    actDeleteInventory = new QAction("Удалить номенклатуру", this);
-    connect(actDeleteInventory, &QAction::triggered, this, &InventoryDialog::procActDeleteInventory);
+    actInventoryAdd = new QAction("Добавить номенклатуру", this);
+    connect(actInventoryAdd, &QAction::triggered, this, &InventoryDialog::procActInventoryAdd);
+    actInventoryEdit = new QAction("Редактировать номеклатуру", this);
+    connect(actInventoryEdit, &QAction::triggered, this, &InventoryDialog::procActInventoryEdit);
+    actInventoryDelete = new QAction("Удалить номенклатуру", this);
+    connect(actInventoryDelete, &QAction::triggered, this, &InventoryDialog::procActInventoryDelete);
 }
 void InventoryDialog::initDialog()
 {
@@ -83,13 +83,13 @@ void InventoryDialog::procActEdit()
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     switch (index.data(ROLE_NODE_TYPE).toInt()) {
     case StockItem::ItemCategory:
-        actEditCategory->trigger();
+        actCategoryEdit->trigger();
         break;
     case StockItem::ItemGroup:
-        actEditGroup->trigger();
+        actGroupEdit->trigger();
         break;
     case StockItem::ItemItem:
-        actEditInventory->trigger();
+        actInventoryEdit->trigger();
         break;
     default:
         break;
@@ -101,20 +101,20 @@ void InventoryDialog::procActDelete()
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     switch (index.data(ROLE_NODE_TYPE).toInt()) {
     case StockItem::ItemCategory:
-        actDeleteCategory->trigger();
+        actCategoryDelete->trigger();
         break;
     case StockItem::ItemGroup:
-        actDeleteGroup->trigger();
+        actGroupDelete->trigger();
         break;
     case StockItem::ItemItem:
-        actDeleteInventory->trigger();
+        actInventoryDelete->trigger();
         break;
     default:
         break;
     }
 }
 
-void InventoryDialog::procActAddCategory()
+void InventoryDialog::procActCategoryAdd()
 {
     bool ok;
     QString newName = QInputDialog::getText(this, "Добавить категорию",
@@ -128,7 +128,7 @@ void InventoryDialog::procActAddCategory()
     }
 }
 
-void InventoryDialog::procActEditCategory()
+void InventoryDialog::procActCategoryEdit()
 {
     // TODO: вынести одинаковые с editgroup участки в отдельный метод
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
@@ -146,7 +146,7 @@ void InventoryDialog::procActEditCategory()
     }
 }
 
-void InventoryDialog::procActDeleteCategory()
+void InventoryDialog::procActCategoryDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
@@ -166,7 +166,7 @@ void InventoryDialog::procActDeleteCategory()
     }
 }
 
-void InventoryDialog::procActAddGroup()
+void InventoryDialog::procActGroupAdd()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
     QModelIndex pindex = [cur]() -> QModelIndex {
@@ -192,7 +192,7 @@ void InventoryDialog::procActAddGroup()
     }
 }
 
-void InventoryDialog::procActEditGroup()
+void InventoryDialog::procActGroupEdit()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     bool ok;
@@ -209,7 +209,7 @@ void InventoryDialog::procActEditGroup()
     }
 }
 
-void InventoryDialog::procActDeleteGroup()
+void InventoryDialog::procActGroupDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
@@ -229,7 +229,7 @@ void InventoryDialog::procActDeleteGroup()
     }
 }
 
-void InventoryDialog::procActAddInventory()
+void InventoryDialog::procActInventoryAdd()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
     QModelIndex pindex = [cur]() -> QModelIndex {
@@ -249,9 +249,7 @@ void InventoryDialog::procActAddInventory()
     InventoryDataDialog dialog(this);
 
     dialog.setData(dummyProduct)
-          .setCategoryMap(m_dictModel->m_mapCategory)
-          .setGropMap(m_dictModel->m_mapGroup)
-          .setComboLink(m_dictModel->m_mapGroupToCategory)
+          .setDictModel(m_dictModel)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
@@ -263,7 +261,7 @@ void InventoryDialog::procActAddInventory()
     ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
-void InventoryDialog::procActEditInventory()
+void InventoryDialog::procActInventoryEdit()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
@@ -272,9 +270,7 @@ void InventoryDialog::procActEditInventory()
     InventoryDataDialog dialog(this);
 
     dialog.setData(oldProduct)
-          .setCategoryMap(m_dictModel->m_mapCategory)
-          .setGropMap(m_dictModel->m_mapGroup)
-          .setComboLink(m_dictModel->m_mapGroupToCategory)
+          .setDictModel(m_dictModel)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
@@ -284,7 +280,7 @@ void InventoryDialog::procActEditInventory()
     m_inventoryModel->editInventory(cur, dialog.getData());
 }
 
-void InventoryDialog::procActDeleteInventory()
+void InventoryDialog::procActInventoryDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     qint32 res = QMessageBox::question(this,
@@ -320,7 +316,7 @@ void InventoryDialog::changeEvent(QEvent *e)
 
 void InventoryDialog::on_btnAddCategory_clicked()
 {
-    actAddCategory->trigger();
+    actCategoryAdd->trigger();
 }
 
 void InventoryDialog::on_btnAddGroup_clicked()
@@ -331,7 +327,7 @@ void InventoryDialog::on_btnAddGroup_clicked()
                              "Выберите категорию для добавления группы.");
         return;
     }
-    actAddGroup->trigger();
+    actGroupAdd->trigger();
 }
 
 void InventoryDialog::on_btnAddInventory_clicked()
@@ -343,7 +339,7 @@ void InventoryDialog::on_btnAddInventory_clicked()
                              "Выберите группу для добавления номенклатуры.");
         return;
     }
-    actAddInventory->trigger();
+    actInventoryAdd->trigger();
 }
 
 void InventoryDialog::on_btnEdit_clicked()
@@ -367,6 +363,14 @@ void InventoryDialog::on_btnDelete_clicked()
     }
     actDelete->trigger();
 }
+
+void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
+{
+    if (index.data(ROLE_NODE_TYPE) == InventoryItem::ItemItem) {
+        actInventoryEdit->trigger();
+    }
+}
+
 
 // ------------------------- utility routines -----------------
 
@@ -436,4 +440,3 @@ QString Utility::rndString(qint32 len)
     }
     return out;
 }
-

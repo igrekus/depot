@@ -1,4 +1,4 @@
-#include "transactmodel.h"
+﻿#include "transactmodel.h"
 
 TransactModel::TransactModel(DataBaseManager *dbman, DictModel *dictModel, QObject *parent)
     : QAbstractTableModel(parent)
@@ -21,7 +21,7 @@ void TransactModel::initModel()
 
 QVariant TransactModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Дата", "Наименование", "Изменение", "Сотрудник", "Примечание"};
+    const QStringList headers = {"Дата", "Наименование", "Изменение", "Сотрудник", "Тема", "Примечание"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers.at(section);
     }
@@ -62,8 +62,12 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
             return QVariant(m_nodeList.at(index.row()).transactItem.itemDiff);
             break;
         }
+        case ColumnProject: {
+            return QVariant(m_dictModel->m_projectListModel->getData(m_nodeList.at(index.row()).transactItem.itemProjectRef));
+            break;
+        }
         case ColumnStaff: {
-            return QVariant(m_nodeList.at(index.row()).transactItem.itemStaff);
+            return QVariant(m_dictModel->m_staffListModel->getData(m_nodeList.at(index.row()).transactItem.itemStaffRef));
             break;
         }
         case ColumnNote: {

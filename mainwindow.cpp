@@ -73,35 +73,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_dictModel = new DictModel(m_dbman, this);
     m_stockModel = new StockModel(m_dbman, m_dictModel, this);
     m_transactModel = new TransactModel(m_dbman, m_dictModel, this);
-
-    m_categoryListModel = new MapModel(this);
-    m_projectListModel = new MapModel(this);
-
-    ui->treeStock->setModel(m_stockModel);
-    ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->treeStock->setUniformRowHeights(false);
-//    ui->treeStock->setAlternatingRowColors(true);
-    ui->treeStock->setIndentation(0);
-    ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
-//    ui->treeStock->setItemDelegateForColumn(1, new TextDelegate(ui->treeStock));
-//    ui->treeStock->setItemDelegateForColumn(2, new TextDelegate(ui->treeStock));
-//    ui->treeStock->setItemDelegateForColumn(3, new TextDelegate(ui->treeStock));
-//    ui->treeStock->setItemDelegateForColumn(4, new TextDelegate(ui->treeStock));
-//    ui->treeStock->setItemDelegateForColumn(5, new TextDelegate(ui->treeStock));
-
-    ui->tableTransact->setModel(m_transactModel);
-    ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
-    ui->tableTransact->verticalHeader()->setVisible(false);
-    ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
-    ui->tableTransact->horizontalHeader()->setHighlightSections(false);
-    ui->tableTransact->horizontalHeader()->setFixedHeight(20);
-
-    ui->comboCategory->setModel(m_categoryListModel);
-    ui->comboProject->setModel(m_projectListModel);
 }
 
 MainWindow::~MainWindow()
@@ -122,9 +93,25 @@ void MainWindow::initApplication()
     m_dictModel->initModel();
     m_transactModel->initModel();
 
-    m_categoryListModel->initModel(m_dictModel->m_mapCategory);
-    m_categoryListModel->addItem(0, 0, "Все");
-    m_projectListModel->initModel(m_dictModel->m_mapProject);
+    ui->treeStock->setModel(m_stockModel);
+    ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->treeStock->setUniformRowHeights(false);
+    ui->treeStock->setIndentation(0);
+    ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
+    ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
+
+    ui->tableTransact->setModel(m_transactModel);
+    ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableTransact->verticalHeader()->setVisible(false);
+    ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
+    ui->tableTransact->horizontalHeader()->setHighlightSections(false);
+    ui->tableTransact->horizontalHeader()->setFixedHeight(20);
+
+    ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
+    ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
     ui->comboCategory->setCurrentIndex(0);
     ui->comboProject->setCurrentText("Общее");
@@ -175,6 +162,20 @@ void MainWindow::createActions()
 
     actRefreshView = new QAction("Обновить", this);
     connect(actRefreshView, &QAction::triggered, this, &MainWindow::procActRefreshView);
+//---
+    actStockAdd = new QAction("Добавить номенклатуру на склад", this);
+    connect(actStockAdd, &QAction::triggered, this, &MainWindow::procActStockAdd);
+    actStockEdit = new QAction("Изменить позицию хранения", this);
+    connect(actStockEdit, &QAction::triggered, this, &MainWindow::procActStockEdit);
+    actStockDelete = new QAction("Удалить позицию хранения", this);
+    connect(actStockDelete, &QAction::triggered, this, &MainWindow::procActStockDelete);
+//---
+    actTransactAdd = new QAction("Добавить приход/расход", this);
+    connect(actTransactAdd, &QAction::triggered, this, &MainWindow::procActTransactAdd);
+    actTransactEdit = new QAction("Изменить приход/расход", this);
+    connect(actTransactEdit, &QAction::triggered, this, &MainWindow::procActTransactEdit);
+    actTransactDelete = new QAction("Удалить приход/расход", this);
+    connect(actTransactDelete, &QAction::triggered, this, &MainWindow::procActTransactDelete);
 }
 
 // -------------------- Action Processing -----------------------------
@@ -194,10 +195,53 @@ void MainWindow::procActRefreshView()
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
     ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
-    ui->tableTransact->setColumnWidth(2, tbwidth*0.10);
-    ui->tableTransact->setColumnWidth(3, tbwidth*0.20);
-    ui->tableTransact->setColumnWidth(4, tbwidth*0.20);
+    ui->tableTransact->setColumnWidth(2, tbwidth*0.07);
+    ui->tableTransact->setColumnWidth(3, tbwidth*0.13);
+    ui->tableTransact->setColumnWidth(4, tbwidth*0.10);
+    ui->tableTransact->setColumnWidth(5, tbwidth*0.20);
     ui->tableTransact->show();
+}
+
+void MainWindow::procActStockAdd()
+{
+    qDebug() << "add stock";
+
+
+}
+
+void MainWindow::procActStockEdit()
+{
+    qDebug() << "edit stock";
+}
+
+void MainWindow::procActStockDelete()
+{
+    qDebug() << "del stock";
+}
+
+void MainWindow::procActTransactAdd()
+{
+    qDebug() << "add transact";
+    TransactDataDialog dialog;
+
+    dialog.exec();
+}
+
+void MainWindow::procActTransactEdit()
+{
+    qDebug() << "edit transact";
+}
+
+void MainWindow::procActTransactDelete()
+{
+    qDebug() << "del transact";
+}
+
+// -------------------- Misc Events -----------------------------------
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    actRefreshView->trigger();
 }
 
 // -------------------- Control Events --------------------------------
@@ -208,6 +252,36 @@ void MainWindow::on_btnInventoryEditor_clicked()
     dialog.initDialog();
 
     dialog.exec();
+}
+
+void MainWindow::on_btnAddTransact_clicked()
+{
+    actTransactAdd->trigger();
+}
+
+void MainWindow::on_btnEditTransact_clicked()
+{
+    actTransactEdit->trigger();
+}
+
+void MainWindow::on_btnDelTransact_clicked()
+{
+    actTransactDelete->trigger();
+}
+
+void MainWindow::on_btnAddStock_clicked()
+{
+    actStockAdd->trigger();
+}
+
+void MainWindow::on_btnEditStock_clicked()
+{
+    actStockEdit->trigger();
+}
+
+void MainWindow::on_btnDelStock_clicked()
+{
+    actStockDelete->trigger();
 }
 
 void MainWindow::on_btnReloadData_clicked()
@@ -228,13 +302,6 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {
     qDebug() << "r:" << index.row() << "id:" << index.data(ROLE_NODE_ID).toInt() << "name:" << index.data(Qt::DisplayRole).toString();
     m_stockModel->debugInfo(index);
-}
-
-// -------------------- Misc Events -----------------------------------
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    Q_UNUSED(event);
-    actRefreshView->trigger();
 }
 
 // -------------------- Delegates -------------------------------------

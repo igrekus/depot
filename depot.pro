@@ -30,7 +30,9 @@ SOURCES += main.cpp\
     inventorydatadialog.cpp \
     inventorymodel.cpp \
     inventoryitem.cpp \
-    abstracttreeitem.cpp
+    abstracttreeitem.cpp \
+    transactdatadialog.cpp \
+    stockdatadialog.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -51,11 +53,15 @@ HEADERS  += mainwindow.h \
     inventorymodel.h \
     inventoryitem.h \
     abstracttreeitem.h \
-    constants.h
+    constants.h \
+    transactdatadialog.h \
+    stockdatadialog.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \
-    inventorydatadialog.ui
+    inventorydatadialog.ui \
+    transactdatadialog.ui \
+    stockdatadialog.ui
 
 RESOURCES += \
     resource.qrc

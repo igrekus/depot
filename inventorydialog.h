@@ -37,17 +37,17 @@ public:
     QAction *actEdit;
     QAction *actDelete;
 
-    QAction *actAddCategory;
-    QAction *actEditCategory;
-    QAction *actDeleteCategory;
+    QAction *actCategoryAdd;
+    QAction *actCategoryEdit;
+    QAction *actCategoryDelete;
 
-    QAction *actAddGroup;
-    QAction *actEditGroup;
-    QAction *actDeleteGroup;
+    QAction *actGroupAdd;
+    QAction *actGroupEdit;
+    QAction *actGroupDelete;
 
-    QAction *actAddInventory;
-    QAction *actEditInventory;
-    QAction *actDeleteInventory;
+    QAction *actInventoryAdd;
+    QAction *actInventoryEdit;
+    QAction *actInventoryDelete;
 
     explicit InventoryDialog(DataBaseManager *dbman, DictModel *dict, QWidget *parent = 0);
     ~InventoryDialog();
@@ -62,17 +62,17 @@ public slots:
     void procActEdit();
     void procActDelete();
 
-    void procActAddCategory();
-    void procActEditCategory();
-    void procActDeleteCategory();
+    void procActCategoryAdd();
+    void procActCategoryEdit();
+    void procActCategoryDelete();
 
-    void procActAddGroup();
-    void procActEditGroup();
-    void procActDeleteGroup();
+    void procActGroupAdd();
+    void procActGroupEdit();
+    void procActGroupDelete();
 
-    void procActAddInventory();
-    void procActEditInventory();
-    void procActDeleteInventory();
+    void procActInventoryAdd();
+    void procActInventoryEdit();
+    void procActInventoryDelete();
 
     // events
     void resizeEvent(QResizeEvent *event) override;
@@ -86,6 +86,7 @@ private slots:
     void on_btnAddInventory_clicked();
     void on_btnEdit_clicked();
     void on_btnDelete_clicked();
+    void on_treeInventory_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::InventoryDialog *ui;

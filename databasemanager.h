@@ -42,6 +42,7 @@ public:
     HashDict getMapMiscTag();
     HashDict getMapCategory();
     HashDict getMapGroup();
+    HashDict getMapStaff();
 
     // связи между словарями
     IdMap getMapGroupToCategory();

@@ -25,6 +25,7 @@ public:
         ColumnProduct,
         ColumnDiff,
         ColumnStaff,
+        ColumnProject,
         ColumnNote,
         ColumnCount
     };

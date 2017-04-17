@@ -221,9 +221,10 @@ TransactItem::TransactList DataBaseManager::getTransactList()
                        .setDate   (                  q.value(1).toDate())
                        .setDiff   (                  q.value(2).toInt())
                        .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-                       .setStaff  (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
+                       .setStaff  (                  q.value(4).toInt())
                        .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
-                       .setBillRef(                  q.value(6).toInt())
+                       .setProject(                  q.value(6).toInt())
+                       .setBillRef(                  q.value(7).toInt())
                        .build());
 #endif
     }
@@ -342,6 +343,32 @@ HashDict DataBaseManager::getMapGroup()
 
     HashDict tmphash;
     QSqlQuery q = execSimpleQuery("CALL getGroupList()");
+    while (q.next()) {
+#ifndef AT_WORK
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
+                          q.value(0).toInt());
+#endif
+
+#ifdef AT_WORK
+        tmphash.id.insert(                  q.value(0).toInt(),
+                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
+                                            q.value(0).toInt());
+#endif
+    }
+    return tmphash;
+}
+
+HashDict DataBaseManager::getMapStaff()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    HashDict tmphash;
+    QSqlQuery q = execSimpleQuery("CALL getStaffList()");
     while (q.next()) {
 #ifndef AT_WORK
         tmphash.id.insert(q.value(0).toInt(),

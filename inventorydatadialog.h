@@ -12,6 +12,7 @@
 #include <hashdict.h>
 #include <mapmodel.h>
 #include <constants.h>
+#include <dictmodel.h>
 
 namespace Ui {
 class InventoryDataDialog;
@@ -25,23 +26,18 @@ public:
 
     ProductItem m_data;
     ProductItem m_oldData;
-    HashDict m_catMap;
-    HashDict m_grpMap;
-    IdMap m_comboMap;
 
-    MapModel *m_categoryListModel;
-    MapModel *m_groupListModel;
+    DictModel *m_dictModel;
+
+    MapModel *m_filteredGroupModel;
 
     bool m_dataModified = false;
-    bool m_newRecord = false;
 
     explicit InventoryDataDialog(QWidget *parent = nullptr);
     ~InventoryDataDialog();
 
-    InventoryDataDialog &setData       (const ProductItem &data)   {m_data     = data;   return *this;}
-    InventoryDataDialog &setCategoryMap(const HashDict    &catmap) {m_catMap   = catmap; return *this;}
-    InventoryDataDialog &setGropMap    (const HashDict    &grpmap) {m_grpMap   = grpmap; return *this;}
-    InventoryDataDialog &setComboLink  (const IdMap       &link)   {m_comboMap = link;   return *this;}
+    InventoryDataDialog &setData         (const ProductItem &data){m_data      = data; return *this;}
+    InventoryDataDialog &setDictModel    (      DictModel   *dict){m_dictModel = dict; return *this;}
 
     void filterGroupCombo(const qint32 catId);
 
