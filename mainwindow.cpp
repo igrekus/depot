@@ -6,6 +6,10 @@
       - обработчик ошибок через throw, сделать в одном месте -- где?;
       - const + typedef class
 
+Если в классе только слоты и нет сигналов, и используется new signal/slots syntax (connect в компайл-тайм к указателю на метод / лямбде вместо макросов SIGNAL/SLOT), то класс не должен иметь макрос Q_OBJECT и для него не будет сгенерирован *_moc.cpp.
+
+Весь Qt позволяет подписываться на события и просто функциями. А учётом того, что этой функций может быть и лямбда, мы легко получаем механизм подписки на события любым своим (не входящий в метасистему Qt и соответственно хоть с шаблонами, хоть с чем угодно) классом в виде конструкции connect(sender, signal, [=]{reciver_object.handler();}).
+
 rework model:
       - store navigational data in the nodes (self row, parent row, etc.):
       https://www.hardcoded.net/articles/using_qtreeview_with_qabstractitemmodel.htm
