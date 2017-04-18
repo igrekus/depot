@@ -49,8 +49,13 @@ public:
     QAction *actInventoryEdit;
     QAction *actInventoryDelete;
 
-    explicit InventoryDialog(DataBaseManager *dbman, DictModel *dict, QWidget *parent = 0);
+    bool treeUpdated = false;
+
+    explicit InventoryDialog(QWidget *parent = nullptr);
     ~InventoryDialog();
+
+    InventoryDialog &setDbManager(DataBaseManager *dbman){m_dbman     = dbman; return *this;}
+    InventoryDialog &setDictModel(      DictModel *dict) {m_dictModel = dict; return *this;}
 
     void createActions();
 

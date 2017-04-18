@@ -19,6 +19,7 @@
 #include <transactmodel.h>
 #include <inventorydialog.h>
 #include <transactdatadialog.h>
+#include <stockdatadialog.h>
 
 namespace Ui {
 class MainWindow;

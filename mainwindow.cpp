@@ -118,7 +118,7 @@ void MainWindow::initApplication()
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
     ui->comboCategory->setCurrentIndex(0);
-    ui->comboProject->setCurrentText("Общее");
+    ui->comboProject->setCurrentIndex(0);
 
     actRefreshView->trigger();
 }
@@ -208,14 +208,44 @@ void MainWindow::procActRefreshView()
 
 void MainWindow::procActStockAdd()
 {
-    qDebug() << "add stock";
+    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(Constants::RoleNodeType).toInt()) {
+        case Constants::ItemGroup:
+            return cur;
+            break;
+        case Constants::ItemItem:
+            return cur.parent();
+            break;
+        }
+    }();
 
+    // TODO: fix cur.parent chain
+    StockItem dummyStockItem = StockItem::StockItemBuilder().build();
 
+    StockDataDialog dialog(this);
+    dialog.setData(dummyStockItem)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
 }
 
 void MainWindow::procActStockEdit()
-{
-    qDebug() << "edit stock";
+{    
+    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = cur.parent();
+
+    StockItem oldStockItem = m_stockModel->getStockItemByIndex(cur);
+
+    qDebug()<< oldStockItem;
+
+    StockDataDialog dialog(this);
+//    dialog.setData(dummyStockItem)
+//          .setDictModel(m_dictModel)
+//          .initDialog();
+
+    dialog.exec();
 }
 
 void MainWindow::procActStockDelete()
@@ -251,11 +281,18 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 // -------------------- Control Events --------------------------------
 void MainWindow::on_btnInventoryEditor_clicked()
 {
-    InventoryDialog dialog(m_dbman, m_dictModel, this);
+    InventoryDialog dialog(this);
 
-    dialog.initDialog();
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
 
     dialog.exec();
+
+    if (dialog.treeUpdated) {
+        m_stockModel->clear();
+        m_stockModel->initModel();
+    }
 }
 
 void MainWindow::on_btnAddTransact_clicked()
@@ -265,26 +302,61 @@ void MainWindow::on_btnAddTransact_clicked()
 
 void MainWindow::on_btnEditTransact_clicked()
 {
+    if (ui->tableTransact->selectionModel()->selectedIndexes().isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись о приходе/расходе для редактирования.");
+        return;
+    }
     actTransactEdit->trigger();
 }
 
 void MainWindow::on_btnDelTransact_clicked()
 {
+    if (ui->tableTransact->selectionModel()->selectedIndexes().isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите запись о приходе/расходе для удаления.");
+        return;
+    }
     actTransactDelete->trigger();
 }
 
 void MainWindow::on_btnAddStock_clicked()
 {
+    QModelIndexList list = ui->treeStock->selectionModel()->selectedIndexes();
+    if (list.isEmpty() ||
+        (list.first().data(Constants::RoleNodeType).toInt() != Constants::ItemGroup &&
+         list.first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem)) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите группу для добавления позиции хранения.");
+        return;
+    }
     actStockAdd->trigger();
 }
 
 void MainWindow::on_btnEditStock_clicked()
 {
+    QModelIndexList list = ui->treeStock->selectionModel()->selectedIndexes();
+    if (list.isEmpty() || list.first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите позицию хранения для редактирования.");
+        return;
+    }
     actStockEdit->trigger();
 }
 
 void MainWindow::on_btnDelStock_clicked()
 {
+    QModelIndexList list = ui->treeStock->selectionModel()->selectedIndexes();
+    if (list.isEmpty() || list.first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите позицию хранения для удаления.");
+        return;
+    }
     actStockDelete->trigger();
 }
 
@@ -327,8 +399,8 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
 //    0x00200000
 //    Used by item views to indicate if a vertical line needs to be drawn (for siblings).
 
-    switch (index.data(ROLE_NODE_TYPE).toInt()) {
-    case StockItem::ItemCategory: {
+    switch (index.data(Constants::RoleNodeType).toInt()) {
+    case Constants::ItemCategory: {
         opt.rect.adjust(0, 0, opt.widget->frameGeometry().width(), 0);
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
@@ -359,7 +431,7 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
                                              QPalette::ButtonText);
         break;
     }
-    case StockItem::ItemGroup: {
+    case Constants::ItemGroup: {
         opt.rect.adjust(0, 0, opt.widget->frameGeometry().width(), 0);
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
@@ -391,7 +463,7 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
                                              QPalette::ButtonText);
         break;
     }
-    case StockItem::ItemItem: {
+    case Constants::ItemItem: {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPalette pal = option.palette;
@@ -432,7 +504,7 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
 //    bool hasChildren = (option.state & QStyle::State_Children);
 //    bool branchOpen = (option.state & QStyle::State_Open);
 
-    if (index.data(ROLE_NODE_TYPE).toInt() == StockItem::ItemItem) {
+    if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemItem) {
         option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
         QPen pen(QColor(Qt::lightGray));

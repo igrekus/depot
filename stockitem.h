@@ -6,18 +6,16 @@
 
 #include <abstracttreeitem.h>
 
-#define DATA_INVALID -1
-
 class StockItem : public AbstractTreeItem
 {
 public:
 
     // TODO: move&swap idiom constructors;
     // данные
-    qint32    itemAmount;
-    QString   itemSerialn;
-    QString   itemProject;
-    QString   itemLocation;
+    qint32  itemAmount;
+    QString itemSerialn;
+    qint32  itemProject;
+    qint32  itemLocation;
 
     StockItem():
         AbstractTreeItem(),
@@ -26,7 +24,7 @@ public:
         itemProject(),
         itemLocation()
     {}
-    StockItem(qint32 id, const QString &name, TreeItemType type, TreeItemLevel level, qint32 amount, const QString &serialn, const QString &proj, const QString &loc):
+    StockItem(qint32 id, const QString &name, Constants::TreeItemType type, Constants::TreeItemLevel level, qint32 amount, const QString &serialn, const qint32 proj, const qint32 loc):
         AbstractTreeItem(id,
                          name,
                          type,
@@ -84,27 +82,27 @@ public:
         return dbg.maybeSpace();
     }
 
-    using StockList = QList<StockItem>;
+    using StockList = QVector<StockItem>;
 
     class StockItemBuilder {
     public:
         qint32        stockId         = 0;
         QString       stockName       = QString();
-        TreeItemType  stockType       = ItemItem;
-        TreeItemLevel stockLevel      = Level_2;
-        qint32        stockAmount     = DATA_INVALID;
+        Constants::TreeItemType  stockType       = Constants::ItemItem;
+        Constants::TreeItemLevel stockLevel      = Constants::Level_2;
+        qint32        stockAmount     = Constants::DataInvalid;
         QString       stockSerialn    = QString();
-        QString       stockProject    = QString();
-        QString       stockLocation   = QString();
+        qint32        stockProject    = 0;
+        qint32        stockLocation   = 0;
 
         StockItemBuilder& setId       (const qint32    id)        { this->stockId       = id;        return *this; }
         StockItemBuilder& setName     (const QString  &name)      { this->stockName     = name;      return *this; }
-        StockItemBuilder& setType     (const TreeItemType  itemtype) { this->stockType  = itemtype;  return *this; }
-        StockItemBuilder& setLevel    (const TreeItemLevel itemlevel){ this->stockLevel = itemlevel; return *this; }
+        StockItemBuilder& setType     (const Constants::TreeItemType  itemtype) { this->stockType  = itemtype;  return *this; }
+        StockItemBuilder& setLevel    (const Constants::TreeItemLevel itemlevel){ this->stockLevel = itemlevel; return *this; }
         StockItemBuilder& setAmount   (const qint32    amout)     { this->stockAmount   = amout;     return *this; }
         StockItemBuilder& setSerialn  (const QString  &serialn)   { this->stockSerialn  = serialn;   return *this; }
-        StockItemBuilder& setProject  (const QString  &project)   { this->stockProject  = project;   return *this; }
-        StockItemBuilder& setLocation (const QString  &loc)       { this->stockLocation = loc;       return *this; }
+        StockItemBuilder& setProject  (const qint32   &project)   { this->stockProject  = project;   return *this; }
+        StockItemBuilder& setLocation (const qint32   &loc)       { this->stockLocation = loc;       return *this; }
         StockItem build() {
             return StockItem(this->stockId,      this->stockName,
                              this->stockType,    this->stockLevel,

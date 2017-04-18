@@ -21,13 +21,6 @@ class StockModel : public QAbstractItemModel
 
 public:
 
-    enum TreeLevel {
-        TreeRoot = 0,
-        TreeLevel_1,
-        TreeLevel_2
-    };
-    Q_ENUM(TreeLevel)
-
     enum Columns {
         RamificationColumn = 0,
         NumberColumn = RamificationColumn,
@@ -42,7 +35,7 @@ public:
 
     // данные
     struct StockNode;
-    typedef QList<StockNode> StockNodeList;
+    typedef QVector<StockNode> StockNodeList;
     StockNodeList m_nodes;                         // узлы дерева на данном уровне
 
     // менеджеры
@@ -64,6 +57,9 @@ public:
     void buildStockLevel();
     void initModel();
 
+    void clearNodeList(StockModel::StockNodeList &list);
+    void clear();
+
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const override;
@@ -81,6 +77,9 @@ public:
     void editGroup(const QModelIndex &index, const QString &newName);
     void deleteGroup(const QModelIndex &index);
 
+    StockItem getStockItemByIndex(const QModelIndex &index);
+
+    // TODO: debug helper
     void debugInfo(const QModelIndex &index);
 
 private:

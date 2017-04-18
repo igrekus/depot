@@ -3,8 +3,7 @@
 
 #include <QAbstractListModel>
 #include <hashdict.h>
-
-#define ROLE_NODE_ID   (Qt::UserRole+3)
+#include <constants.h>
 
 class MapModel : public QAbstractListModel
 {

@@ -43,7 +43,7 @@ public:
         return dbg.maybeSpace();
     }
 
-    using GroupList = QList<GroupItem>;
+    using GroupList = QVector<GroupItem>;
 
     class GroupItemBuilder {
     public:

@@ -79,7 +79,7 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
         return QVariant(m_strList.at(index.row()));
         break;
     }
-    case ROLE_NODE_ID: {
+    case Constants::RoleNodeId: {
         return QVariant(m_mapData.di.value(m_strList.at(index.row())));
     }
     }

@@ -5,12 +5,9 @@ InventoryDataDialog::InventoryDataDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::InventoryDataDialog)
 {
-//    m_filteredGroupModel = new MapModel(this);
+    m_filteredGroupModel = new MapModel(this);
 
     ui->setupUi(this);
-
-    ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
-    ui->comboGroup->setModel(m_dictModel->m_groupListModel);
 }
 
 InventoryDataDialog::~InventoryDataDialog()
@@ -20,18 +17,18 @@ InventoryDataDialog::~InventoryDataDialog()
 
 void InventoryDataDialog::filterGroupCombo(const qint32 catId)
 {
-//    if (!m_filteredGroupModel->isEmpty()) {
-//        m_filteredGroupModel->clear();
-//    }
+    if (!m_filteredGroupModel->isEmpty()) {
+        m_filteredGroupModel->clear();
+    }
 
-//    HashDict tmpdict;
-//    for (const auto &it : m_dictModel->m_mapGroupToCategory.values(catId)) {
-//        QString str = m_dictModel->m_groupListModel->getData(it);
-//        tmpdict.id.insert(it, str);
-//        tmpdict.di.insert(str, it);
-//    }
+    HashDict tmpdict;
+    for (const auto &it : m_dictModel->m_mapGroupToCategory.values(catId)) {
+        QString str = m_dictModel->m_groupListModel->getData(it);
+        tmpdict.id.insert(it, str);
+        tmpdict.di.insert(str, it);
+    }
 
-//    m_filteredGroupModel->initModel(tmpdict);
+    m_filteredGroupModel->initModel(tmpdict);
 }
 
 void InventoryDataDialog::initDialog()
@@ -41,6 +38,9 @@ void InventoryDataDialog::initDialog()
     } else {
         setWindowTitle("Изменить номенклатуру:");
     }
+
+    ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
+    ui->comboGroup->setModel(m_filteredGroupModel);
 
     ui->editFullname->setText(m_data.itemFullname);
     ui->editMiscTag->setText("");
@@ -83,14 +83,14 @@ ProductItem InventoryDataDialog::collectData()
             .setSerialn(ui->editSerialn->text())
             .setUnit(ui->editUnit->text())
             .setMiscTag(ui->editMiscTag->text())
-            .setGroup(ui->comboGroup->currentData(ROLE_NODE_ID).toInt())
-            .setCategory(ui->comboCategory->currentData(ROLE_NODE_ID).toInt())
+            .setGroup(ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
+            .setCategory(ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
             .build());
 }
 
 void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)
 {
-    filterGroupCombo(ui->comboCategory->currentData(ROLE_NODE_ID).toInt());
+    filterGroupCombo(ui->comboCategory->currentData(Constants::RoleNodeId).toInt());
     ui->comboGroup->setCurrentIndex(0);
     emit ui->comboGroup->currentTextChanged("");
 }

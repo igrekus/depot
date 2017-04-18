@@ -61,8 +61,8 @@ StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
     return StockModel::StockNode(StockItem::StockItemBuilder()
                                  .setId   (item.itemId)
                                  .setName (item.itemName)
-                                 .setType (StockItem::ItemCategory)
-                                 .setLevel(StockItem::LevelRoot)
+                                 .setType (Constants::ItemCategory)
+                                 .setLevel(Constants::LevelRoot)
                                  .build());
 }
 
@@ -71,8 +71,8 @@ StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode
     return StockModel::StockNode(StockItem::StockItemBuilder()
                                  .setId   (item.itemId)
                                  .setName (item.itemName)
-                                 .setType (StockItem::ItemGroup)
-                                 .setLevel(StockItem::Level_1)
+                                 .setType (Constants::ItemGroup)
+                                 .setLevel(Constants::Level_1)
                                  .build(),
                                  parent);
 }
@@ -128,6 +128,40 @@ void StockModel::initModel()
     buildCategoryLevel();
     buildGroupLevel();
     buildStockLevel();
+}
+
+void StockModel::clearNodeList(StockModel::StockNodeList &list)
+{
+    Q_ASSERT(!list.isEmpty());
+    for (StockNode &it : list) {
+        if (!it.children.isEmpty()) {
+            clearNodeList(it.children);
+        }
+    }
+    // если есть родитель у списка (т.е. не в корне):
+    if (list.at(0).parent != nullptr) {
+        // получаем указатель на ноду-родителя списка
+        StockNode *parentStockNode = list.at(0).parent;
+        // создаём QModelIndex ноды-родителя для сигнала
+        QModelIndex pindex = createIndex(findRow(parentStockNode), 0, &parentStockNode);
+        beginRemoveRows(pindex, 0, 0+list.count()-1);
+        list.clear();
+        endRemoveRows();
+    } else {
+        // чистим корень, пустой индекс
+        beginRemoveRows(QModelIndex(), 0, 0+list.count()-1);
+        list.clear();
+        endRemoveRows();
+    }
+}
+
+void StockModel::clear()
+{
+    beginResetModel();
+    if (!m_nodes.isEmpty()) {
+        clearNodeList(m_nodes);
+    }
+    endResetModel();
 }
 
 QVariant StockModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -207,7 +241,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         switch (index.column()) {
         case NumberColumn: {
-            if (tmpitem.itemType == StockItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemId;
             } else {
                 return tmpitem.itemName;
@@ -215,7 +249,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case NameColumn: {
-            if (tmpitem.itemType == StockItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemName;
             } else {
                 return QVariant();
@@ -223,7 +257,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case AmountColumn: {
-            if (tmpitem.itemType == StockItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemAmount;
             } else {
                 return QVariant();
@@ -235,11 +269,11 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             break;
         }
         case ProjectColumn: {
-            return tmpitem.itemProject;
+            return m_dictModel->m_projectListModel->getData(tmpitem.itemProject);
             break;
         }
         case LocationColumn: {
-            return tmpitem.itemLocation;
+            return m_dictModel->m_locationListModel->getData(tmpitem.itemLocation);
             break;
         }
         case ColumnCount:
@@ -248,7 +282,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_LEVEL_ID: {
+    case Constants::RoleLevelId: {
         switch (index.column()) {
         case NumberColumn:
         case NameColumn:
@@ -265,7 +299,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_TYPE: {
+    case Constants::RoleNodeType: {
         switch (index.column()) {
         case NumberColumn:
         case NameColumn:
@@ -282,7 +316,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_ID: {
+    case Constants::RoleNodeId: {
         switch (index.column()) {
         case NumberColumn:
         case NameColumn:
@@ -299,7 +333,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_HAS_CHILDREN: {
+    case Constants::RoleNodeHasChildren: {
         switch (index.column()) {
         case NumberColumn:
         case NameColumn:
@@ -428,6 +462,12 @@ void StockModel::deleteGroup(const QModelIndex &index)
 //    delNode->parent->children.removeAt(row);
     delNode->siblings()->removeAt(row);
     endRemoveRows();
+}
+
+StockItem StockModel::getStockItemByIndex(const QModelIndex &index)
+{
+    StockNode *tmpnode = static_cast<StockNode *>(index.internalPointer());
+    return (tmpnode->stockItem);
 }
 
 void StockModel::debugInfo(const QModelIndex &index)

@@ -147,12 +147,12 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
         tmplist.append(StockItem::StockItemBuilder()
                        .setId         (                  q.value(0).toInt())
                        .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-                       .setType       (                  StockItem::ItemItem)
-                       .setLevel      (                  StockItem::Level_2)
+                       .setType       (                  Constants::ItemItem)
+                       .setLevel      (                  Constants::Level_2)
                        .setAmount     (                  q.value(2).toInt())
                        .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-                       .setProject    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
-                       .setLocation   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setProject    (                  q.value(4).toString().toInt())
+                       .setLocation   (                  q.value(5).toString().toInt())
                        .build());
 #endif
     }

@@ -60,8 +60,8 @@ InventoryModel::InventoryNode InventoryModel::makeCategoryNode(const CategoryIte
     return InventoryModel::InventoryNode(InventoryItem::InventoryItemBuilder()
                                          .setId   (item.itemId)
                                          .setName (item.itemName)
-                                         .setType (StockItem::ItemCategory)
-                                         .setLevel(StockItem::LevelRoot)
+                                         .setType (Constants::ItemCategory)
+                                         .setLevel(Constants::LevelRoot)
                                          .build());
 }
 
@@ -70,8 +70,8 @@ InventoryModel::InventoryNode InventoryModel::makeGroupNode(const GroupItem &ite
     return InventoryModel::InventoryNode(InventoryItem::InventoryItemBuilder()
                                          .setId   (item.itemId)
                                          .setName (item.itemName)
-                                         .setType (StockItem::ItemGroup)
-                                         .setLevel(StockItem::Level_1)
+                                         .setType (Constants::ItemGroup)
+                                         .setLevel(Constants::Level_1)
                                          .build(),
                                          parent);
 }
@@ -81,8 +81,8 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
     return InventoryModel::InventoryNode(InventoryItem::InventoryItemBuilder()
                                          .setId(item.itemId)
                                          .setName(item.itemName)
-                                         .setType (StockItem::ItemItem)
-                                         .setLevel(StockItem::Level_2)
+                                         .setType (Constants::ItemItem)
+                                         .setLevel(Constants::Level_2)
                                          .setFullname(item.itemFullname)
                                          .setSerialn(item.itemSerialn)
                                          .setUnit(item.itemUnit)
@@ -215,7 +215,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         switch (index.column()) {
         case CategoryColumn: {
-            if (tmpitem.itemType == InventoryItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
 //                return tmpitem.itemId;
                 return QVariant(QString(""));
             } else {
@@ -224,7 +224,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
             break;
         }
         case CodeColumn: {
-            if (tmpitem.itemType == InventoryItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemId;
             } else {
                 return QVariant();
@@ -232,7 +232,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
             break;
         }
         case NameColumn: {
-            if (tmpitem.itemType == InventoryItem::ItemItem) {
+            if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemName;
             } else {
                 return QVariant();
@@ -257,7 +257,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_LEVEL_ID: {
+    case Constants::RoleLevelId: {
         switch (index.column()) {
         case CategoryColumn:
         case CodeColumn:
@@ -274,7 +274,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_TYPE: {
+    case Constants::RoleNodeType: {
         switch (index.column()) {
         case CategoryColumn:
         case CodeColumn:
@@ -291,7 +291,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_ID: {
+    case Constants::RoleNodeId: {
         switch (index.column()) {
         case CategoryColumn:
         case CodeColumn:
@@ -308,7 +308,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
-    case ROLE_NODE_HAS_CHILDREN: {
+    case Constants::RoleNodeHasChildren: {
         switch (index.column()) {
         case CategoryColumn:
         case CodeColumn:

@@ -10,13 +10,6 @@
 #include <databasemanager.h>
 #include <inventoryitem.h>
 
-#define DATA_INVALID -1
-
-#define ROLE_LEVEL_ID  (Qt::UserRole+1)
-#define ROLE_NODE_TYPE (Qt::UserRole+2)
-#define ROLE_NODE_ID   (Qt::UserRole+3)
-#define ROLE_NODE_HAS_CHILDREN (Qt::UserRole+4)
-
 class InventoryModel : public QAbstractItemModel
 {
     Q_OBJECT
@@ -37,7 +30,7 @@ public:
 
     // данные
     struct InventoryNode;
-    typedef QList<InventoryNode> InventoryNodeList;
+    typedef QVector<InventoryNode> InventoryNodeList;
     InventoryNodeList m_nodes;                         // узлы дерева на данном уровне
 
     DataBaseManager *m_dbman;

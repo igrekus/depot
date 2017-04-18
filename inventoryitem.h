@@ -6,8 +6,6 @@
 
 #include <abstracttreeitem.h>
 
-#define DATA_INVALID -1
-
 class InventoryItem : public AbstractTreeItem
 {
 public:
@@ -24,7 +22,7 @@ public:
         itemUnit(),
         itemMiscTag()
     {}
-    InventoryItem(qint32 id, const QString &name, TreeItemType type, TreeItemLevel level, const QString &fullname, const QString &serialn, const QString &unit, const QString misctag):
+    InventoryItem(qint32 id, const QString &name, Constants::TreeItemType type, Constants::TreeItemLevel level, const QString &fullname, const QString &serialn, const QString &unit, const QString misctag):
         AbstractTreeItem(id,
                          name,
                          type,
@@ -80,14 +78,14 @@ public:
         return dbg.maybeSpace();
     }
 
-    using InventoryList = QList<InventoryItem>;
+    using InventoryList = QVector<InventoryItem>;
 
     class InventoryItemBuilder {
     public:
         qint32        invId       = 0;
         QString       invName     = QString();
-        TreeItemType  invType     = ItemItem;
-        TreeItemLevel invLevel    = Level_2;
+        Constants::TreeItemType  invType     = Constants::ItemItem;
+        Constants::TreeItemLevel invLevel    = Constants::Level_2;
         QString       invFullname = QString();
         QString       invSerialn  = QString();
         QString       invUnit     = QString();
@@ -95,8 +93,8 @@ public:
 
         InventoryItemBuilder& setId      (const qint32    id)           { this->invId       = id;        return *this; }
         InventoryItemBuilder& setName    (const QString  &name)         { this->invName     = name;      return *this; }
-        InventoryItemBuilder& setType    (const TreeItemType  itemtype) { this->invType     = itemtype;  return *this; }
-        InventoryItemBuilder& setLevel   (const TreeItemLevel itemlevel){ this->invLevel    = itemlevel; return *this; }
+        InventoryItemBuilder& setType    (const Constants::TreeItemType  itemtype) { this->invType     = itemtype;  return *this; }
+        InventoryItemBuilder& setLevel   (const Constants::TreeItemLevel itemlevel){ this->invLevel    = itemlevel; return *this; }
         InventoryItemBuilder& setFullname(const QString  &fullname)     { this->invFullname = fullname;  return *this; }
         InventoryItemBuilder& setSerialn (const QString  &serialn)      { this->invSerialn  = serialn;   return *this; }
         InventoryItemBuilder& setUnit    (const QString  &unit)         { this->invUnit     = unit;      return *this; }

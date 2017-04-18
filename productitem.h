@@ -94,7 +94,7 @@ public:
         return dbg.maybeSpace();
     }
 
-    using ProductList = QList<ProductItem>;
+    using ProductList = QVector<ProductItem>;
 
     class ProductItemBuilder {
     public:

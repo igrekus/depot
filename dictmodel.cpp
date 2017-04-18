@@ -26,6 +26,7 @@ void DictModel::initModel()
     m_categoryListModel->initModel(m_dbman->getMapCategory());
     m_categoryListModel->addItem(0, 0, "");
     m_projectListModel->initModel(m_dbman->getMapProject());
+    m_projectListModel->addItem(0, 0, "");
     m_locationListModel->initModel(m_dbman->getMapLocation());
     m_groupListModel->initModel(m_dbman->getMapGroup());
     m_staffListModel->initModel(m_dbman->getMapStaff());

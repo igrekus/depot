@@ -1,24 +1,13 @@
 #include "inventorydialog.h"
 #include "ui_inventorydialog.h"
 
-InventoryDialog::InventoryDialog(DataBaseManager *dbman, DictModel *dict, QWidget *parent) :
+InventoryDialog::InventoryDialog(QWidget *parent) :
     QDialog(parent, Qt::WindowFlags() | Qt::Window),
     ui(new Ui::InventoryDialog)
 {
     ui->setupUi(this);
 
     createActions();
-
-    m_dbman = dbman;
-    m_dictModel = dict;
-
-    m_inventoryModel = new InventoryModel(m_dbman, this);
-
-    ui->treeInventory->setModel(m_inventoryModel);
-    ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
-    ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
-    ui->treeInventory->setUniformRowHeights(false);
-    ui->treeInventory->setAlternatingRowColors(true);
 }
 
 InventoryDialog::~InventoryDialog()
@@ -60,7 +49,14 @@ void InventoryDialog::createActions()
 }
 void InventoryDialog::initDialog()
 {
+    m_inventoryModel = new InventoryModel(m_dbman, this);
     m_inventoryModel->initModel();
+
+    ui->treeInventory->setModel(m_inventoryModel);
+    ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->treeInventory->setUniformRowHeights(false);
+    ui->treeInventory->setAlternatingRowColors(true);
 
     actRefreshView->trigger();
 }
@@ -81,14 +77,14 @@ void InventoryDialog::procActRefreshView()
 void InventoryDialog::procActEdit()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    switch (index.data(ROLE_NODE_TYPE).toInt()) {
-    case StockItem::ItemCategory:
+    switch (index.data(Constants::RoleNodeType).toInt()) {
+    case Constants::ItemCategory:
         actCategoryEdit->trigger();
         break;
-    case StockItem::ItemGroup:
+    case Constants::ItemGroup:
         actGroupEdit->trigger();
         break;
-    case StockItem::ItemItem:
+    case Constants::ItemItem:
         actInventoryEdit->trigger();
         break;
     default:
@@ -99,14 +95,14 @@ void InventoryDialog::procActEdit()
 void InventoryDialog::procActDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    switch (index.data(ROLE_NODE_TYPE).toInt()) {
-    case StockItem::ItemCategory:
+    switch (index.data(Constants::RoleNodeType).toInt()) {
+    case Constants::ItemCategory:
         actCategoryDelete->trigger();
         break;
-    case StockItem::ItemGroup:
+    case Constants::ItemGroup:
         actGroupDelete->trigger();
         break;
-    case StockItem::ItemItem:
+    case Constants::ItemItem:
         actInventoryDelete->trigger();
         break;
     default:
@@ -125,6 +121,7 @@ void InventoryDialog::procActCategoryAdd()
         QModelIndex ind = m_inventoryModel->addCategory(newName);
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        treeUpdated = true;
     }
 }
 
@@ -143,13 +140,14 @@ void InventoryDialog::procActCategoryEdit()
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
         m_inventoryModel->editCategory(index, newName);
+        treeUpdated = true;
     }
 }
 
 void InventoryDialog::procActCategoryDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+    if (index.data(Constants::RoleNodeHasChildren).toBool()) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Нельзя удалить непустую категорию. "
@@ -163,6 +161,7 @@ void InventoryDialog::procActCategoryDelete()
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteCategory(index);
+        treeUpdated = true;
     }
 }
 
@@ -170,12 +169,12 @@ void InventoryDialog::procActGroupAdd()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
     QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
-        case StockItem::ItemCategory:
+        switch (cur.data(Constants::RoleNodeType).toInt()) {
+        case Constants::ItemCategory:
             return cur;
-        case StockItem::ItemGroup:
+        case Constants::ItemGroup:
             return cur.parent();
-        case StockItem::ItemItem:
+        case Constants::ItemItem:
             return cur.parent().parent();   // TODO: FIX parent search model->getparentroot
         }
             return QModelIndex();
@@ -189,6 +188,7 @@ void InventoryDialog::procActGroupAdd()
         QModelIndex ind = m_inventoryModel->addGroup(pindex, newName);
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        treeUpdated = true;
     }
 }
 
@@ -206,13 +206,14 @@ void InventoryDialog::procActGroupEdit()
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
         m_inventoryModel->editGroup(index, newName);
+        treeUpdated = true;
     }
 }
 
 void InventoryDialog::procActGroupDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    if (index.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+    if (index.data(Constants::RoleNodeHasChildren).toBool()) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Нельзя удалить непустую группу. "
@@ -226,6 +227,7 @@ void InventoryDialog::procActGroupDelete()
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteGroup(index);
+        treeUpdated = true;
     }
 }
 
@@ -233,17 +235,17 @@ void InventoryDialog::procActInventoryAdd()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
     QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(ROLE_NODE_TYPE).toInt()) {
-        case StockItem::ItemGroup:
+        switch (cur.data(Constants::RoleNodeType).toInt()) {
+        case Constants::ItemGroup:
             return cur;
-        case StockItem::ItemItem:
+        case Constants::ItemItem:
             return cur.parent();
     }
     }();
-
+// TODO: fix ind.parent chain;
     ProductItem dummyProduct = ProductItem::ProductItemBuilder()
-                               .setGroup(pindex.data(ROLE_NODE_ID).toInt())
-                               .setCategory(pindex.parent().data(ROLE_NODE_ID).toInt())
+                               .setGroup(pindex.data(Constants::RoleNodeId).toInt())
+                               .setCategory(pindex.parent().data(Constants::RoleNodeId).toInt())
                                .build();
 
     InventoryDataDialog dialog(this);
@@ -333,7 +335,7 @@ void InventoryDialog::on_btnAddGroup_clicked()
 void InventoryDialog::on_btnAddInventory_clicked()
 {
     if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
-         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(ROLE_NODE_TYPE) == InventoryItem::ItemCategory)) {
+         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) == Constants::ItemCategory)) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите группу для добавления номенклатуры.");
@@ -366,7 +368,7 @@ void InventoryDialog::on_btnDelete_clicked()
 
 void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 {
-    if (index.data(ROLE_NODE_TYPE) == InventoryItem::ItemItem) {
+    if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
         actInventoryEdit->trigger();
     }
 }
@@ -391,7 +393,7 @@ void InventoryDialog::testRemCat()
     qint32 count = m_inventoryModel->rowCount(QModelIndex());
     for (qint32 i=0; i<count; ++i) {
         QModelIndex ind = m_inventoryModel->index(i, 0);
-        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        if (!ind.data(Constants::RoleNodeHasChildren).toBool()) {
             m_inventoryModel->deleteCategory(ind);
             --i;
             --count;
@@ -418,7 +420,7 @@ void InventoryDialog::testRemGrp()
     qint32 count = m_inventoryModel->rowCount(catind);
     for (qint32 i=0; i<count; ++i) {
         QModelIndex ind = m_inventoryModel->index(i, 0, catind);
-        if (!ind.data(ROLE_NODE_HAS_CHILDREN).toBool()) {
+        if (!ind.data(Constants::RoleNodeHasChildren).toBool()) {
             m_inventoryModel->deleteGroup(ind);
             --i;
             --count;
