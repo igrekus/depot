@@ -32,7 +32,8 @@ SOURCES += main.cpp\
     inventoryitem.cpp \
     abstracttreeitem.cpp \
     transactdatadialog.cpp \
-    stockdatadialog.cpp
+    stockdatadialog.cpp \
+    idstringmodel.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -55,7 +56,8 @@ HEADERS  += mainwindow.h \
     abstracttreeitem.h \
     constants.h \
     transactdatadialog.h \
-    stockdatadialog.h
+    stockdatadialog.h \
+    idstringmodel.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

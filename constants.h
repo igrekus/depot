@@ -3,7 +3,10 @@
 
 #include <QObject>
 
-using IdMap = QMultiHash<qint32, qint32>;
+using IdMap  = QMultiHash<qint32, qint32>;
+using Keys   = QVector<qint32>;
+using Values = QVector<QString>;
+using IdStringList = QPair<Keys, Values>;
 
 namespace Constants {
 

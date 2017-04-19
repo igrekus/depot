@@ -36,6 +36,8 @@ public:
     ProductItem::ProductList getProductList(const qint32 catId, const qint32 groupId);
     TransactItem::TransactList getTransactList();
 
+    IdStringList getIdProductList100();
+
     // словари
     HashDict getMapLocation();
     HashDict getMapProject();

@@ -3,7 +3,9 @@
 
 #include <QDialog>
 #include <QDebug>
+#include <QSortFilterProxyModel>
 
+#include <idstringmodel.h>
 #include <stockitem.h>
 #include <constants.h>
 #include <mapmodel.h>
@@ -24,7 +26,9 @@ public:
 
     DictModel *m_dictModel;
 
-    MapModel *m_productModel;
+    IdStringModel *m_productListModel;
+
+    QSortFilterProxyModel *m_searchFilterModel;
 
     DataBaseManager *m_dbman;
 
@@ -41,6 +45,11 @@ public:
 
 protected:
     void changeEvent(QEvent *e);
+
+private slots:
+    void on_editSearchProduct_textChanged(const QString &arg1);
+
+    void on_listProduct_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::StockDataDialog *ui;

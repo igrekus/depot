@@ -3,6 +3,8 @@
 
 /*
  TODO:
+      - ф-ция копирования номенклатуры
+      - ф-ция регистрации созданной номенклатуры на складе в окне редактора номенклатуры
       - обработчик ошибок через throw, сделать в одном месте -- где?;
       - const + typedef class
 
@@ -238,12 +240,13 @@ void MainWindow::procActStockEdit()
 
     StockItem oldStockItem = m_stockModel->getStockItemByIndex(cur);
 
-    qDebug()<< oldStockItem;
+//    qDebug()<< oldStockItem;
 
     StockDataDialog dialog(this);
-//    dialog.setData(dummyStockItem)
-//          .setDictModel(m_dictModel)
-//          .initDialog();
+    dialog.setData(oldStockItem)
+          .setDictModel(m_dictModel)
+          .setDbManager(m_dbman)
+          .initDialog();
 
     dialog.exec();
 }

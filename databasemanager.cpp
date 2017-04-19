@@ -231,6 +231,22 @@ TransactItem::TransactList DataBaseManager::getTransactList()
     return tmplist;
 }
 
+IdStringList DataBaseManager::getIdProductList100()
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    IdStringList tmplist;
+    QSqlQuery q = execSimpleQuery("CALL getIdProductList()");
+//    QSqlQuery q = execSimpleQuery("CALL getIdProductList100()");
+    while (q.next()) {
+        tmplist.first.append(                   q.value(0).toInt());
+        tmplist.second.append(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+    }
+    return tmplist;
+}
+
 HashDict DataBaseManager::getMapLocation()
 {
 #ifdef AT_WORK
