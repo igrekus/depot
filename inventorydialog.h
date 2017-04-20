@@ -11,6 +11,7 @@
 #include <inventorydatadialog.h>
 #include <linkeddict.h>
 #include <dictmodel.h>
+#include <inventorytreemodel.h>
 
 namespace Ui {
 class InventoryDialog;
@@ -27,6 +28,7 @@ class InventoryDialog : public QDialog
 public:
 
     InventoryModel *m_inventoryModel;
+    InventoryTreeModel *mdl;
 
     DataBaseManager *m_dbman;
     DictModel *m_dictModel;

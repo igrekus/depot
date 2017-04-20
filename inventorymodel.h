@@ -10,6 +10,8 @@
 #include <databasemanager.h>
 #include <inventoryitem.h>
 
+#include <treenode.h>
+
 class InventoryModel : public QAbstractItemModel
 {
     Q_OBJECT

@@ -54,7 +54,13 @@ void InventoryDialog::initDialog()
     m_inventoryModel = new InventoryModel(m_dbman, this);
     m_inventoryModel->initModel();
 
-    ui->treeInventory->setModel(m_inventoryModel);
+    mdl = new InventoryTreeModel(this);
+    mdl->initModel();
+
+//    ui->treeInventory->setModel(m_inventoryModel);
+    ui->treeInventory->setModel(mdl);
+
+
     ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
