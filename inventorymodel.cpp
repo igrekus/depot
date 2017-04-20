@@ -355,20 +355,14 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
     qint32 newId = m_dbman->insertCategory(catName);
 
     beginInsertRows(QModelIndex(), row, row + 1);
-//    beginInsertRows(QModelIndex(), m_nodes.size(), m_nodes.size()+1);
     InventoryNode tmpnode = makeCategoryNode(CategoryItem::CategoryItemBuilder()
                                              .setId(newId)
                                              .setName(catName)
                                              .build());
     m_nodes.insert(row, tmpnode);
-//    m_nodes.append(makeCategoryNode(CategoryItem::CategoryItemBuilder()
-//                                    .setId(1000)
-//                                    .setName(catName)
-//                                    .build()));
     endInsertRows();
 
-//    return index(row, 0, QModelIndex());
-    return index(m_nodes.size(), 0, QModelIndex());
+    return index(row, 0, QModelIndex());
 }
 
 QModelIndex InventoryModel::editCategory(const QModelIndex &index, const QString &newName)
@@ -425,8 +419,7 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
 
     qint32 newId = m_dbman->insertGroup(grpName);
 
-    pnode->children.reserve(1);
-    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+    beginInsertRows(pindex, row, row + 1);
     pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
                                                         .setId  (newId)
                                                         .setName(grpName)
@@ -477,7 +470,7 @@ QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const Produc
 
     qint32 newId = m_dbman->insertProduct(item);
 
-    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+    beginInsertRows(pindex, row, row + 1);
     pnode->children.insert(row, std::move(makeProductNode(ProductItem::ProductItemBuilder(item)
                                                           .setId(newId)
                                                           .build(), pnode)));

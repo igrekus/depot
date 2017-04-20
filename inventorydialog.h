@@ -11,7 +11,6 @@
 #include <inventorydatadialog.h>
 #include <linkeddict.h>
 #include <dictmodel.h>
-#include <inventorytreemodel.h>
 
 namespace Ui {
 class InventoryDialog;
@@ -28,7 +27,6 @@ class InventoryDialog : public QDialog
 public:
 
     InventoryModel *m_inventoryModel;
-    InventoryTreeModel *mdl;
 
     DataBaseManager *m_dbman;
     DictModel *m_dictModel;
@@ -51,6 +49,8 @@ public:
     QAction *actInventoryCopy;
     QAction *actInventoryEdit;
     QAction *actInventoryDelete;
+
+    QAction *actRegisterStock;
 
     bool treeUpdated = false;
 
@@ -83,6 +83,8 @@ public slots:
     void procActInventoryEdit();
     void procActInventoryDelete();
 
+    void procActRegisterStock();
+
     // events
     void resizeEvent(QResizeEvent *event) override;
 
@@ -97,6 +99,7 @@ private slots:
     void on_btnEdit_clicked();
     void on_btnDelete_clicked();
     void on_treeInventory_doubleClicked(const QModelIndex &index);
+    void on_btnRegisterStock_clicked();
 
 private:
     Ui::InventoryDialog *ui;

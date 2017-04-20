@@ -48,19 +48,16 @@ void InventoryDialog::createActions()
     connect(actInventoryEdit, &QAction::triggered, this, &InventoryDialog::procActInventoryEdit);
     actInventoryDelete = new QAction("Удалить номенклатуру", this);
     connect(actInventoryDelete, &QAction::triggered, this, &InventoryDialog::procActInventoryDelete);
+
+    actRegisterStock = new QAction("Удалить номенклатуру", this);
+    connect(actRegisterStock, &QAction::triggered, this, &InventoryDialog::procActRegisterStock);
 }
 void InventoryDialog::initDialog()
 {
     m_inventoryModel = new InventoryModel(m_dbman, this);
     m_inventoryModel->initModel();
 
-    mdl = new InventoryTreeModel(this);
-    mdl->initModel();
-
-//    ui->treeInventory->setModel(m_inventoryModel);
-    ui->treeInventory->setModel(mdl);
-
-
+    ui->treeInventory->setModel(m_inventoryModel);
     ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
@@ -257,6 +254,7 @@ void InventoryDialog::procActInventoryAdd()
     ProductItem dummyProduct = ProductItem::ProductItemBuilder()
                                .setGroup(pindex.data(Constants::RoleNodeId).toInt())
                                .setCategory(pindex.parent().data(Constants::RoleNodeId).toInt())
+                               .setUnit("шт")
                                .build();
 
     InventoryDataDialog dialog(this);
@@ -327,6 +325,12 @@ void InventoryDialog::procActInventoryDelete()
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteInventory(index);
     }
+}
+
+void InventoryDialog::procActRegisterStock()
+{
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    qDebug()<< "regustering stock item:" << m_inventoryModel->getProductItemByIndex(index);
 }
 
 void InventoryDialog::resizeEvent(QResizeEvent *event)
@@ -412,6 +416,20 @@ void InventoryDialog::on_btnDelete_clicked()
     actDelete->trigger();
 }
 
+
+void InventoryDialog::on_btnRegisterStock_clicked()
+{
+    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
+         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) != Constants::ItemItem)) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите номенклатуру для регистрации на складе.");
+        return;
+    }
+    actRegisterStock->trigger();
+}
+
+
 void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 {
     if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
@@ -489,4 +507,3 @@ QString Utility::rndString(qint32 len)
     }
     return out;
 }
-
