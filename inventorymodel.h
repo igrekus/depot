@@ -76,6 +76,7 @@ public:
     void deleteInventory(const QModelIndex &index);
 
     ProductItem getProductItemByIndex(const QModelIndex &index);
+    InventoryItem getInventoryItemByIndex(const QModelIndex &index);
 
 private:
 };

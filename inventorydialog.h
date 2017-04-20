@@ -46,6 +46,7 @@ public:
     QAction *actGroupDelete;
 
     QAction *actInventoryAdd;
+    QAction *actInventoryCopy;
     QAction *actInventoryEdit;
     QAction *actInventoryDelete;
 
@@ -76,6 +77,7 @@ public slots:
     void procActGroupDelete();
 
     void procActInventoryAdd();
+    void procActInventoryCopy();
     void procActInventoryEdit();
     void procActInventoryDelete();
 
@@ -89,6 +91,7 @@ private slots:
     void on_btnAddCategory_clicked();
     void on_btnAddGroup_clicked();
     void on_btnAddInventory_clicked();
+    void on_btnCopy_clicked();
     void on_btnEdit_clicked();
     void on_btnDelete_clicked();
     void on_treeInventory_doubleClicked(const QModelIndex &index);

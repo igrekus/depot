@@ -42,6 +42,8 @@ void InventoryDialog::createActions()
 
     actInventoryAdd = new QAction("Добавить номенклатуру", this);
     connect(actInventoryAdd, &QAction::triggered, this, &InventoryDialog::procActInventoryAdd);
+    actInventoryCopy = new QAction("Скопировать номенклатуру", this);
+    connect(actInventoryCopy, &QAction::triggered, this, &InventoryDialog::procActInventoryCopy);
     actInventoryEdit = new QAction("Редактировать номеклатуру", this);
     connect(actInventoryEdit, &QAction::triggered, this, &InventoryDialog::procActInventoryEdit);
     actInventoryDelete = new QAction("Удалить номенклатуру", this);
@@ -121,6 +123,9 @@ void InventoryDialog::procActCategoryAdd()
         QModelIndex ind = m_inventoryModel->addCategory(newName);
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+        // TODO: update main window search filter with the new category
+        m_dictModel->m_categoryListModel->addItem(1, 0, newName);
         treeUpdated = true;
     }
 }
@@ -263,6 +268,27 @@ void InventoryDialog::procActInventoryAdd()
     ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
+void InventoryDialog::procActInventoryCopy()
+{
+    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+
+    ProductItem CopyProduct = m_inventoryModel->getProductItemByIndex(cur);
+    CopyProduct.itemId = 0;
+
+    InventoryDataDialog dialog(this);
+
+    dialog.setData(CopyProduct)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+    m_inventoryModel->addInventory(cur.parent(), dialog.getData());
+}
+
+
 void InventoryDialog::procActInventoryEdit()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
@@ -344,6 +370,18 @@ void InventoryDialog::on_btnAddInventory_clicked()
     actInventoryAdd->trigger();
 }
 
+void InventoryDialog::on_btnCopy_clicked()
+{
+    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
+         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) != Constants::ItemItem)) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите номенклатуру для создания копии.");
+        return;
+    }
+    actInventoryCopy->trigger();
+}
+
 void InventoryDialog::on_btnEdit_clicked()
 {
     if (!ui->treeInventory->selectionModel()->hasSelection()) {
@@ -368,9 +406,10 @@ void InventoryDialog::on_btnDelete_clicked()
 
 void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 {
-    if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
-        actInventoryEdit->trigger();
-    }
+//    if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
+//        actInventoryEdit->trigger();
+//    }
+    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
 }
 
 
@@ -442,3 +481,4 @@ QString Utility::rndString(qint32 len)
     }
     return out;
 }
+

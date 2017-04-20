@@ -80,6 +80,13 @@
         </spacer>
        </item>
        <item>
+        <widget class="QPushButton" name="btnCopy">
+         <property name="text">
+          <string>Копировать</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="btnEdit">
          <property name="text">
           <string>Изменить &amp;E</string>
@@ -90,6 +97,29 @@
         <widget class="QPushButton" name="btnDelete">
          <property name="text">
           <string>Удалить</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <widget class="QPushButton" name="btnRegisterStock">
+         <property name="text">
+          <string>+ Склад</string>
          </property>
         </widget>
        </item>

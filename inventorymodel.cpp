@@ -10,10 +10,10 @@ struct InventoryModel::InventoryNode
         m_isExpanded(false)
     {}
 
-    InventoryNode(const InventoryItem &invItem, InventoryNode *parent = nullptr):
+    InventoryNode(const InventoryItem &invItem, InventoryNode *par = nullptr):
         inventoryItem(invItem),
         children(),
-        parent(parent),
+        parent(par),
         mapped(false),
         m_isExpanded(false)
     {}
@@ -41,7 +41,7 @@ struct InventoryModel::InventoryNode
     bool mapped = false;                           // проводился ли поиск дочерних узлов?
     bool m_isExpanded = false;                     // раскрыт ли узел в view?
 
-    InventoryModel::InventoryNodeList *siblings(){return &parent->children;}
+    InventoryModel::InventoryNodeList siblings() const {return parent->children;}
 };
 
 InventoryModel::InventoryModel(DataBaseManager *dbman, QObject *parent)
@@ -62,7 +62,8 @@ InventoryModel::InventoryNode InventoryModel::makeCategoryNode(const CategoryIte
                                          .setName (item.itemName)
                                          .setType (Constants::ItemCategory)
                                          .setLevel(Constants::LevelRoot)
-                                         .build());
+                                         .build(),
+                                         nullptr);
 }
 
 InventoryModel::InventoryNode InventoryModel::makeGroupNode(const GroupItem &item, InventoryNode *parent)
@@ -95,14 +96,14 @@ void InventoryModel::buildCategoryLevel()
 {
     qDebug() << "inventory: building category level";
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
-    beginInsertRows(QModelIndex(), 0, list.size()-1);
+//    beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
         if (it.itemId == 1) {
             continue;
         }
         m_nodes.append(std::move(makeCategoryNode(it)));
     }
-    endInsertRows();
+//    endInsertRows();
 }
 
 void InventoryModel::buildGroupLevel()
@@ -334,11 +335,11 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
 int InventoryModel::findRow(const InventoryNode *invNode) const
 {
     Q_ASSERT(invNode != nullptr);
-    const InventoryNodeList &searchList = invNode->parent != nullptr ? invNode->parent->children : m_nodes;
-    return searchList.indexOf(*invNode);
-//    StockNodeList::const_iterator position = std::find(searchList.begin(), searchList.end(), *stockNode);
-//    Q_ASSERT(position != searchList.end());
-//    return std::distance(searchList.begin(), position);
+    const InventoryNodeList searchList = invNode->parent != nullptr ? invNode->siblings() : m_nodes;
+//    return searchList.indexOf(*invNode);
+    InventoryNodeList::const_iterator position = std::find(searchList.begin(), searchList.end(), *invNode);
+    Q_ASSERT(position != searchList.end());
+    return std::distance(searchList.begin(), position);
 }
 
 QModelIndex InventoryModel::addCategory(const QString &catName)
@@ -351,15 +352,26 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
 
     qint32 newId = m_dbman->insertCategory(catName);
 
-    m_nodes.reserve(1);
     beginInsertRows(QModelIndex(), row, row + 1);
-    m_nodes.insert(row, std::move(makeCategoryNode(CategoryItem::CategoryItemBuilder()
-                                                   .setId(newId)
-                                                   .setName(catName)
-                                                   .build())));
+//    beginInsertRows(QModelIndex(), m_nodes.size(), m_nodes.size()+1);
+    InventoryNode tmpnode = makeCategoryNode(CategoryItem::CategoryItemBuilder()
+                                             .setId(newId)
+                                             .setName(catName)
+                                             .build());
+    m_nodes.insert(row, std::move(tmpnode));
+//    m_nodes.append(makeCategoryNode(CategoryItem::CategoryItemBuilder()
+//                                    .setId(1000)
+//                                    .setName(catName)
+//                                    .build()));
     endInsertRows();
 
-    return index(row, 0, QModelIndex());
+    qDebug() << m_nodes.first();
+    qDebug() << m_nodes.last();
+    qDebug() << tmpnode;
+    qDebug() << m_nodes.size();
+
+//    return index(row, 0, QModelIndex());
+    return index(m_nodes.size(), 0, QModelIndex());
 }
 
 QModelIndex InventoryModel::editCategory(const QModelIndex &index, const QString &newName)
@@ -394,7 +406,6 @@ QModelIndex InventoryModel::editCategory(const QModelIndex &index, const QString
 void InventoryModel::deleteCategory(const QModelIndex &index)
 {
     InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
-//    qint32 row = findRow(delNode);
 
     m_dbman->deleteCategory(CategoryItem::CategoryItemBuilder()
                             .setId  (delNode->inventoryItem.itemId)
@@ -451,7 +462,7 @@ void InventoryModel::deleteGroup(const QModelIndex &index)
                          .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    delNode->siblings()->removeAt(index.row());
+    delNode->siblings().removeAt(index.row());
     endRemoveRows();
 }
 
@@ -469,7 +480,6 @@ QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const Produc
 
     qint32 newId = m_dbman->insertProduct(item);
 
-    pnode->children.reserve(1);
     beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
     pnode->children.insert(row, std::move(makeProductNode(ProductItem::ProductItemBuilder(item)
                                                           .setId(newId)
@@ -499,7 +509,7 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
                            .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    delNode->siblings()->removeAt(index.row());
+    delNode->siblings().removeAt(index.row());
     endRemoveRows();
 }
 
@@ -516,4 +526,10 @@ ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
             .setGroup   (tmpnode->parent->inventoryItem.itemId)          // TODO: FIX this shit
             .setCategory(tmpnode->parent->parent->inventoryItem.itemId)
             .build());
+}
+
+InventoryItem InventoryModel::getInventoryItemByIndex(const QModelIndex &index)
+{
+    InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
+    return (tmpnode->inventoryItem);
 }
