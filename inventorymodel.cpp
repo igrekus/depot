@@ -32,12 +32,14 @@ struct InventoryModel::InventoryNode
                       << "data:"    << right.inventoryItem
                       << " child:"  << right.children
                       << " parent:" << right.parent
+                      << " row:"    << right.selfRow
                       << ")";
         return dbg.maybeSpace();
     }
     InventoryItem inventoryItem;                   // данные узла
     InventoryModel::InventoryNodeList children;    // массив ссылок на дочерние узлы
     InventoryNode *parent = nullptr;               // ссылка на родительский узел
+    qint32 selfRow = 0;
     bool mapped = false;                           // проводился ли поиск дочерних узлов?
     bool m_isExpanded = false;                     // раскрыт ли узел в view?
 
@@ -338,7 +340,7 @@ int InventoryModel::findRow(const InventoryNode *invNode) const
     const InventoryNodeList searchList = invNode->parent != nullptr ? invNode->siblings() : m_nodes;
 //    return searchList.indexOf(*invNode);
     InventoryNodeList::const_iterator position = std::find(searchList.begin(), searchList.end(), *invNode);
-    Q_ASSERT(position != searchList.end());
+//    Q_ASSERT(position != searchList.end());
     return std::distance(searchList.begin(), position);
 }
 
@@ -358,17 +360,12 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
                                              .setId(newId)
                                              .setName(catName)
                                              .build());
-    m_nodes.insert(row, std::move(tmpnode));
+    m_nodes.insert(row, tmpnode);
 //    m_nodes.append(makeCategoryNode(CategoryItem::CategoryItemBuilder()
 //                                    .setId(1000)
 //                                    .setName(catName)
 //                                    .build()));
     endInsertRows();
-
-    qDebug() << m_nodes.first();
-    qDebug() << m_nodes.last();
-    qDebug() << tmpnode;
-    qDebug() << m_nodes.size();
 
 //    return index(row, 0, QModelIndex());
     return index(m_nodes.size(), 0, QModelIndex());

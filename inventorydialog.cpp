@@ -291,7 +291,9 @@ void InventoryDialog::procActInventoryCopy()
         return;
     }
 
-    m_inventoryModel->addInventory(cur.parent(), dialog.getData());
+    QModelIndex ind = m_inventoryModel->addInventory(cur.parent(), dialog.getData());
+    ui->treeInventory->selectionModel()->clear();
+    ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 
@@ -412,10 +414,10 @@ void InventoryDialog::on_btnDelete_clicked()
 
 void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 {
-//    if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
-//        actInventoryEdit->trigger();
-//    }
-    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
+    if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
+        actInventoryEdit->trigger();
+    }
+//    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
 }
 
 

@@ -65,7 +65,7 @@ public:
                 itemMiscTag  == right.itemMiscTag);
     }
     friend QDebug operator<<(QDebug dbg, const InventoryItem &right) {
-        dbg.nospace() << "StockItem("
+        dbg.nospace() << "InventoryItem("
                       << "type:"  << right.itemType
                       << " lvl:"  << right.itemLevel
                       << " id:"   << right.itemId

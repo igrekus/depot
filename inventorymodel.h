@@ -32,8 +32,8 @@ public:
 
     // данные
     struct InventoryNode;
-    typedef QVector<InventoryNode> InventoryNodeList;
-    InventoryNodeList m_nodes;                         // узлы дерева на данном уровне
+    typedef QList<InventoryNode> InventoryNodeList;
+    InventoryNodeList m_nodes;                         // root nodes
 
     DataBaseManager *m_dbman;
 
