@@ -42,6 +42,7 @@ public:
     void filterGroupCombo(const qint32 catId);
 
     // init widgets with data
+    void initWidgetsWithData();
     void initDialog();
 
     ProductItem getData();

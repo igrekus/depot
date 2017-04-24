@@ -77,6 +77,10 @@ public:
     void editGroup(const QModelIndex &index, const QString &newName);
     void deleteGroup(const QModelIndex &index);
 
+    QModelIndex addStock(const StockItem &item);
+    void editStock(const StockItem &item);
+    void deleteStock(const StockItem &item);
+
     StockItem getStockItemByIndex(const QModelIndex &index);
 
     // TODO: debug helper

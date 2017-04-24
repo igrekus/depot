@@ -102,7 +102,7 @@ public:
         QString prodName      = QString();
         QString prodFullname  = QString();
         QString prodSerialn   = QString();
-        QString prodUnit      = QString();
+        QString prodUnit      = QString("шт");
         QString prodMiscTag   = QString();
         qint32  prodGroupRef  = 0;
         qint32  prodCatRef    = 0;

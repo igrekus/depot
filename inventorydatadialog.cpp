@@ -31,6 +31,19 @@ void InventoryDataDialog::filterGroupCombo(const qint32 catId)
     m_filteredGroupModel->initModel(tmpdict);
 }
 
+void InventoryDataDialog::initWidgetsWithData()
+{
+    ui->editFullname->setText(m_data.itemFullname);
+    ui->editMiscTag->setText("");
+    ui->editName->setText(m_data.itemName);
+    ui->editSerialn->setText(m_data.itemSerialn);
+    ui->editUnit->setText(m_data.itemUnit);
+
+    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
+    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
+
+}
+
 void InventoryDataDialog::initDialog()
 {
     if (m_data.itemId == 0) {
@@ -42,16 +55,7 @@ void InventoryDataDialog::initDialog()
     ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
     ui->comboGroup->setModel(m_filteredGroupModel);
 
-    ui->editFullname->setText(m_data.itemFullname);
-    ui->editMiscTag->setText("");
-    ui->editName->setText(m_data.itemName);
-    ui->editSerialn->setText(m_data.itemSerialn);
-    ui->editUnit->setText(m_data.itemUnit);
-
-//    ui->comboCategory->setCurrentIndex(0);
-
-    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
-    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
+    initWidgetsWithData();
 
     m_oldData = m_data;
 }

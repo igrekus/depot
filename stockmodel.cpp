@@ -464,6 +464,55 @@ void StockModel::deleteGroup(const QModelIndex &index)
     endRemoveRows();
 }
 
+QModelIndex StockModel::addStock(const StockItem &item)
+{
+    QPair<qint32, qint32> grpcat = m_dbman->getProductParents(item.itemProductRef);
+
+    auto catIter = std::find_if(m_nodes.begin(), m_nodes.end(),
+                                [&grpcat](const StockNode &it) -> bool {
+        return (it.stockItem.itemId == grpcat.second);
+    });
+    qint32 catrow = std::distance(m_nodes.begin(), catIter);
+    qint32 catId = catIter->stockItem.itemId;
+
+    auto grpIter = std::find_if(catIter->children.begin(), catIter->children.end(),
+                                [&grpcat](const StockNode &it) -> bool {
+        return (it.stockItem.itemId == grpcat.first);
+    });
+    qint32 grprow = std::distance(catIter->children.begin(), grpIter);
+    qint32 grpId = grpIter->stockItem.itemId;
+//---
+    auto targetIter = std::find_if(grpIter->children.begin(), grpIter->children.end(),
+                                   [&grpIter](const StockNode &it) -> bool {
+            return it.stockItem.itemName > grpIter->stockItem.itemName;});
+
+    qint32 targetRow = std::distance(grpIter->children.begin(), targetIter);
+
+    qDebug() << "at row:" << targetRow;
+//    qint32 newId = m_dbman->insertGroup(grpName);
+
+//    pnode->children.reserve(1);
+//    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+//    pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
+//                                                        .setId  (newId)
+//                                                        .setName(grpName)
+//                                                        .build(), pnode)));
+//    endInsertRows();
+
+    return QModelIndex();
+//    return index(row, 0, pindex);
+}
+
+void StockModel::editStock(const StockItem &item)
+{
+
+}
+
+void StockModel::deleteStock(const StockItem &item)
+{
+
+}
+
 StockItem StockModel::getStockItemByIndex(const QModelIndex &index)
 {
     StockNode *tmpnode = static_cast<StockNode *>(index.internalPointer());

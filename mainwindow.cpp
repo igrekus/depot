@@ -162,9 +162,6 @@ void MainWindow::createActions()
 //    QAction *actAbout = helpMenu->addAction(tr("О программе"), this, &MainWindow::procActAbout);
 //    actAbout->setStatusTip(tr("Показать информацию о программе"));
 
-//    actReFetchRootData = new QAction(tr("Fetch Data"), this);
-//    connect(actReFetchRootData, &QAction::triggered, this, &MainWindow::procActReFetchRootData);
-
     actRefreshView = new QAction("Обновить", this);
     connect(actRefreshView, &QAction::triggered, this, &MainWindow::procActRefreshView);
 //---
@@ -181,6 +178,12 @@ void MainWindow::createActions()
     connect(actTransactEdit, &QAction::triggered, this, &MainWindow::procActTransactEdit);
     actTransactDelete = new QAction("Удалить приход/расход", this);
     connect(actTransactDelete, &QAction::triggered, this, &MainWindow::procActTransactDelete);
+}
+
+void MainWindow::refreshStock()
+{
+    m_stockModel->clear();
+    m_stockModel->initModel();
 }
 
 // -------------------- Action Processing -----------------------------
@@ -216,30 +219,34 @@ void MainWindow::procActStockAdd()
             return cur;
             break;
         case Constants::ItemItem:
-            return cur.parent();
+            return cur.parent();     // TODO: fix cur.parent chain
             break;
         }
     }();
 
-    // TODO: fix cur.parent chain
-    StockItem dummyStockItem = StockItem::StockItemBuilder().build();
+    StockItem newStockItem = StockItem::StockItemBuilder().build();
 
     StockDataDialog dialog(this);
-    dialog.setData(dummyStockItem)
+    dialog.setData(newStockItem)
           .setDictModel(m_dictModel)
           .initDialog();
 
-    dialog.exec();
+    if (!dialog.exec() == QDialog::Accepted) {
+        return;
+    }
+
+    newStockItem = dialog.getData();
+
+    m_stockModel->addStock(newStockItem);
+    qint32 newStockId = m_dbman->insertStock(newStockItem);
+//    refreshStock(); // TODO: search and add to the correct branch
 }
 
 void MainWindow::procActStockEdit()
 {    
     QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = cur.parent();
 
     StockItem oldStockItem = m_stockModel->getStockItemByIndex(cur);
-
-//    qDebug()<< oldStockItem;
 
     StockDataDialog dialog(this);
     dialog.setData(oldStockItem)
@@ -247,7 +254,14 @@ void MainWindow::procActStockEdit()
           .setDbManager(m_dbman)
           .initDialog();
 
-    dialog.exec();
+    if (!dialog.exec() == QDialog::Accepted) {
+        return;
+    }
+
+    oldStockItem = dialog.getData();
+
+//    qint32 newStockId = m_dbman->insertStock(newStockItem);
+//    refreshStock(); // TODO: search and add to the correct branch
 }
 
 void MainWindow::procActStockDelete()
@@ -292,8 +306,7 @@ void MainWindow::on_btnInventoryEditor_clicked()
     dialog.exec();
 
     if (dialog.treeUpdated) {
-        m_stockModel->clear();
-        m_stockModel->initModel();
+        refreshStock();
     }
 }
 

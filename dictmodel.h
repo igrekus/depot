@@ -12,6 +12,7 @@
 #include <hashdict.h>
 #include <constants.h>
 #include <mapmodel.h>
+#include <idstringmodel.h>
 
 class DictModel : public QObject
 {
@@ -37,7 +38,7 @@ public:
     MapModel *m_staffListModel;
 //    MapModel *m_miscTagListModel;
 
-//    HashDict m_mapMisc;        // разные теги
+    IdStringModel *m_productListModel;
 
     DataBaseManager *m_dbman;
 

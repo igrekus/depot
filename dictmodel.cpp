@@ -9,6 +9,8 @@ DictModel::DictModel(DataBaseManager *dbman, QObject *parent) : QObject(parent)
     m_locationListModel = new MapModel(this);
     m_groupListModel    = new MapModel(this);
     m_staffListModel    = new MapModel(this);
+
+    m_productListModel  = new IdStringModel(this);
 }
 
 void DictModel::initModel()
@@ -30,4 +32,6 @@ void DictModel::initModel()
     m_locationListModel->initModel(m_dbman->getMapLocation());
     m_groupListModel->initModel(m_dbman->getMapGroup());
     m_staffListModel->initModel(m_dbman->getMapStaff());
+
+    m_productListModel->setData(m_dbman->getIdProductList());
 }

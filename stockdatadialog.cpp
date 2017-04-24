@@ -13,6 +13,27 @@ StockDataDialog::~StockDataDialog()
     delete ui;
 }
 
+void StockDataDialog::updateWidgetsWithStock(const StockItem &tmpstock)
+{
+    ui->editSearchProduct->setText(tmpstock.itemName);
+    ui->editProductName->setText(tmpstock.itemName);
+    ui->editProductId->setText(QString::number(tmpstock.itemProductRef));
+    ui->comboLocation->setCurrentText(m_dictModel->m_locationListModel->getData(tmpstock.itemLocation));
+    ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(tmpstock.itemProject));
+
+}
+
+void StockDataDialog::updateWidgetsWithProduct(const qint32 prodId)
+{
+    QString prodname = m_dictModel->m_productListModel->getName(prodId);
+
+    ui->editSearchProduct->setText(prodname);
+    ui->editProductName->setText(prodname);
+    ui->editProductId->setText(QString::number(prodId));
+    ui->comboLocation->setCurrentIndex(0);
+    ui->comboProject->setCurrentIndex(0);
+}
+
 void StockDataDialog::initDialog()
 {
     if (m_data.itemId == 0) {
@@ -21,25 +42,28 @@ void StockDataDialog::initDialog()
         setWindowTitle("Изменить позицию хранения:");
     }
 
-    m_productListModel = new IdStringModel(this);
     m_searchFilterModel = new QSortFilterProxyModel(this);
-
-    m_productListModel->setData(m_dbman->getIdProductList100());
-    m_searchFilterModel->setSourceModel(m_productListModel);
+    m_searchFilterModel->setSourceModel(m_dictModel->m_productListModel);
     m_searchFilterModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-    m_searchFilterModel->setFilterWildcard(m_data.itemName);
+    m_searchFilterModel->setFilterWildcard(m_oldData.itemName);
 
     ui->listProduct->setModel(m_searchFilterModel);
     ui->comboLocation->setModel(m_dictModel->m_locationListModel);
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
-    ui->editSearchProduct->setText(m_data.itemName);
-    ui->editProductName->setText(m_data.itemName);
-    ui->editProductId->setText(QString::number(m_data.itemId));
-    ui->comboLocation->setCurrentText(m_dictModel->m_locationListModel->getData(m_data.itemLocation));
-    ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(m_data.itemProject));
+    m_oldData = m_dbman->getStockByProductId(m_data.itemProductRef);
+//    m_oldData.itemName = m_data.itemName;
 
-    m_oldData = m_data;
+    if (m_data.itemId == 0) {
+        updateWidgetsWithProduct(m_data.itemProductRef);
+    } else {
+        updateWidgetsWithStock(m_data);
+    }
+}
+
+StockItem StockDataDialog::getData()
+{
+    return m_data;
 }
 
 void StockDataDialog::changeEvent(QEvent *e)
@@ -54,6 +78,21 @@ void StockDataDialog::changeEvent(QEvent *e)
     }
 }
 
+StockItem StockDataDialog::collectData()
+{
+    return (StockItem::StockItemBuilder()
+            .setId         (m_data.itemId)
+            .setName       (ui->editProductName->text())
+            .setType       (Constants::ItemItem)
+            .setLevel      (Constants::Level_2)
+            .setAmount     (m_data.itemAmount)
+            .setSerialn    (m_data.itemSerialn)
+            .setProject    (ui->comboProject->currentData(Constants::RoleNodeId).toInt())
+            .setLocation   (ui->comboLocation->currentData(Constants::RoleNodeId).toInt())
+            .setProduct    (ui->editProductId->text().toInt())
+            .build());
+}
+
 void StockDataDialog::on_editSearchProduct_textChanged(const QString &arg1)
 {
     m_searchFilterModel->setFilterWildcard(arg1);
@@ -62,7 +101,40 @@ void StockDataDialog::on_editSearchProduct_textChanged(const QString &arg1)
 
 void StockDataDialog::on_listProduct_doubleClicked(const QModelIndex &index)
 {
-    ui->editSearchProduct->setText(index.data(Qt::DisplayRole).toString());
-    ui->editProductName->setText(index.data(Qt::DisplayRole).toString());
-    ui->editProductId->setText(index.data(Constants::RoleNodeId).toString());
+    m_data = m_dbman->getStockByProductId(index.data(Constants::RoleNodeId).toInt());
+
+    if (m_data.itemId == 0) {
+        updateWidgetsWithProduct(index.data(Constants::RoleNodeId).toInt());
+    } else {
+        updateWidgetsWithStock(m_data);
+    }
+
+    m_searchFilterModel->setFilterWildcard(QString(""));
+    ui->listProduct->scrollTo(index);
 }
+
+void StockDataDialog::on_listProduct_clicked(const QModelIndex &index)
+{
+    on_listProduct_doubleClicked(index);
+}
+
+void StockDataDialog::on_btnOk_clicked()
+{
+    if (ui->editProductName->text().isEmpty() ||
+        ui->editProductId->text() == QString("0")) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите продукт для регистрации на складе.");
+        return;
+    }
+    if (ui->comboProject->currentText().isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите тему, на которую будет зарегистрирована данная позиция.");
+        return;
+    }
+
+    m_data = collectData();
+    accept();
+}
+

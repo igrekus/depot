@@ -56,6 +56,7 @@ public:
 
     void initApplication();
     void createActions();
+    void refreshStock();
 //    void createStatusBar();
 
 private slots:

@@ -294,7 +294,6 @@ void InventoryDialog::procActInventoryCopy()
     ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
-
 void InventoryDialog::procActInventoryEdit()
 {
     QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
@@ -329,8 +328,38 @@ void InventoryDialog::procActInventoryDelete()
 
 void InventoryDialog::procActRegisterStock()
 {
-    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    qDebug()<< "regustering stock item:" << m_inventoryModel->getProductItemByIndex(index);
+    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex pindex = [cur]() -> QModelIndex {
+        switch (cur.data(Constants::RoleNodeType).toInt()) {
+        case Constants::ItemGroup:
+            return cur;
+            break;
+        case Constants::ItemItem:
+            return cur.parent();     // TODO: fix cur.parent chain
+            break;
+        }
+    }();
+
+    StockItem newStockItem = StockItem::StockItemBuilder()
+                             .setName(cur.sibling(cur.row(), 2).data(Qt::DisplayRole).toString())
+                             .setProduct(cur.data(Constants::RoleNodeId).toInt())
+                             .build();
+
+    StockDataDialog dialog(this);
+    dialog.setData(newStockItem)
+          .setDictModel(m_dictModel)
+          .setDbManager(m_dbman)
+          .initDialog();
+
+    if (!dialog.exec() == QDialog::Accepted) {
+        return;
+    }
+
+    newStockItem = dialog.getData();
+
+    m_dbman->insertStock(newStockItem);
+
+    treeUpdated = true;
 }
 
 void InventoryDialog::resizeEvent(QResizeEvent *event)

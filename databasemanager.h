@@ -36,7 +36,10 @@ public:
     ProductItem::ProductList getProductList(const qint32 catId, const qint32 groupId);
     TransactItem::TransactList getTransactList();
 
-    IdStringList getIdProductList100();
+    IdStringList getIdProductList();
+
+    StockItem getStockByProductId(const qint32 prodId);
+    QPair<qint32, qint32> getProductParents(const qint32 prodId);
 
     // словари
     HashDict getMapLocation();
@@ -61,6 +64,10 @@ public:
     qint32 insertProduct(const ProductItem &item);
     void updateProduct(const ProductItem &item);
     void deleteProduct(const ProductItem &item);
+
+    qint32 insertStock(const StockItem &item);
+    void updateStock(const StockItem &item);
+    void deleteStock(const StockItem &item);
 
     // utility
     void convertDB();

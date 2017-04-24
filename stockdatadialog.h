@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QDebug>
 #include <QSortFilterProxyModel>
+#include <QMessageBox>
 
 #include <idstringmodel.h>
 #include <stockitem.h>
@@ -26,8 +27,6 @@ public:
 
     DictModel *m_dictModel;
 
-    IdStringModel *m_productListModel;
-
     QSortFilterProxyModel *m_searchFilterModel;
 
     DataBaseManager *m_dbman;
@@ -41,15 +40,25 @@ public:
     StockDataDialog &setData     (const StockItem &data)       {m_data      = data;  return *this;}
     StockDataDialog &setDictModel(      DictModel *dict)       {m_dictModel = dict;  return *this;}
 
+    void updateWidgetsWithStock(const StockItem &tmpstock);
+    void updateWidgetsWithProduct(const qint32 prodId);
     void initDialog();
+
+    StockItem getData();
 
 protected:
     void changeEvent(QEvent *e);
+
+    StockItem collectData();
 
 private slots:
     void on_editSearchProduct_textChanged(const QString &arg1);
 
     void on_listProduct_doubleClicked(const QModelIndex &index);
+
+    void on_listProduct_clicked(const QModelIndex &index);
+
+    void on_btnOk_clicked();
 
 private:
     Ui::StockDataDialog *ui;

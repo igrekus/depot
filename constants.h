@@ -4,9 +4,8 @@
 #include <QObject>
 
 using IdMap  = QMultiHash<qint32, qint32>;
-using Keys   = QVector<qint32>;
-using Values = QVector<QString>;
-using IdStringList = QPair<Keys, Values>;
+using IdPair = QPair<qint32, QString>;
+using IdStringList = QVector<IdPair>;
 
 namespace Constants {
 

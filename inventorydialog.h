@@ -11,6 +11,7 @@
 #include <inventorydatadialog.h>
 #include <linkeddict.h>
 #include <dictmodel.h>
+#include <stockdatadialog.h>
 
 namespace Ui {
 class InventoryDialog;

@@ -153,6 +153,7 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
                        .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
                        .setProject    (                  q.value(4).toString().toInt())
                        .setLocation   (                  q.value(5).toString().toInt())
+                       .setProduct    (                  q.value(6).toString().toInt())
                        .build());
 #endif
     }
@@ -231,7 +232,7 @@ TransactItem::TransactList DataBaseManager::getTransactList()
     return tmplist;
 }
 
-IdStringList DataBaseManager::getIdProductList100()
+IdStringList DataBaseManager::getIdProductList()
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
@@ -241,10 +242,55 @@ IdStringList DataBaseManager::getIdProductList100()
     QSqlQuery q = execSimpleQuery("CALL getIdProductList()");
 //    QSqlQuery q = execSimpleQuery("CALL getIdProductList100()");
     while (q.next()) {
-        tmplist.first.append(                   q.value(0).toInt());
-        tmplist.second.append(decode->toUnicode(q.value(1).toString().toLocal8Bit()));
+        QPair<qint32, QString> tmppair;
+        tmppair.first  =                   q.value(0).toInt();
+        tmppair.second = decode->toUnicode(q.value(1).toString().toLocal8Bit());
+        tmplist.append(tmppair);
+//        if (tmppair.second.contains("атаре"))
+//            qDebug() << tmppair;
     }
     return tmplist;
+}
+
+StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
+{
+#ifdef AT_WORK
+    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
+#endif
+
+    QSqlQuery q = execSimpleQuery("CALL getStockByProductId("+QString::number(prodId)+")");
+
+    if (!q.next()) {
+        return StockItem::StockItemBuilder().build();
+    }
+#ifdef AT_WORK
+    return StockItem::StockItemBuilder()
+           .setId         (                  q.value(0).toInt())
+           .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
+           .setType       (                  Constants::ItemItem)
+           .setLevel      (                  Constants::Level_2)
+           .setAmount     (                  q.value(2).toInt())
+           .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+           .setProject    (                  q.value(4).toString().toInt())
+           .setLocation   (                  q.value(5).toString().toInt())
+           .setProduct    (                  q.value(6).toString().toInt())
+           .build();
+#endif
+}
+
+QPair<qint32, qint32> DataBaseManager::getProductParents(const qint32 prodId)
+{
+    QSqlQuery q = execSimpleQuery("CALL getProductParents("+QString::number(prodId)+")");
+
+    QPair<qint32, qint32> tmppair;
+    if (!q.next()) {
+        tmppair.first=0;
+        tmppair.second=0;
+        return tmppair;
+    }
+    tmppair.first =q.value(0).toInt();
+    tmppair.second=q.value(1).toInt();
+    return tmppair;
 }
 
 HashDict DataBaseManager::getMapLocation()
@@ -469,6 +515,21 @@ void DataBaseManager::deleteProduct(const ProductItem &item)
     qDebug()<<"db delete prodcut:"<<item;
 }
 
+qint32 DataBaseManager::insertStock(const StockItem &item)
+{
+    qDebug()<<"db insert stock:"<<item;
+    return 0;
+}
+
+void DataBaseManager::updateStock(const StockItem &item)
+{
+    qDebug()<<"db update stock:"<<item;
+}
+
+void DataBaseManager::deleteStock(const StockItem &item)
+{
+    qDebug()<<"db delete stock:"<<item;
+}
 
 void DataBaseManager::convertDB()
 {

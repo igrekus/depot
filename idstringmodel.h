@@ -26,6 +26,9 @@ public:
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
+    qint32 getId(const QString &name) const;
+    QString getName(const qint32 id) const;
+
 private:
 };
 
