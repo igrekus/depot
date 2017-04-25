@@ -46,7 +46,7 @@ public:
         }
     };
     // данные
-    using TransactNodeList = QVector<TransactNode>;
+    using TransactNodeList = QList<TransactNode>;
     TransactNodeList m_nodeList;
 
     // менеджеры
@@ -66,6 +66,8 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+
+    TransactItem getTransactItemByIndex(const QModelIndex &index);
 
 private:
 };

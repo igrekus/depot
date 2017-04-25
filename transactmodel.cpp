@@ -116,3 +116,8 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
     }
     return QVariant();
 }
+
+TransactItem TransactModel::getTransactItemByIndex(const QModelIndex &index)
+{
+    return (m_nodeList.at(index.row()).transactItem);
+}

@@ -186,6 +186,21 @@ void MainWindow::refreshStock()
     m_stockModel->initModel();
 }
 
+TransactItem MainWindow::makeTransactItemFromStockItem(const StockItem &stock)
+{
+    return (TransactItem::TransactItemBuilder()
+//            .setId(0)                           // new transact
+            .setName(stock.itemName)
+            .setDate(QDate::currentDate())
+//            .setDiff(0)
+//            .setNote(QString())
+            .setStock(stock.itemId)             // ref to appropriate stock item
+//            .setStaff(0)
+            .setProject(stock.itemProject)
+//            .setBill(0)
+            .build());
+}
+
 // -------------------- Action Processing -----------------------------
 void MainWindow::procActRefreshView()
 {
@@ -212,17 +227,17 @@ void MainWindow::procActRefreshView()
 
 void MainWindow::procActStockAdd()
 {
-    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(Constants::RoleNodeType).toInt()) {
-        case Constants::ItemGroup:
-            return cur;
-            break;
-        case Constants::ItemItem:
-            return cur.parent();     // TODO: fix cur.parent chain
-            break;
-        }
-    }();
+//    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+//    QModelIndex pindex = [cur]() -> QModelIndex {
+//        switch (cur.data(Constants::RoleNodeType).toInt()) {
+//        case Constants::ItemGroup:
+//            return cur;
+//            break;
+//        case Constants::ItemItem:
+//            return cur.parent();     // TODO: fix cur.parent chain
+//            break;
+//        }
+//    }();
 
     StockItem newStockItem = StockItem::StockItemBuilder().build();
 
@@ -231,14 +246,15 @@ void MainWindow::procActStockAdd()
           .setDictModel(m_dictModel)
           .initDialog();
 
-    if (!dialog.exec() == QDialog::Accepted) {
+    if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
     newStockItem = dialog.getData();
 
     m_stockModel->addStock(newStockItem);
-    qint32 newStockId = m_dbman->insertStock(newStockItem);
+//    qDebug() << pindex;
+    statusBar()->showMessage("Позиция добавлена на склад.", 10000);
 //    refreshStock(); // TODO: search and add to the correct branch
 }
 
@@ -254,32 +270,66 @@ void MainWindow::procActStockEdit()
           .setDbManager(m_dbman)
           .initDialog();
 
-    if (!dialog.exec() == QDialog::Accepted) {
+    if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
     oldStockItem = dialog.getData();
 
-//    qint32 newStockId = m_dbman->insertStock(newStockItem);
-//    refreshStock(); // TODO: search and add to the correct branch
+    m_stockModel->editStock(cur, oldStockItem);
 }
 
 void MainWindow::procActStockDelete()
 {
-    qDebug() << "del stock";
+    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную позицию?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_stockModel->deleteStock(index);
+    }
 }
 
 void MainWindow::procActTransactAdd()
 {
-    qDebug() << "add transact";
-    TransactDataDialog dialog;
+    QModelIndex stockIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
+    StockItem stock = m_stockModel->getStockItemByIndex(stockIndex);
 
-    dialog.exec();
+    qDebug()<<stock;
+    TransactItem newTransItem = makeTransactItemFromStockItem(stock);
+    qDebug() << newTransItem;
+
+    TransactDataDialog dialog(this);
+    dialog.setData(newTransItem)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
+
+//    newTransItem = dialog.getData();
+
+//    QModelIndex index = m_transactModel->addTransact(newTransItem);
 }
 
 void MainWindow::procActTransactEdit()
 {
-    qDebug() << "edit transact";
+    QModelIndex index = ui->tableTransact->selectionModel()->selectedIndexes().first();
+    TransactItem oldTransItem = m_transactModel->getTransactItemByIndex(index);
+
+    qDebug()<<oldTransItem;
+
+    TransactDataDialog dialog(this);
+    dialog.setData(oldTransItem)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    if (dialog.exec() != QDialog::Accepted) {
+        return;
+    }
 }
 
 void MainWindow::procActTransactDelete()
@@ -312,6 +362,13 @@ void MainWindow::on_btnInventoryEditor_clicked()
 
 void MainWindow::on_btnAddTransact_clicked()
 {
+    if (!ui->treeStock->selectionModel()->hasSelection() ||
+         ui->treeStock->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите продукт на складе для создания записи о приходе/расходе.");
+        return;
+    }
     actTransactAdd->trigger();
 }
 
@@ -378,7 +435,7 @@ void MainWindow::on_btnDelStock_clicked()
 void MainWindow::on_btnReloadData_clicked()
 {
     qDebug() << "add test";
-//    testAddCat();
+    refreshStock();
 //    testAddGrp();
 }
 
@@ -391,8 +448,16 @@ void MainWindow::on_btnReport_clicked()
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {
-    qDebug() << "r:" << index.row() << "id:" << index.data(ROLE_NODE_ID).toInt() << "name:" << index.data(Qt::DisplayRole).toString();
-    m_stockModel->debugInfo(index);
+    if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemItem) {
+        actTransactAdd->trigger();
+    }
+//    qDebug() << "r:" << index.row() << "id:" << index.data(ROLE_NODE_ID).toInt() << "name:" << index.data(Qt::DisplayRole).toString();
+//    m_stockModel->debugInfo(index);
+}
+
+void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
+{
+    actTransactEdit->trigger();
 }
 
 // -------------------- Delegates -------------------------------------
@@ -546,3 +611,4 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
 // -------------------- Testing routines ------------------------------
 
 // -------------------- Utility ---------------------------------------
+

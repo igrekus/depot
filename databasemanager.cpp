@@ -225,7 +225,8 @@ TransactItem::TransactList DataBaseManager::getTransactList()
                        .setStaff  (                  q.value(4).toInt())
                        .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
                        .setProject(                  q.value(6).toInt())
-                       .setBillRef(                  q.value(7).toInt())
+                       .setStock  (                  q.value(7).toInt())
+                       .setBill   (                  q.value(8).toInt())
                        .build());
 #endif
     }

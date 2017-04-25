@@ -35,7 +35,7 @@ public:
 
     // данные
     struct StockNode;
-    typedef QVector<StockNode> StockNodeList;
+    typedef QList<StockNode> StockNodeList;
     StockNodeList m_nodes;                         // узлы дерева на данном уровне
 
     // менеджеры
@@ -78,8 +78,8 @@ public:
     void deleteGroup(const QModelIndex &index);
 
     QModelIndex addStock(const StockItem &item);
-    void editStock(const StockItem &item);
-    void deleteStock(const StockItem &item);
+    void editStock(const QModelIndex &index, const StockItem &item);
+    void deleteStock(const QModelIndex &index);
 
     StockItem getStockItemByIndex(const QModelIndex &index);
 

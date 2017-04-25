@@ -472,51 +472,64 @@ QModelIndex StockModel::addStock(const StockItem &item)
                                 [&grpcat](const StockNode &it) -> bool {
         return (it.stockItem.itemId == grpcat.second);
     });
-    qint32 catrow = std::distance(m_nodes.begin(), catIter);
-    qint32 catId = catIter->stockItem.itemId;
+//    qDebug() << "cat:" << catIter->stockItem.itemId << catIter->stockItem.itemName;
 
     auto grpIter = std::find_if(catIter->children.begin(), catIter->children.end(),
                                 [&grpcat](const StockNode &it) -> bool {
         return (it.stockItem.itemId == grpcat.first);
     });
     qint32 grprow = std::distance(catIter->children.begin(), grpIter);
-    qint32 grpId = grpIter->stockItem.itemId;
-//---
+//    qDebug() << "grp:" << grpIter->stockItem.itemId << grpIter->stockItem.itemName;
+
     auto targetIter = std::find_if(grpIter->children.begin(), grpIter->children.end(),
                                    [&grpIter](const StockNode &it) -> bool {
             return it.stockItem.itemName > grpIter->stockItem.itemName;});
-
     qint32 targetRow = std::distance(grpIter->children.begin(), targetIter);
 
-    qDebug() << "at row:" << targetRow;
-//    qint32 newId = m_dbman->insertGroup(grpName);
+    qint32 newId = m_dbman->insertStock(item);
 
-//    pnode->children.reserve(1);
-//    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
-//    pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
-//                                                        .setId  (newId)
-//                                                        .setName(grpName)
-//                                                        .build(), pnode)));
-//    endInsertRows();
+    StockNode *pnode = &catIter->children[grprow];
 
-    return QModelIndex();
-//    return index(row, 0, pindex);
+    QModelIndex pindex = createIndex(targetRow, RamificationColumn, pnode);
+
+    beginInsertRows(pindex, targetRow, targetRow + 1);
+    pnode->children.insert(targetRow, std::move(makeStockNode(StockItem::StockItemBuilder(item)
+                                                              .setId  (newId)
+                                                              .build(),
+                                                              pnode)));
+    endInsertRows();
+
+    return index (targetRow, RamificationColumn, pindex);
 }
 
-void StockModel::editStock(const StockItem &item)
+void StockModel::editStock(const QModelIndex &index, const StockItem &item)
 {
+    StockItem &editItem = static_cast<StockNode *>(index.internalPointer())->stockItem;
 
+    editItem = item;
+
+    m_dbman->updateStock(item);
+
+    emit dataChanged(index, index);
 }
 
-void StockModel::deleteStock(const StockItem &item)
+void StockModel::deleteStock(const QModelIndex &index)
 {
+    StockNode *delNode = static_cast<StockNode *>(index.internalPointer());
+    qint32 row = findRow(delNode);
 
+    m_dbman->deleteStock(StockItem::StockItemBuilder()
+                         .setId  (delNode->stockItem.itemId)
+                         .build());
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    delNode->siblings()->removeAt(row);
+    endRemoveRows();
 }
 
 StockItem StockModel::getStockItemByIndex(const QModelIndex &index)
 {
-    StockNode *tmpnode = static_cast<StockNode *>(index.internalPointer());
-    return (tmpnode->stockItem);
+    return (static_cast<StockNode *>(index.internalPointer())->stockItem);
 }
 
 void StockModel::debugInfo(const QModelIndex &index)

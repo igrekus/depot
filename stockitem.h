@@ -97,11 +97,25 @@ public:
         QString       stockName       = QString();
         Constants::TreeItemType  stockType       = Constants::ItemItem;
         Constants::TreeItemLevel stockLevel      = Constants::Level_2;
-        qint32        stockAmount     = Constants::DataInvalid;
+        qint32        stockAmount     = 0;
         QString       stockSerialn    = QString();
         qint32        stockProject    = 0;
         qint32        stockLocation   = 0;
         qint32        stockProductRef = 0;
+
+        StockItemBuilder() = default;
+
+        StockItemBuilder(const StockItem &copy):
+            stockId        (copy.itemId),
+            stockName      (copy.itemName),
+            stockType      (copy.itemType),
+            stockLevel     (copy.itemLevel),
+            stockAmount    (copy.itemAmount),
+            stockSerialn   (copy.itemSerialn),
+            stockProject   (copy.itemProject),
+            stockLocation  (copy.itemLocation),
+            stockProductRef(copy.itemProductRef)
+        {}
 
         StockItemBuilder& setId       (const qint32    id)        { this->stockId         = id;        return *this; }
         StockItemBuilder& setName     (const QString  &name)      { this->stockName       = name;      return *this; }

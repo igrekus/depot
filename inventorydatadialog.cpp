@@ -31,7 +31,7 @@ void InventoryDataDialog::filterGroupCombo(const qint32 catId)
     m_filteredGroupModel->initModel(tmpdict);
 }
 
-void InventoryDataDialog::initWidgetsWithData()
+void InventoryDataDialog::updateWidgets()
 {
     ui->editFullname->setText(m_data.itemFullname);
     ui->editMiscTag->setText("");
@@ -55,7 +55,7 @@ void InventoryDataDialog::initDialog()
     ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
     ui->comboGroup->setModel(m_filteredGroupModel);
 
-    initWidgetsWithData();
+    updateWidgets();
 
     m_oldData = m_data;
 }

@@ -360,6 +360,10 @@ void InventoryDialog::procActRegisterStock()
     m_dbman->insertStock(newStockItem);
 
     treeUpdated = true;
+
+    QMessageBox::information(this,
+                             "Информация",
+                             "Позиция успешно зарегистрирована на складе.");
 }
 
 void InventoryDialog::resizeEvent(QResizeEvent *event)

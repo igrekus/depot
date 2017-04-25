@@ -14,6 +14,7 @@ public:
     QDate   itemDate;
     qint32  itemDiff;
     QString itemNote;
+    qint32  itemStockRef;
     qint32  itemStaffRef;
     qint32  itemProjectRef;
     qint32  itemBillRef;
@@ -23,6 +24,7 @@ public:
         itemDate(),
         itemDiff(),
         itemNote(),
+        itemStockRef(),
         itemStaffRef(),
         itemProjectRef(),
         itemBillRef()
@@ -33,6 +35,7 @@ public:
                           const QDate   &date,
                           const qint32   diff,
                           const QString &note,
+                          const qint32   stock,
                           const qint32   staff,
                           const qint32   proj,
                           const qint32   bill):
@@ -40,6 +43,7 @@ public:
         itemDate      (date),
         itemDiff      (diff),
         itemNote      (note),
+        itemStockRef  (stock),
         itemStaffRef  (staff),
         itemProjectRef(proj),
         itemBillRef   (bill)
@@ -50,6 +54,7 @@ public:
         itemDate      (copy.itemDate),
         itemDiff      (copy.itemDiff),
         itemNote      (copy.itemNote),
+        itemStockRef  (copy.itemStockRef),
         itemStaffRef  (copy.itemStaffRef),
         itemProjectRef(copy.itemProjectRef),
         itemBillRef   (copy.itemBillRef)
@@ -62,6 +67,7 @@ public:
             itemDate       = right.itemDate;
             itemDiff       = right.itemDiff;
             itemNote       = right.itemNote;
+            itemStockRef   = right.itemStockRef;
             itemStaffRef   = right.itemStaffRef;
             itemProjectRef = right.itemProjectRef;
             itemBillRef    = right.itemBillRef;
@@ -75,6 +81,7 @@ public:
                 itemDate       == right.itemDate   &&
                 itemDiff       == right.itemDiff   &&
                 itemNote       == right.itemNote   &&
+                itemStockRef   == right.itemStockRef  &&
                 itemStaffRef   == right.itemStaffRef  &&
                 itemProjectRef == right.itemProjectRef&&
                 itemBillRef    == right.itemBillRef);
@@ -87,8 +94,9 @@ public:
                       << " date:"  << right.itemDate
                       << " diff:"  << right.itemDiff
                       << " note:"  << right.itemNote
+                      << " stock:" << right.itemStockRef
                       << " staff:" << right.itemStaffRef
-                      << " staff:" << right.itemProjectRef
+                      << " proj:"  << right.itemProjectRef
                       << " bill:"  << right.itemBillRef
                       << ")";
         return dbg.maybeSpace();
@@ -102,6 +110,7 @@ public:
         QDate   transDate    = QDate();
         qint32  transDiff    = 0;
         QString transNote    = QString();
+        qint32  transStockRef= 0;
         qint32  transStaffRef= 0;
         qint32  transProject = 0;
         qint32  transBillRef = 0;
@@ -111,14 +120,20 @@ public:
         TransactItemBuilder& setDate   (const QDate   &date)  { this->transDate    = date;  return *this; }
         TransactItemBuilder& setDiff   (const qint32   diff)  { this->transDiff    = diff;  return *this; }
         TransactItemBuilder& setNote   (const QString &note)  { this->transNote    = note;  return *this; }
+        TransactItemBuilder& setStock  (const qint32  &stock) { this->transStockRef= stock; return *this; }
         TransactItemBuilder& setStaff  (const qint32  &staff) { this->transStaffRef= staff; return *this; }
         TransactItemBuilder& setProject(const qint32  &proj ) { this->transProject = proj;  return *this; }
-        TransactItemBuilder& setBillRef(const qint32  &bill)  { this->transBillRef = bill;  return *this; }
+        TransactItemBuilder& setBill(const qint32  &bill)  { this->transBillRef = bill;  return *this; }
         TransactItem build() {
-            return TransactItem(this->transId,      this->transName,
-                                this->transDate,    this->transDiff,
-                                this->transNote,    this->transStaffRef,
-                                this->transProject, this->transBillRef);
+            return TransactItem(this->transId,
+                                this->transName,
+                                this->transDate,
+                                this->transDiff,
+                                this->transNote,
+                                this->transStockRef,
+                                this->transStaffRef,
+                                this->transProject,
+                                this->transBillRef);
         }
     };
 };
