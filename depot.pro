@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     abstracttreeitem.cpp \
     transactdatadialog.cpp \
     stockdatadialog.cpp \
-    idstringmodel.cpp
+    idstringmodel.cpp \
+    reportmanager.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -57,13 +58,15 @@ HEADERS  += mainwindow.h \
     constants.h \
     transactdatadialog.h \
     stockdatadialog.h \
-    idstringmodel.h
+    idstringmodel.h \
+    reportmanager.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \
     inventorydatadialog.ui \
     transactdatadialog.ui \
-    stockdatadialog.ui
+    stockdatadialog.ui \
+    reportmanager.ui
 
 RESOURCES += \
     resource.qrc

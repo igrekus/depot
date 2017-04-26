@@ -466,7 +466,7 @@ qint32 DataBaseManager::insertCategory(const QString &name)
 {
     // TODO: FIXME
     qDebug()<<"db: insert cat:" << name;
-    return 0;
+    return 100;
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)
@@ -485,7 +485,7 @@ qint32 DataBaseManager::insertGroup(const QString &name)
 {
     // TODO: FIXME
     qDebug()<<"db: insert group:" << name;
-    return 0;
+    return 100;
 }
 
 void DataBaseManager::updateGroup(const GroupItem &item)
@@ -503,7 +503,7 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 qint32 DataBaseManager::insertProduct(const ProductItem &item)
 {
     qDebug()<<"db: insert product:"<<item;
-    return 0;
+    return 100;
 }
 
 void DataBaseManager::updateProduct(const ProductItem &item)
@@ -519,7 +519,7 @@ void DataBaseManager::deleteProduct(const ProductItem &item)
 qint32 DataBaseManager::insertStock(const StockItem &item)
 {
     qDebug()<<"db insert stock:"<<item;
-    return 0;
+    return 100;
 }
 
 void DataBaseManager::updateStock(const StockItem &item)
@@ -530,6 +530,22 @@ void DataBaseManager::updateStock(const StockItem &item)
 void DataBaseManager::deleteStock(const StockItem &item)
 {
     qDebug()<<"db delete stock:"<<item;
+}
+
+qint32 DataBaseManager::insertTransact(const TransactItem &item)
+{
+    qDebug()<<"db insert transact:"<<item;
+    return 100;
+}
+
+void DataBaseManager::updateTransact(const TransactItem &item)
+{
+    qDebug()<<"db update transact:"<<item;
+}
+
+void DataBaseManager::deleteTransact(const TransactItem &item)
+{
+    qDebug()<<"db delete transact:"<<item;
 }
 
 void DataBaseManager::convertDB()

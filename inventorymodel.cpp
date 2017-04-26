@@ -46,10 +46,10 @@ struct InventoryModel::InventoryNode
     InventoryModel::InventoryNodeList siblings() const {return parent->children;}
 };
 
-InventoryModel::InventoryModel(DataBaseManager *dbman, QObject *parent)
+InventoryModel::InventoryModel(QObject *parent)
     : QAbstractItemModel(parent)
 {
-    m_dbman = dbman;
+
 }
 
 InventoryModel::~InventoryModel()
@@ -100,9 +100,9 @@ void InventoryModel::buildCategoryLevel()
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
 //    beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
-        if (it.itemId == 1) {
-            continue;
-        }
+//        if (it.itemId == 1) {
+//            continue;
+//        }
         m_nodes.append(std::move(makeCategoryNode(it)));
     }
 //    endInsertRows();
@@ -220,7 +220,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         case CategoryColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
 //                return tmpitem.itemId;
-                return QVariant(QString(""));
+                return QVariant();
             } else {
                 return tmpitem.itemName;
             }
@@ -229,6 +229,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         case CodeColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemId;
+//                return m_dictModel->m_productListModel->getName(tmpitem.itemId);
             } else {
                 return QVariant();
             }
@@ -354,7 +355,8 @@ QModelIndex InventoryModel::addCategory(const QString &catName)
 
     qint32 newId = m_dbman->insertCategory(catName);
 
-    beginInsertRows(QModelIndex(), row, row + 1);
+//    beginInsertRows(QModelIndex(), row, row + 1);
+    beginInsertRows(QModelIndex(), row, row);
     InventoryNode tmpnode = makeCategoryNode(CategoryItem::CategoryItemBuilder()
                                              .setId(newId)
                                              .setName(catName)
@@ -419,7 +421,8 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
 
     qint32 newId = m_dbman->insertGroup(grpName);
 
-    beginInsertRows(pindex, row, row + 1);
+//    beginInsertRows(pindex, row, row + 1);
+    beginInsertRows(pindex, row, row);
     pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
                                                         .setId  (newId)
                                                         .setName(grpName)
@@ -470,7 +473,8 @@ QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const Produc
 
     qint32 newId = m_dbman->insertProduct(item);
 
-    beginInsertRows(pindex, row, row + 1);
+//    beginInsertRows(pindex, row, row + 1);
+    beginInsertRows(pindex, row, row);
     pnode->children.insert(row, std::move(makeProductNode(ProductItem::ProductItemBuilder(item)
                                                           .setId(newId)
                                                           .build(), pnode)));

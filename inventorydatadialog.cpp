@@ -96,7 +96,7 @@ void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)
 {
     filterGroupCombo(ui->comboCategory->currentData(Constants::RoleNodeId).toInt());
     ui->comboGroup->setCurrentIndex(0);
-    emit ui->comboGroup->currentTextChanged("");
+//    emit ui->comboGroup->currentTextChanged("");
 }
 
 void InventoryDataDialog::on_comboGroup_currentTextChanged(const QString &arg1)
@@ -121,9 +121,23 @@ void InventoryDataDialog::on_btnOk_clicked()
     if (ui->editName->text().isEmpty()) {
         QMessageBox::warning(this,
                              "Ошибка!",
-                             "Поле наименования категории не должно быть пустым!");
+                             "Поле наименования номенклатуры не должно быть пустым.");
         return;
     }
+    if (ui->comboGroup->currentText().isEmpty() ||
+        ui->comboGroup->currentData(Constants::RoleNodeId).toInt() == 0) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите группу для добавления номенклатуры.");
+        return;
+    }
+    if (ui->comboCategory->currentData(Constants::RoleNodeId) == 0) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите существующую категорию.");
+        return;
+    }
+
     m_data = collectData();
 
     if (!(m_data == m_oldData)) {

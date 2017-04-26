@@ -199,6 +199,13 @@
            <enum>QLayout::SetMinimumSize</enum>
           </property>
           <item>
+           <widget class="QPushButton" name="btnReport">
+            <property name="text">
+             <string>Отчет &amp;R</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="pushButton_4">
             <property name="text">
              <string>Требование-накладная</string>
@@ -209,13 +216,6 @@
            <widget class="QPushButton" name="pushButton_6">
             <property name="text">
              <string>Заказ на сборку</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnReport">
-            <property name="text">
-             <string>Отчет</string>
             </property>
            </widget>
           </item>

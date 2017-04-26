@@ -32,6 +32,11 @@ enum DataValues {
     DataInvalid = -1
 };
 
+enum Color {
+     ColorReceipt = 0xBAFAAD,
+     ColorExpense = 0xFFD3C9
+};
+
 }
 
 #endif // CONSTANTS_H

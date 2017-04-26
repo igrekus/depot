@@ -9,8 +9,8 @@
 #include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QMessageBox>
-#include <QUuid>
 
+#include <reportmanager.h>
 #include <mapmodel.h>
 #include <linkeddict.h>
 #include <databasemanager.h>

@@ -47,9 +47,9 @@ public:
     StockItem getData();
 
 protected:
-    void changeEvent(QEvent *e);
-
     StockItem collectData();
+
+    void changeEvent(QEvent *e);
 
 private slots:
     void on_editSearchProduct_textChanged(const QString &arg1);

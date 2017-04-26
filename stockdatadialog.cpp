@@ -127,7 +127,7 @@ void StockDataDialog::on_btnOk_clicked()
                              "Выберите продукт для регистрации на складе.");
         return;
     }
-    if (ui->comboProject->currentText().isEmpty()) {
+    if (ui->comboProject->currentData(Constants::RoleNodeId).toInt() == 0) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите тему, на которую будет зарегистрирована данная позиция.");

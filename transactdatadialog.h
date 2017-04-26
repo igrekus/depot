@@ -2,9 +2,13 @@
 #define TRANSACTDATADIALOG_H
 
 #include <QDialog>
+#include <QCompleter>
+#include <QMessageBox>
+
 #include <transactitem.h>
 #include <constants.h>
 #include <dictmodel.h>
+
 
 namespace Ui {
 class TransactDataDialog;
@@ -21,6 +25,9 @@ public:
 
     DictModel *m_dictModel;
 
+    QCompleter *comProject;
+    QCompleter *comStaff;
+
     explicit TransactDataDialog(QWidget *parent = nullptr);
     ~TransactDataDialog();
 
@@ -30,8 +37,17 @@ public:
     void updateWidgets();
     void initDialog();
 
+    TransactItem getData();
+
 protected:
+    TransactItem collectData();
+
     void changeEvent(QEvent *e);
+
+private slots:
+    void on_spinDiff_valueChanged(int arg1);
+
+    void on_btnOk_clicked();
 
 private:
     Ui::TransactDataDialog *ui;

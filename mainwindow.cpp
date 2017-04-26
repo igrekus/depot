@@ -297,9 +297,7 @@ void MainWindow::procActTransactAdd()
     QModelIndex stockIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
     StockItem stock = m_stockModel->getStockItemByIndex(stockIndex);
 
-    qDebug()<<stock;
     TransactItem newTransItem = makeTransactItemFromStockItem(stock);
-    qDebug() << newTransItem;
 
     TransactDataDialog dialog(this);
     dialog.setData(newTransItem)
@@ -310,17 +308,17 @@ void MainWindow::procActTransactAdd()
         return;
     }
 
-//    newTransItem = dialog.getData();
+    QModelIndex index = m_transactModel->addTransact(dialog.getData());
 
-//    QModelIndex index = m_transactModel->addTransact(newTransItem);
+    ui->tableTransact->selectionModel()->clear();
+    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    // TODO: select new record
 }
 
 void MainWindow::procActTransactEdit()
 {
     QModelIndex index = ui->tableTransact->selectionModel()->selectedIndexes().first();
     TransactItem oldTransItem = m_transactModel->getTransactItemByIndex(index);
-
-    qDebug()<<oldTransItem;
 
     TransactDataDialog dialog(this);
     dialog.setData(oldTransItem)
@@ -330,11 +328,26 @@ void MainWindow::procActTransactEdit()
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
+
+    m_transactModel->editTransact(index, dialog.getData());
 }
 
 void MainWindow::procActTransactDelete()
 {
-    qDebug() << "del transact";
+    QItemSelectionModel *selection = ui->tableTransact->selectionModel();
+    QModelIndex index = selection->selectedIndexes().first();
+
+    qint32 res = QMessageBox::question(this,
+                                       "Внимание!",
+                                       "Вы действительно хотите удалить выбранную запись о приходе/расходе?",
+                                       QMessageBox::Yes,
+                                       QMessageBox::No | QMessageBox::Default);
+    if (res == QMessageBox::Yes) {
+        m_transactModel->deleteTransact(index);
+    }
+
+    ui->tableTransact->selectionModel()->clear();
+    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 // -------------------- Misc Events -----------------------------------
@@ -441,9 +454,13 @@ void MainWindow::on_btnReloadData_clicked()
 
 void MainWindow::on_btnReport_clicked()
 {
-    qDebug() << "rem test";
-//    testRemCat();
-//    testRemGrp();
+    ReportManager dialog;
+
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
 }
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)

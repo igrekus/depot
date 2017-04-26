@@ -9,11 +9,6 @@
 #include <databasemanager.h>
 #include <transactitem.h>
 
-#define ROLE_NODE_ID   (Qt::UserRole+3)
-
-#define COLOR_RECEIPT 0xBAFAAD
-#define COLOR_EXPENSE 0xFFD3C9
-
 class TransactModel : public QAbstractTableModel
 {
     Q_OBJECT
@@ -30,24 +25,9 @@ public:
         ColumnCount
     };
 
-    struct TransactNode {
-        TransactItem transactItem;
-
-        TransactNode():
-            transactItem()
-        {}
-
-        TransactNode(const TransactItem &transItem):
-            transactItem(transItem)
-        {}
-
-        bool operator==(const TransactNode &a) const {
-            return this->transactItem == a.transactItem;
-        }
-    };
     // данные
-    using TransactNodeList = QList<TransactNode>;
-    TransactNodeList m_nodeList;
+    using TransactItemList = QList<TransactItem>;
+    TransactItemList m_data;
 
     // менеджеры
     DataBaseManager *m_dbman;
@@ -68,6 +48,10 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
     TransactItem getTransactItemByIndex(const QModelIndex &index);
+
+    QModelIndex addTransact(const TransactItem &item);
+    void editTransact(const QModelIndex &index, const TransactItem &item);
+    void deleteTransact(const QModelIndex &index);
 
 private:
 };

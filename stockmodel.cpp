@@ -88,9 +88,9 @@ void StockModel::buildCategoryLevel()
     CategoryItem::CategoryList list = m_dbman->getCategoryList();
     beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
-        if (it.itemId == 1) {
-            continue;
-        }
+//        if (it.itemId == 1) {
+//            continue;
+//        }
         m_nodes.append(std::move(makeCategoryNode(it)));
     }
     endInsertRows();
@@ -376,7 +376,8 @@ QModelIndex StockModel::addCategory(const QString &catName)
 
     qint32 newId = m_dbman->insertCategory(catName);
 
-    beginInsertRows(QModelIndex(), row, row + 1);
+//    beginInsertRows(QModelIndex(), row, row + 1);
+    beginInsertRows(QModelIndex(), row, row);
     m_nodes.insert(row, std::move(makeCategoryNode(CategoryItem::CategoryItemBuilder()
                                                    .setId(newId)
                                                    .setName(catName)
@@ -425,7 +426,8 @@ QModelIndex StockModel::addGroup(const QModelIndex &pindex, const QString &grpNa
     qint32 newId = m_dbman->insertGroup(grpName);
 
     pnode->children.reserve(1);
-    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+//    beginInsertRows(pindex, pnode->children.size(), pnode->children.size() + 1);
+    beginInsertRows(pindex, pnode->children.size(), pnode->children.size());
     pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
                                                         .setId  (newId)
                                                         .setName(grpName)
@@ -492,7 +494,8 @@ QModelIndex StockModel::addStock(const StockItem &item)
 
     QModelIndex pindex = createIndex(targetRow, RamificationColumn, pnode);
 
-    beginInsertRows(pindex, targetRow, targetRow + 1);
+//    beginInsertRows(pindex, targetRow, targetRow + 1);
+    beginInsertRows(pindex, targetRow, targetRow);
     pnode->children.insert(targetRow, std::move(makeStockNode(StockItem::StockItemBuilder(item)
                                                               .setId  (newId)
                                                               .build(),

@@ -69,6 +69,10 @@ public:
     void updateStock(const StockItem &item);
     void deleteStock(const StockItem &item);
 
+    qint32 insertTransact(const TransactItem &item);
+    void updateTransact(const TransactItem &item);
+    void deleteTransact(const TransactItem &item);
+
     // utility
     void convertDB();
 

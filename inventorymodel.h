@@ -9,6 +9,7 @@
 #include <productitem.h>
 #include <databasemanager.h>
 #include <inventoryitem.h>
+#include <dictmodel.h>
 
 class InventoryModel : public QAbstractItemModel
 {
@@ -35,8 +36,13 @@ public:
 
     DataBaseManager *m_dbman;
 
-    explicit InventoryModel(DataBaseManager *dbman, QObject *parent = nullptr);
+    DictModel *m_dictModel;
+
+    explicit InventoryModel(QObject *parent = nullptr);
     ~InventoryModel();
+
+    InventoryModel &setDatabaseManager(DataBaseManager *dbman) {m_dbman    = dbman; return *this;}
+    InventoryModel &setDictModel      (DictModel       *dict) {m_dictModel = dict;  return *this;}
 
     // фабрики узлов дерева
     InventoryNode makeCategoryNode(const CategoryItem &item);

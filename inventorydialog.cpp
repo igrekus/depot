@@ -54,7 +54,9 @@ void InventoryDialog::createActions()
 }
 void InventoryDialog::initDialog()
 {
-    m_inventoryModel = new InventoryModel(m_dbman, this);
+    m_inventoryModel = new InventoryModel(this);
+    m_inventoryModel->setDatabaseManager(m_dbman);
+    m_inventoryModel->setDictModel(m_dictModel);
     m_inventoryModel->initModel();
 
     ui->treeInventory->setModel(m_inventoryModel);
