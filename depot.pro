@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     transactdatadialog.cpp \
     stockdatadialog.cpp \
     idstringmodel.cpp \
-    reportmanager.cpp
+    reportmanager.cpp \
+    reportrequest.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -59,7 +60,8 @@ HEADERS  += mainwindow.h \
     transactdatadialog.h \
     stockdatadialog.h \
     idstringmodel.h \
-    reportmanager.h
+    reportmanager.h \
+    reportrequest.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

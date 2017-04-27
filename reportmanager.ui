@@ -130,23 +130,10 @@
              </spacer>
             </item>
            </layout>
-           <zorder>dateFrom</zorder>
-           <zorder>lblUntil</zorder>
-           <zorder>dateFrom</zorder>
-           <zorder>lblFrom</zorder>
-           <zorder>dateUntil</zorder>
-           <zorder>lblProject</zorder>
-           <zorder>comboProject</zorder>
-           <zorder>lblGroup</zorder>
-           <zorder>comboGroup</zorder>
-           <zorder>comboCategory</zorder>
-           <zorder>lblCategory</zorder>
            <zorder>verticalSpacer</zorder>
           </widget>
          </item>
         </layout>
-        <zorder>groupBox</zorder>
-        <zorder></zorder>
        </widget>
        <widget class="QWidget" name="tabTransact">
         <attribute name="title">
@@ -232,12 +219,18 @@
                 <property name="text">
                  <string>Приход</string>
                 </property>
+                <property name="checked">
+                 <bool>true</bool>
+                </property>
                </widget>
               </item>
               <item>
                <widget class="QCheckBox" name="checkExpense">
                 <property name="text">
                  <string>Расход</string>
+                </property>
+                <property name="checked">
+                 <bool>true</bool>
                 </property>
                </widget>
               </item>
@@ -314,23 +307,37 @@
        </property>
       </spacer>
      </item>
+     <item>
+      <widget class="QPushButton" name="btnClose">
+       <property name="text">
+        <string>Закрыть</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
    <item>
     <widget class="QTableView" name="tableView"/>
    </item>
   </layout>
-  <zorder>tabReport</zorder>
-  <zorder>horizontalSpacer</zorder>
-  <zorder>tableView</zorder>
-  <zorder>btnShow</zorder>
-  <zorder>btnExport</zorder>
-  <zorder>btnPrint</zorder>
-  <zorder>horizontalSpacer_2</zorder>
-  <zorder>checkReceipt</zorder>
-  <zorder>checkExpense</zorder>
-  <zorder>btnPrint</zorder>
  </widget>
  <resources/>
- <connections/>
+ <connections>
+  <connection>
+   <sender>btnClose</sender>
+   <signal>clicked()</signal>
+   <receiver>ReportManager</receiver>
+   <slot>reject()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>680</x>
+     <y>285</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>365</x>
+     <y>242</y>
+    </hint>
+   </hints>
+  </connection>
+ </connections>
 </ui>

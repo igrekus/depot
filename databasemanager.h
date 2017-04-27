@@ -17,6 +17,7 @@
 #include <transactitem.h>
 #include <linkeddict.h>
 #include <constants.h>
+#include <reportrequest.h>
 
 class DataBaseManager : public QObject
 {
@@ -51,6 +52,10 @@ public:
 
     // связи между словарями
     IdMap getMapGroupToCategory();
+
+    // стата по запросу
+    QSqlQuery getStockStats(const ReportRequest &req);
+    QSqlQuery getTransactStats(const ReportRequest &req);
 
     // запись данных в БД
     qint32 insertCategory(const QString &name);

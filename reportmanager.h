@@ -4,10 +4,13 @@
 #include <QDialog>
 #include <QDebug>
 #include <QDate>
+#include <QSqlQueryModel>
+#include <QSortFilterProxyModel>
 
 #include <databasemanager.h>
 #include <dictmodel.h>
 #include <mapmodel.h>
+#include <reportrequest.h>
 
 namespace Ui {
 class ReportManager;
@@ -18,13 +21,15 @@ class ReportManager : public QDialog
     Q_OBJECT
 
 public:
-
     DataBaseManager *m_dbman;
 
     DictModel *m_dictModel;
 
     MapModel *m_filteredGroupModel_1;
     MapModel *m_filteredGroupModel_2;
+
+    QSqlQueryModel *reportModel;
+    QSortFilterProxyModel *proxyModel;
 
     explicit ReportManager(QWidget *parent = 0);
     ~ReportManager();
@@ -37,7 +42,15 @@ public:
 
     void initDialog();
 
+    ReportRequest collectStockRequestData();
+    ReportRequest collectTransactRequestData();
+
+    void resizeStockTable();
+    void resizeTransactTable();
+
 protected:
+    void resizeEvent(QResizeEvent *event) override;
+
     void changeEvent(QEvent *e);
 
 private slots:

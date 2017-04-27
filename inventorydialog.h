@@ -87,9 +87,9 @@ public slots:
     void procActRegisterStock();
 
     // events
+protected:
     void resizeEvent(QResizeEvent *event) override;
 
-protected:
     void changeEvent(QEvent *e);
 
 private slots:

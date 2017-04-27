@@ -462,6 +462,55 @@ IdMap DataBaseManager::getMapGroupToCategory()
     return tmpmap;
 }
 
+QSqlQuery DataBaseManager::getStockStats(const ReportRequest &req)
+{
+    // TODO: fix this shit
+    if (req.projectId == 0) {
+        if (req.categoryId == 0) {
+            if (req.groupId == 0) {
+                return execSimpleQuery("CALL getStockStatFull()");
+            } else {
+                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+")");
+            }
+        } else {
+            if (req.groupId == 0) {
+                return execSimpleQuery("CALL getStockStatByCategory("+QString::number(req.categoryId)+")");
+            } else {
+                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+")");
+            }
+        }
+    } else {
+        if (req.categoryId == 0) {
+            if (req.groupId == 0) {
+                return execSimpleQuery("CALL getStockStatByProject("+QString::number(req.projectId)+")");
+            } else {
+                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
+                                       QString::number(req.groupId)+", "+
+                                       QString::number(req.projectId)+")");
+            }
+        } else {
+            if (req.groupId == 0) {
+                return execSimpleQuery("CALL getStockStatByCategoryAndProject("+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.projectId)+")");
+            } else {
+                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
+                                       QString::number(req.groupId)+", "+
+                                       QString::number(req.projectId)+")");
+            }
+        }
+    }
+    return QSqlQuery();
+}
+
+QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
+{
+    return execSimpleQuery("CALL getTransactStatFull('"+
+                           req.fromDate.toString(Qt::ISODate)+"', '"+
+                           req.untilDate.toString(Qt::ISODate)+"', "+
+                           QString::number(req.flag)+")");
+}
+
 qint32 DataBaseManager::insertCategory(const QString &name)
 {
     // TODO: FIXME

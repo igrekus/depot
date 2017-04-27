@@ -2,7 +2,7 @@
 #include "ui_reportmanager.h"
 
 ReportManager::ReportManager(QWidget *parent) :
-    QDialog(parent),
+    QDialog(parent, Qt::WindowFlags() | Qt::Window),
     ui(new Ui::ReportManager)
 {
     ui->setupUi(this);
@@ -63,6 +63,19 @@ void ReportManager::initDialog()
 {
     m_filteredGroupModel_1 = new MapModel(this);
     m_filteredGroupModel_2 = new MapModel(this);
+    reportModel = new QSqlQueryModel(this);
+    proxyModel = new QSortFilterProxyModel(this);
+
+    proxyModel->setSourceModel(reportModel);
+
+    ui->tableView->setModel(proxyModel);
+    ui->tableView->verticalHeader()->hide();
+    ui->tableView->verticalHeader()->setDefaultSectionSize(14);
+    ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
+    ui->tableView->setSelectionBehavior(QAbstractItemView::SelectRows);
+    ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableView->horizontalHeader()->setHighlightSections(false);
+    ui->tableView->horizontalHeader()->setFixedHeight(20);
 
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
     ui->comboProject->setCurrentIndex(0);
@@ -85,8 +98,78 @@ void ReportManager::initDialog()
     ui->comboGroup_2->setModel(m_filteredGroupModel_2);
     ui->comboGroup_2->setCurrentIndex(0);
 
-    ui->dateFrom_2->setDate(QDate::currentDate());
+//    ui->dateFrom_2->setDate(QDate::currentDate().addDays(-1));
+//    ui->dateUntil_2->setDate(QDate::currentDate());
+    ui->dateFrom_2->setDate(QDate::currentDate().addDays(-1000));
     ui->dateUntil_2->setDate(QDate::currentDate());
+}
+
+ReportRequest ReportManager::collectStockRequestData()
+{
+    return ReportRequest::ReportRequestBuilder()
+           .setProject  (ui->comboProject->currentData(Constants::RoleNodeId).toInt())
+           .setCategory (ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
+           .setGroup    (ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
+           .setFromDate (ui->dateFrom->date())
+           .setUntilDate(ui->dateUntil->date())
+           .build();
+}
+
+ReportRequest ReportManager::collectTransactRequestData()
+{
+    qint32 flag = 0;
+    if (!ui->checkExpense->isChecked() && ui->checkReceipt->isChecked()) {
+        flag = 1;
+    }
+    if (ui->checkExpense->isChecked() && !ui->checkReceipt->isChecked()) {
+        flag = 2;
+    }
+    return ReportRequest::ReportRequestBuilder()
+           .setProject  (ui->comboProject_2->currentData(Constants::RoleNodeId).toInt())
+           .setCategory (ui->comboCategory_2->currentData(Constants::RoleNodeId).toInt())
+           .setGroup    (ui->comboGroup_2->currentData(Constants::RoleNodeId).toInt())
+           .setFromDate (ui->dateFrom_2->date())
+           .setUntilDate(ui->dateUntil_2->date())
+           .setFlag     (flag)
+           .build();
+}
+
+void ReportManager::resizeStockTable()
+{
+    qint32 trwidth = ui->tableView->frameGeometry().width()-18;
+    ui->tableView->hide();
+    ui->tableView->setColumnWidth(1, trwidth*0.05);
+    ui->tableView->setColumnWidth(2, trwidth*0.15);
+    ui->tableView->setColumnWidth(3, trwidth*0.15);
+    ui->tableView->setColumnWidth(4, trwidth*0.38);
+    ui->tableView->setColumnWidth(5, trwidth*0.05);
+    ui->tableView->setColumnWidth(6, trwidth*0.05);
+    ui->tableView->setColumnWidth(7, trwidth*0.12);
+    ui->tableView->setColumnWidth(8, trwidth*0.05);
+    ui->tableView->show();
+}
+
+void ReportManager::resizeTransactTable()
+{
+//    qint32 trwidth = ui->tableView->frameGeometry().width()-30;
+//    ui->tableView->hide();
+//    ui->tableView->setColumnWidth(0, trwidth*0.20);
+//    ui->tableView->setColumnWidth(1, trwidth*0.05);
+//    ui->tableView->setColumnWidth(2, trwidth*0.35);
+//    ui->tableView->setColumnWidth(3, trwidth*0.05);
+//    ui->tableView->setColumnWidth(4, trwidth*0.05);
+//    ui->tableView->setColumnWidth(5, trwidth*0.30);
+//    ui->tableView->show();
+}
+
+void ReportManager::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    if (ui->tabReport->currentIndex() == 0) {
+        resizeStockTable();
+    } else {
+        resizeTransactTable();
+    }
 }
 
 void ReportManager::changeEvent(QEvent *e)
@@ -136,14 +219,27 @@ void ReportManager::on_btnShow_clicked()
 {
     switch (ui->tabReport->currentIndex()) {
     case 0: {
-        qDebug() << "stock stat request";
+        reportModel->setQuery(m_dbman->getStockStats(collectStockRequestData()));
+        reportModel->setHeaderData(0, Qt::Horizontal, "Склад");
+        reportModel->setHeaderData(1, Qt::Horizontal, "Код");
+        reportModel->setHeaderData(2, Qt::Horizontal, "Категория");
+        reportModel->setHeaderData(3, Qt::Horizontal, "Группа");
+        reportModel->setHeaderData(4, Qt::Horizontal, "Наименование");
+        reportModel->setHeaderData(5, Qt::Horizontal, "Сер.№");
+        reportModel->setHeaderData(6, Qt::Horizontal, "Остаток");
+        reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
+        reportModel->setHeaderData(8, Qt::Horizontal, "Место хран.");
+        ui->tableView->hideColumn(0);
+        resizeStockTable();
         break;
     }
     case 1: {
-        qDebug() << "transact stat requst";
+        reportModel->setQuery(m_dbman->getTransactStats(collectTransactRequestData()));
+        ui->tableView->hideColumn(0);
         break;
     }
     default:
         break;
     }
+
 }
