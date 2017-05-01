@@ -4,6 +4,8 @@
 #
 #-------------------------------------------------
 
+include(c:/devtools/!lib/qtxlsx/src/xlsx/qtxlsx.pri)
+
 QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets

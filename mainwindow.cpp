@@ -3,8 +3,8 @@
 
 /*
  TODO:
-      - ф-ция копирования номенклатуры
-      - ф-ция регистрации созданной номенклатуры на складе в окне редактора номенклатуры
+    - вынести обработку условий запроса из клиента в хранимую процедуру
+
       - обработчик ошибок через throw, сделать в одном месте -- где?;
 
 Если в классе только слоты и нет сигналов, и используется new signal/slots syntax (connect в компайл-тайм к указателю на метод / лямбде вместо макросов SIGNAL/SLOT), то класс не должен иметь макрос Q_OBJECT и для него не будет сгенерирован *_moc.cpp.
@@ -474,6 +474,7 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 
 void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 {
+    Q_UNUSED(index)
     actTransactEdit->trigger();
 }
 

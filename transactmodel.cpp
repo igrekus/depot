@@ -105,9 +105,9 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case ColumnDiff: {
             if (m_data.at(index.row()).itemDiff > 0) {
-                return QVariant(QBrush(QColor(QRgb(Constants::ColorReceipt))));
+                return QVariant(QBrush(QColor(QRgb(Constants::ColorReceiptBackground))));
             } else {
-                return QVariant(QBrush(QColor(QRgb(Constants::ColorExpense))));
+                return QVariant(QBrush(QColor(QRgb(Constants::ColorExpenseBackground))));
             }
             break;
         }

@@ -94,6 +94,7 @@ ProductItem InventoryDataDialog::collectData()
 
 void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)
 {
+    Q_UNUSED(index)
     filterGroupCombo(ui->comboCategory->currentData(Constants::RoleNodeId).toInt());
     ui->comboGroup->setCurrentIndex(0);
 //    emit ui->comboGroup->currentTextChanged("");
@@ -101,6 +102,7 @@ void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)
 
 void InventoryDataDialog::on_comboGroup_currentTextChanged(const QString &arg1)
 {
+    Q_UNUSED(arg1)
     if (ui->comboGroup->count() == 0) {
         ui->comboGroup->setDisabled(true);
         ui->editFullname->setDisabled(true);

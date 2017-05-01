@@ -432,7 +432,7 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
     return index(row, 0, pindex);
 }
 
-QModelIndex InventoryModel::editGroup(const QModelIndex &index, const QString &newName)
+void InventoryModel::editGroup(const QModelIndex &index, const QString &newName)
 {
     // TODO: сортировака при добавлении группы
     InventoryItem &editItem = static_cast<InventoryNode *>(index.internalPointer())->inventoryItem;
@@ -483,7 +483,7 @@ QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const Produc
     return index(row, 0, pindex);
 }
 
-QModelIndex InventoryModel::editInventory(const QModelIndex &index, const ProductItem &item)
+void InventoryModel::editInventory(const QModelIndex &index, const ProductItem &item)
 {
     // TODO: сортировака при добавлении продукта
     InventoryNode *editNode = static_cast<InventoryNode *>(index.internalPointer());

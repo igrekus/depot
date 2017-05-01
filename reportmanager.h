@@ -6,11 +6,14 @@
 #include <QDate>
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
+#include <QMessageBox>
 
 #include <databasemanager.h>
 #include <dictmodel.h>
 #include <mapmodel.h>
 #include <reportrequest.h>
+
+#include "xlsxdocument.h"
 
 namespace Ui {
 class ReportManager;
@@ -28,8 +31,11 @@ public:
     MapModel *m_filteredGroupModel_1;
     MapModel *m_filteredGroupModel_2;
 
-    QSqlQueryModel *reportModel;
-    QSortFilterProxyModel *proxyModel;
+    QSqlQueryModel *m_reportModel;
+    QSortFilterProxyModel *m_proxyModel;
+
+    QString m_reportDir;
+    QString m_exportFileName;
 
     explicit ReportManager(QWidget *parent = 0);
     ~ReportManager();
@@ -47,6 +53,10 @@ public:
 
     void resizeStockTable();
     void resizeTransactTable();
+    QString makeFileName();
+
+    void saveStockReport();
+    void saveTransactReport();
 
 protected:
     void resizeEvent(QResizeEvent *event) override;
@@ -63,6 +73,8 @@ private slots:
     void on_comboGroup_2_currentTextChanged(const QString &arg1);
 
     void on_btnShow_clicked();
+
+    void on_btnExport_clicked();
 
 private:
     Ui::ReportManager *ui;

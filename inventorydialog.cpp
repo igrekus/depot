@@ -250,7 +250,8 @@ void InventoryDialog::procActInventoryAdd()
             return cur;
         case Constants::ItemItem:
             return cur.parent();
-    }
+        }
+        return QModelIndex();
     }();
 // TODO: fix ind.parent chain;
     ProductItem dummyProduct = ProductItem::ProductItemBuilder()
@@ -340,6 +341,7 @@ void InventoryDialog::procActRegisterStock()
             return cur.parent();     // TODO: fix cur.parent chain
             break;
         }
+        return QModelIndex();
     }();
 
     StockItem newStockItem = StockItem::StockItemBuilder()
@@ -353,7 +355,7 @@ void InventoryDialog::procActRegisterStock()
           .setDbManager(m_dbman)
           .initDialog();
 
-    if (!dialog.exec() == QDialog::Accepted) {
+    if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 

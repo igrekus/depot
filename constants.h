@@ -33,8 +33,10 @@ enum DataValues {
 };
 
 enum Color {
-     ColorReceipt = 0xBAFAAD,
-     ColorExpense = 0xFFD3C9
+    ColorReceipt = 0xff006100,
+    ColorExpense = 0xff9c0006,
+    ColorReceiptBackground = 0xffBAFAAD,
+    ColorExpenseBackground = 0xffFFD3C9
 };
 
 }
