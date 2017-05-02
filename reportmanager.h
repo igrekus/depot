@@ -14,6 +14,10 @@
 #include <reportrequest.h>
 
 #include "xlsxdocument.h"
+#include "xlsxworkbook.h"
+#include "xlsxcellrange.h"
+#include "xlsxformat.h"
+#include "xlsxabstractsheet.h"
 
 namespace Ui {
 class ReportManager;
@@ -24,6 +28,12 @@ class ReportManager : public QDialog
     Q_OBJECT
 
 public:
+
+    enum ReportType {
+        ReportStock = 0,
+        ReportTransact
+    };
+
     DataBaseManager *m_dbman;
 
     DictModel *m_dictModel;
@@ -36,6 +46,7 @@ public:
 
     QString m_reportDir;
     QString m_exportFileName;
+    ReportType m_reportType = ReportStock;
 
     explicit ReportManager(QWidget *parent = 0);
     ~ReportManager();
