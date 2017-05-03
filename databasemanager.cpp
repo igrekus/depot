@@ -468,35 +468,83 @@ QSqlQuery DataBaseManager::getStockStats(const ReportRequest &req)
     if (req.projectId == 0) {
         if (req.categoryId == 0) {
             if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStatFull()");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatFull('"+
+//                                       req.searchString+"')");
             } else {
-                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+", '"+
+//                                       req.searchString+"')");
             }
         } else {
             if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStatByCategory("+QString::number(req.categoryId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByCategory("+QString::number(req.categoryId)+", '"+
+//                                       req.searchString+"')");
             } else {
-                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+", '"+
+//                                       req.searchString+"')");
             }
         }
     } else {
         if (req.categoryId == 0) {
             if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStatByProject("+QString::number(req.projectId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByProject("+QString::number(req.projectId)+", '"+
+//                                       req.searchString+"')");
             } else {
-                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
-                                       QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
+//                                       QString::number(req.groupId)+", "+
+//                                       QString::number(req.projectId)+", '"+
+//                                       req.searchString+"')");
             }
         } else {
             if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStatByCategoryAndProject("+
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
                                        QString::number(req.categoryId)+", "+
-                                       QString::number(req.projectId)+")");
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByCategoryAndProject("+
+//                                       QString::number(req.categoryId)+", "+
+//                                       QString::number(req.projectId)+", '"+
+//                                       req.searchString+"')");
             } else {
-                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
-                                       QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+")");
+                return execSimpleQuery("CALL getStockStat("+
+                                       QString::number(req.projectId) +", "+
+                                       QString::number(req.categoryId)+", "+
+                                       QString::number(req.groupId)   +", '"+
+                                       req.searchString+"')");
+//                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
+//                                       QString::number(req.groupId)+", "+
+//                                       QString::number(req.projectId)+", '"+
+//                                       req.searchString+"')");
             }
         }
     }
@@ -512,13 +560,15 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                 return execSimpleQuery("CALL getTransactStatFull('"+
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+")");
+                                       QString::number(req.flag)+", '"+
+                                       req.searchString+"')");
             } else {
                 return execSimpleQuery("CALL getTransactStatByGroup('"+
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+")");
+                                       QString::number(req.groupId)+", '"+
+                                       req.searchString+"')");
             }
         } else {
             if (req.groupId == 0) {
@@ -526,13 +576,15 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
-                                       QString::number(req.categoryId)+")");
+                                       QString::number(req.categoryId)+", '"+
+                                       req.searchString+"')");
             } else {
                 return execSimpleQuery("CALL getTransactStatByGroup('"+
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+")");
+                                       QString::number(req.groupId)+", '"+
+                                       req.searchString+"')");
             }
         }
     } else {
@@ -542,14 +594,16 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
-                                       QString::number(req.projectId)+")");
+                                       QString::number(req.projectId)+", '"+
+                                       req.searchString+"')");
             } else {
                 return execSimpleQuery("CALL getTransactStatByGroupAndProject('"+
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
                                        QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+")");
+                                       QString::number(req.projectId)+", '"+
+                                       req.searchString+"')");
             }
         } else {
             if (req.groupId == 0) {
@@ -558,14 +612,16 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
                                        QString::number(req.categoryId)+", "+
-                                       QString::number(req.projectId)+")");
+                                       QString::number(req.projectId)+", '"+
+                                       req.searchString+"')");
             } else {
                 return execSimpleQuery("CALL getTransactStatByGroupAndProject('"+
                                        req.fromDate.toString(Qt::ISODate)+"', '"+
                                        req.untilDate.toString(Qt::ISODate)+"', "+
                                        QString::number(req.flag)+", "+
                                        QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+")");
+                                       QString::number(req.projectId)+", '"+
+                                       req.searchString+"')");
             }
         }
     }

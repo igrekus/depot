@@ -18,6 +18,7 @@
 #include "xlsxcellrange.h"
 #include "xlsxformat.h"
 #include "xlsxabstractsheet.h"
+#include "xlsxconditionalformatting.h"
 
 namespace Ui {
 class ReportManager;
