@@ -195,54 +195,105 @@ QString ReportManager::makeFileName()
     }
 }
 
+void ReportManager::xlsxWriteHeader(QXlsx::Document &doc,
+                                    const QXlsx::CellReference &topleft,
+                                    const QVector<qint32> columnWidths,
+                                    const QStringList &hdrData)
+{
+    qint32 hdrCaptionBg = 0xffDDDDDD;
+    qint32 hdrDateBg = 0xffFFE88E;
+
+    {qint32 i=0;
+    for (const auto &it : columnWidths) {
+        doc.setColumnWidth(topleft.column()+i,  it);
+        ++i;
+    }}
+
+    {QXlsx::Format fmt;
+    fmt.setBorderColor(QColor(Qt::black));
+    fmt.setBorderStyle(QXlsx::Format::BorderThin);
+    fmt.setPatternBackgroundColor(QColor(QRgb(hdrCaptionBg)));
+    doc.write(topleft, hdrData.at(0), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row(), topleft.column(), topleft.row(), topleft.column()+2), fmt);}
+
+    {QXlsx::Format fmt;
+    fmt.setLeftBorderColor(QColor(Qt::black));
+    fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
+    fmt.setRightBorderColor(QColor(Qt::black));
+    fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
+    doc.write(topleft.row()+1, topleft.column(), hdrData.at(1), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+1, topleft.column(), topleft.row()+1, topleft.column()+2), fmt);
+    doc.write(topleft.row()+2, topleft.column(), hdrData.at(2), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+2, topleft.column(), topleft.row()+2, topleft.column()+2), fmt);
+    doc.write(topleft.row()+3, topleft.column(), hdrData.at(3), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+3, topleft.column(), topleft.row()+3, topleft.column()+2), fmt);
+    doc.write(topleft.row()+4, topleft.column(), hdrData.at(4), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+4, topleft.column(), topleft.row()+4, topleft.column()+2), fmt);}
+
+    {QXlsx::Format fmt;
+    fmt.setBorderColor(QColor(Qt::black));
+    fmt.setBorderStyle(QXlsx::Format::BorderThin);
+    fmt.setPatternBackgroundColor(QColor(QRgb(hdrDateBg)));
+    doc.write(topleft.row()+5, topleft.column(), hdrData.at(5));
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+5, topleft.column(), topleft.row()+5, topleft.column()+2), fmt);}
+}
+
 void ReportManager::saveStockReport()
 {
 //    QString fname = m_reportDir+m_exportFileName;
     QString fname = "d:/"+m_exportFileName;
 
     QXlsx::Document xlsx;
-
     QXlsx::CellReference hdrTopLeft("A1");
+    QVector<qint32> widths = {5, 25, 30, 45, 15, 8, 15, 10};
+    QStringList hdrData = {"Отчёт об остатках на складе на "+QDate::currentDate().toString(Qt::ISODate),
+                           "Тема: "+ui->comboProject->currentText(),
+                           "Категория: "+ui->comboCategory->currentText(),
+                           "Группа: "+ui->comboGroup->currentText(),
+                           "Ключевое слово в наименовании: "+ui->editSearch_1->text(),
+                           "Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate)};
 
-    xlsx.setColumnWidth(hdrTopLeft.column()+0,  5);
-    xlsx.setColumnWidth(hdrTopLeft.column()+1, 25);
-    xlsx.setColumnWidth(hdrTopLeft.column()+2, 30);
-    xlsx.setColumnWidth(hdrTopLeft.column()+3, 45);
-    xlsx.setColumnWidth(hdrTopLeft.column()+4, 15);
-    xlsx.setColumnWidth(hdrTopLeft.column()+5,  8);
-    xlsx.setColumnWidth(hdrTopLeft.column()+6, 15);
-    xlsx.setColumnWidth(hdrTopLeft.column()+7, 10);
+    xlsxWriteHeader(xlsx, hdrTopLeft, widths, hdrData);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+0,  5);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+1, 25);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+2, 30);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+3, 45);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+4, 15);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+5,  8);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+6, 15);
+//    xlsx.setColumnWidth(hdrTopLeft.column()+7, 10);
+
+//    QXlsx::Format fmt;
+//    fmt.setBorderColor(QColor(Qt::black));
+//    fmt.setBorderStyle(QXlsx::Format::BorderThin);
+//    fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
+//    xlsx.write(hdrTopLeft, "Отчёт об остатках на складе на "+QDate::currentDate().toString(Qt::ISODate), fmt);
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row(), hdrTopLeft.column(), hdrTopLeft.row(), hdrTopLeft.column()+2), fmt);
+//    fmt = QXlsx::Format();
+
+//    fmt.setLeftBorderColor(QColor(Qt::black));
+//    fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
+//    fmt.setRightBorderColor(QColor(Qt::black));
+//    fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
+//    xlsx.write(hdrTopLeft.row()+1, hdrTopLeft.column(), "Тема: "+ui->comboProject->currentText(), fmt);
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+1, hdrTopLeft.column(), hdrTopLeft.row()+1, hdrTopLeft.column()+2), fmt);
+//    xlsx.write(hdrTopLeft.row()+2, hdrTopLeft.column(), "Категория: "+ui->comboCategory->currentText(), fmt);
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+2, hdrTopLeft.column(), hdrTopLeft.row()+2, hdrTopLeft.column()+2), fmt);
+//    xlsx.write(hdrTopLeft.row()+3, hdrTopLeft.column(), "Группа: "+ui->comboGroup->currentText(), fmt);
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+3, hdrTopLeft.column(), hdrTopLeft.row()+3, hdrTopLeft.column()+2), fmt);
+//    xlsx.write(hdrTopLeft.row()+4, hdrTopLeft.column(), "Ключевое слово в наименовании: "+ui->editSearch_1->text(), fmt);
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+4, hdrTopLeft.column(), hdrTopLeft.row()+4, hdrTopLeft.column()+2), fmt);
+
+//    fmt = QXlsx::Format();
+
+//    fmt.setBorderColor(QColor(Qt::black));
+//    fmt.setBorderStyle(QXlsx::Format::BorderThin);
+//    fmt.setPatternBackgroundColor(QColor(QRgb(0xffFFE88E)));
+//    xlsx.write(hdrTopLeft.row()+5, hdrTopLeft.column(), "Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate));
+//    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+5, hdrTopLeft.column(), hdrTopLeft.row()+5, hdrTopLeft.column()+2), fmt);
+//    fmt = QXlsx::Format();
 
     QXlsx::Format fmt;
-    fmt.setBorderColor(QColor(Qt::black));
-    fmt.setBorderStyle(QXlsx::Format::BorderThin);
-    fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
-    xlsx.write(hdrTopLeft, "Отчёт об остатках на складе на "+QDate::currentDate().toString(Qt::ISODate), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row(), hdrTopLeft.column(), hdrTopLeft.row(), hdrTopLeft.column()+2), fmt);
-    fmt = QXlsx::Format();
-
-    fmt.setLeftBorderColor(QColor(Qt::black));
-    fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
-    fmt.setRightBorderColor(QColor(Qt::black));
-    fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
-    xlsx.write(hdrTopLeft.row()+1, hdrTopLeft.column(), "Тема: "+ui->comboProject->currentText(), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+1, hdrTopLeft.column(), hdrTopLeft.row()+1, hdrTopLeft.column()+2), fmt);
-    xlsx.write(hdrTopLeft.row()+2, hdrTopLeft.column(), "Категория: "+ui->comboCategory->currentText(), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+2, hdrTopLeft.column(), hdrTopLeft.row()+2, hdrTopLeft.column()+2), fmt);
-    xlsx.write(hdrTopLeft.row()+3, hdrTopLeft.column(), "Группа: "+ui->comboGroup->currentText(), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+3, hdrTopLeft.column(), hdrTopLeft.row()+3, hdrTopLeft.column()+2), fmt);
-    xlsx.write(hdrTopLeft.row()+4, hdrTopLeft.column(), "Ключевое слово в наименовании: "+ui->editSearch_1->text(), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+4, hdrTopLeft.column(), hdrTopLeft.row()+4, hdrTopLeft.column()+2), fmt);
-
-    fmt = QXlsx::Format();
-
-    fmt.setBorderColor(QColor(Qt::black));
-    fmt.setBorderStyle(QXlsx::Format::BorderThin);
-    fmt.setPatternBackgroundColor(QColor(QRgb(0xffFFE88E)));
-    xlsx.write(hdrTopLeft.row()+5, hdrTopLeft.column(), "Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate));
-    xlsx.mergeCells(QXlsx::CellRange(hdrTopLeft.row()+5, hdrTopLeft.column(), hdrTopLeft.row()+5, hdrTopLeft.column()+2), fmt);
-    fmt = QXlsx::Format();
-
     QXlsx::CellReference tblTopLeft(hdrTopLeft.row()+7, hdrTopLeft.column());
     fmt.setBorderColor(QColor(Qt::black));
     fmt.setBorderStyle(QXlsx::Format::BorderThin);

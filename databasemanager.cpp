@@ -464,168 +464,23 @@ IdMap DataBaseManager::getMapGroupToCategory()
 
 QSqlQuery DataBaseManager::getStockStats(const ReportRequest &req)
 {
-    // TODO: fix this shit
-    if (req.projectId == 0) {
-        if (req.categoryId == 0) {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatFull('"+
-//                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+", '"+
-//                                       req.searchString+"')");
-            }
-        } else {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByCategory("+QString::number(req.categoryId)+", '"+
-//                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByGroup("+QString::number(req.groupId)+", '"+
-//                                       req.searchString+"')");
-            }
-        }
-    } else {
-        if (req.categoryId == 0) {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByProject("+QString::number(req.projectId)+", '"+
-//                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
-//                                       QString::number(req.groupId)+", "+
-//                                       QString::number(req.projectId)+", '"+
-//                                       req.searchString+"')");
-            }
-        } else {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByCategoryAndProject("+
-//                                       QString::number(req.categoryId)+", "+
-//                                       QString::number(req.projectId)+", '"+
-//                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getStockStat("+
-                                       QString::number(req.projectId) +", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.groupId)   +", '"+
-                                       req.searchString+"')");
-//                return execSimpleQuery("CALL getStockStatByGroupAndProject("+
-//                                       QString::number(req.groupId)+", "+
-//                                       QString::number(req.projectId)+", '"+
-//                                       req.searchString+"')");
-            }
-        }
-    }
-    return QSqlQuery();
+    return execSimpleQuery("CALL getStockStat("+
+                           QString::number(req.projectId) +", "+
+                           QString::number(req.categoryId)+", "+
+                           QString::number(req.groupId)   +", '"+
+                           req.searchString+"')");
 }
 
 QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
 {    
-    // TODO: fix this shit
-    if (req.projectId == 0) {
-        if (req.categoryId == 0) {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getTransactStatFull('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", '"+
-                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getTransactStatByGroup('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+", '"+
-                                       req.searchString+"')");
-            }
-        } else {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getTransactStatByCategory('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.categoryId)+", '"+
-                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getTransactStatByGroup('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+", '"+
-                                       req.searchString+"')");
-            }
-        }
-    } else {
-        if (req.categoryId == 0) {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getTransactStatByProject('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.projectId)+", '"+
-                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getTransactStatByGroupAndProject('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+", '"+
-                                       req.searchString+"')");
-            }
-        } else {
-            if (req.groupId == 0) {
-                return execSimpleQuery("CALL getTransactStatByCategoryAndProject('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.categoryId)+", "+
-                                       QString::number(req.projectId)+", '"+
-                                       req.searchString+"')");
-            } else {
-                return execSimpleQuery("CALL getTransactStatByGroupAndProject('"+
-                                       req.fromDate.toString(Qt::ISODate)+"', '"+
-                                       req.untilDate.toString(Qt::ISODate)+"', "+
-                                       QString::number(req.flag)+", "+
-                                       QString::number(req.groupId)+", "+
-                                       QString::number(req.projectId)+", '"+
-                                       req.searchString+"')");
-            }
-        }
-    }
-    return QSqlQuery();
+    return execSimpleQuery("CALL getTransactStat('"+
+                           req.fromDate.toString(Qt::ISODate)+"', '"+
+                           req.untilDate.toString(Qt::ISODate)+"', "+
+                           QString::number(req.flag)+", "+
+                           QString::number(req.projectId) +", "+
+                           QString::number(req.categoryId)+", "+
+                           QString::number(req.groupId)   +", '"+
+                           req.searchString+"')");
 }
 
 qint32 DataBaseManager::insertCategory(const QString &name)

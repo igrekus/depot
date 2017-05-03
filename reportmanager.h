@@ -67,6 +67,11 @@ public:
     void resizeTransactTable();
     QString makeFileName();
 
+    void xlsxWriteHeader(QXlsx::Document &doc,
+                          const QXlsx::CellReference &topleft,
+                          const QVector<qint32> columnWidths,
+                          const QStringList &hdrData);
+
     void saveStockReport();
     void saveTransactReport();
 
