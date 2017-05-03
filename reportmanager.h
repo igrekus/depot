@@ -35,6 +35,9 @@ public:
         ReportTransact
     };
 
+    const qint32 hdrCaptionBg = 0xffDDDDDD;
+    const qint32 hdrDateBg = 0xffFFE88E;
+
     DataBaseManager *m_dbman;
 
     DictModel *m_dictModel;
@@ -67,10 +70,14 @@ public:
     void resizeTransactTable();
     QString makeFileName();
 
-    void xlsxWriteHeader(QXlsx::Document &doc,
+    void xlsxWriteDocumentHeader(QXlsx::Document &doc,
                           const QXlsx::CellReference &topleft,
                           const QVector<qint32> columnWidths,
                           const QStringList &hdrData);
+
+    void xlsxWriteTableHeader(QXlsx::Document &doc,
+                              const QXlsx::CellReference &topleft,
+                              const QStringList &data);
 
     void saveStockReport();
     void saveTransactReport();
