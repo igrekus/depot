@@ -21,7 +21,8 @@ public:
 
     bool isEmpty();
 
-    void addItem(const qint32 pos, const qint32 id, const QString &str);
+    void addItem(const qint32 id, const QString &str);
+    void addItemAtPosition(const qint32 pos, const qint32 id, const QString &str);
 
     QString getData(const qint32 id);
     qint32 getId(const QString &data);

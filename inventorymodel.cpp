@@ -347,15 +347,13 @@ int InventoryModel::findRow(const InventoryNode *invNode) const
 
 QModelIndex InventoryModel::addCategory(const QString &catName)
 {
+    qint32 newId = m_dbman->insertCategory(catName);
+    m_dictModel->m_categoryListModel->addItem(newId, catName);
+
     auto row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&catName](const InventoryNode &it){
         return it.inventoryItem.itemName > catName;
     });
-
     qint32 row = std::distance(m_nodes.begin(), row_iterator);
-
-    qint32 newId = m_dbman->insertCategory(catName);
-
-//    beginInsertRows(QModelIndex(), row, row + 1);
     beginInsertRows(QModelIndex(), row, row);
     InventoryNode tmpnode = makeCategoryNode(CategoryItem::CategoryItemBuilder()
                                              .setId(newId)

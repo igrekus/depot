@@ -69,14 +69,6 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     int findRow(const StockNode *stockNode) const;
 
-    QModelIndex addCategory(const QString &catName);
-    void editCategory(const QModelIndex &index, const QString &newName);
-    void deleteCategory(const QModelIndex &index);
-
-    QModelIndex addGroup(const QModelIndex &index, const QString &grpName);
-    void editGroup(const QModelIndex &index, const QString &newName);
-    void deleteGroup(const QModelIndex &index);
-
     QModelIndex addStock(const StockItem &item);
     void editStock(const QModelIndex &index, const StockItem &item);
     void deleteStock(const QModelIndex &index);

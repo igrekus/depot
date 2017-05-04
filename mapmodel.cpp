@@ -32,7 +32,21 @@ bool MapModel::isEmpty()
     return m_strList.isEmpty();
 }
 
-void MapModel::addItem(const qint32 pos, const qint32 id, const QString &str)
+void MapModel::addItem(const qint32 id, const QString &str)
+{
+    auto rowIter = std::find_if(m_strList.begin(), m_strList.end(), [&str](const QString &it){
+        return it > str;
+    });
+    qint32 row = std::distance(m_strList.begin(), rowIter);
+    m_mapData.id.insert(id, str);
+    m_mapData.di.insert(str, id);
+
+    beginInsertRows(QModelIndex(), row, row);
+    m_strList.insert(row, str);
+    endInsertRows();
+}
+
+void MapModel::addItemAtPosition(const qint32 pos, const qint32 id, const QString &str)
 {
     beginInsertRows(QModelIndex(), pos, pos);
     m_strList.insert(pos, str);

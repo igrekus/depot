@@ -73,11 +73,15 @@ public:
     void xlsxWriteDocumentHeader(QXlsx::Document &doc,
                           const QXlsx::CellReference &topleft,
                           const QVector<qint32> columnWidths,
-                          const QStringList &hdrData);
+                          const QString &caption);
 
     void xlsxWriteTableHeader(QXlsx::Document &doc,
                               const QXlsx::CellReference &topleft,
-                              const QStringList &data);
+                              QSortFilterProxyModel *model);
+
+    void xlsxWriteTable(QXlsx::Document &doc,
+                        const QXlsx::CellReference &topleft,
+                        QSortFilterProxyModel *model);
 
     void saveStockReport();
     void saveTransactReport();

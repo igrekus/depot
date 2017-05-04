@@ -128,9 +128,6 @@ void InventoryDialog::procActCategoryAdd()
         QModelIndex ind = m_inventoryModel->addCategory(newName);
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-
-        // TODO: update main window search filter with the new category
-        m_dictModel->m_categoryListModel->addItem(1, 0, newName);
         treeUpdated = true;
     }
 }
@@ -472,7 +469,7 @@ void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
     if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
         actInventoryEdit->trigger();
     }
-//    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
+    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
 }
 
 

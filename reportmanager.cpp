@@ -35,7 +35,7 @@ void ReportManager::filterGroupCombo_1(const qint32 catId)
     }
 
     m_filteredGroupModel_1->initModel(tmpdict);
-    m_filteredGroupModel_1->addItem(0, 0, QString("Все"));
+    m_filteredGroupModel_1->addItemAtPosition(0, 0, QString("Все"));
 }
 
 void ReportManager::filterGroupCombo_2(const qint32 catId)
@@ -58,7 +58,7 @@ void ReportManager::filterGroupCombo_2(const qint32 catId)
     }
 
     m_filteredGroupModel_2->initModel(tmpdict);
-    m_filteredGroupModel_2->addItem(0, 0, QString("Все"));
+    m_filteredGroupModel_2->addItemAtPosition(0, 0, QString("Все"));
 }
 
 void ReportManager::initDialog()
@@ -198,7 +198,7 @@ QString ReportManager::makeFileName()
 void ReportManager::xlsxWriteDocumentHeader(QXlsx::Document &doc,
                                     const QXlsx::CellReference &topleft,
                                     const QVector<qint32> columnWidths,
-                                    const QStringList &hdrData)
+                                    const QString &caption)
 {
     {qint32 i=0;
     for (const auto &it : columnWidths) {
@@ -210,7 +210,7 @@ void ReportManager::xlsxWriteDocumentHeader(QXlsx::Document &doc,
     fmt.setBorderColor(QColor(Qt::black));
     fmt.setBorderStyle(QXlsx::Format::BorderThin);
     fmt.setPatternBackgroundColor(QColor(QRgb(hdrCaptionBg)));
-    doc.write(topleft, hdrData.at(0), fmt);
+    doc.write(topleft, caption, fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row(), topleft.column(), topleft.row(), topleft.column()+2), fmt);}
 
     {QXlsx::Format fmt;
@@ -218,26 +218,26 @@ void ReportManager::xlsxWriteDocumentHeader(QXlsx::Document &doc,
     fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
     fmt.setRightBorderColor(QColor(Qt::black));
     fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
-    doc.write(topleft.row()+1, topleft.column(), hdrData.at(1), fmt);
+    doc.write(topleft.row()+1, topleft.column(), "Тема: "+ui->comboProject->currentText(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+1, topleft.column(), topleft.row()+1, topleft.column()+2), fmt);
-    doc.write(topleft.row()+2, topleft.column(), hdrData.at(2), fmt);
+    doc.write(topleft.row()+2, topleft.column(), "Категория: "+ui->comboCategory->currentText(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+2, topleft.column(), topleft.row()+2, topleft.column()+2), fmt);
-    doc.write(topleft.row()+3, topleft.column(), hdrData.at(3), fmt);
+    doc.write(topleft.row()+3, topleft.column(), "Группа: "+ui->comboGroup->currentText(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+3, topleft.column(), topleft.row()+3, topleft.column()+2), fmt);
-    doc.write(topleft.row()+4, topleft.column(), hdrData.at(4), fmt);
+    doc.write(topleft.row()+4, topleft.column(),"Ключевое слово в наименовании: "+ui->editSearch_1->text(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+4, topleft.column(), topleft.row()+4, topleft.column()+2), fmt);}
 
     {QXlsx::Format fmt;
     fmt.setBorderColor(QColor(Qt::black));
     fmt.setBorderStyle(QXlsx::Format::BorderThin);
     fmt.setPatternBackgroundColor(QColor(QRgb(hdrDateBg)));
-    doc.write(topleft.row()+5, topleft.column(), hdrData.at(5));
+    doc.write(topleft.row()+5, topleft.column(),"Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+5, topleft.column(), topleft.row()+5, topleft.column()+2), fmt);}
 }
 
 void ReportManager::xlsxWriteTableHeader(QXlsx::Document &doc,
                                          const QXlsx::CellReference &topleft,
-                                         const QStringList &data)
+                                         QSortFilterProxyModel *model)
 {
     QXlsx::Format fmt;
     fmt.setBorderColor(QColor(Qt::black));
@@ -246,58 +246,16 @@ void ReportManager::xlsxWriteTableHeader(QXlsx::Document &doc,
     fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
     fmt.setFontBold(true);
     fmt.setPatternBackgroundColor(QColor(QRgb(hdrCaptionBg)));
-    qint32 i=0;
-    for (const auto &it : data) {
-        doc.write(topleft.row(), topleft.column()+i, it, fmt);
-        ++i;
+    for (qint32 i=1; i<model->columnCount(); ++i) {
+        doc.write(topleft.row(), topleft.column()+i-1, model->headerData(i, Qt::Horizontal).toString(), fmt);
     }
 }
 
-void ReportManager::saveStockReport()
+void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
+                                   const QXlsx::CellReference &topleft,
+                                   QSortFilterProxyModel *model)
 {
-//    QString fname = m_reportDir+m_exportFileName;
-    QString fname = "d:/"+m_exportFileName;
-
-    QXlsx::Document xlsx;
-    QXlsx::CellReference hdrTopLeft("A1");
-    QVector<qint32> widths = {5, 25, 30, 45, 15, 8, 15, 10};
-    QStringList docHdrData = {"Отчёт об остатках на складе на "+QDate::currentDate().toString(Qt::ISODate),
-                              "Тема: "+ui->comboProject->currentText(),
-                              "Категория: "+ui->comboCategory->currentText(),
-                              "Группа: "+ui->comboGroup->currentText(),
-                              "Ключевое слово в наименовании: "+ui->editSearch_1->text(),
-                              "Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate)};
-
-    xlsxWriteDocumentHeader(xlsx, hdrTopLeft, widths, docHdrData);
-
-    QXlsx::CellReference tblTopLeft(hdrTopLeft.row()+7, hdrTopLeft.column());
-
-    QStringList tblHdrData;
-    for (qint32 i=1; i<m_reportModel->columnCount(); ++i) {
-        tblHdrData.append(m_reportModel->headerData(i, Qt::Horizontal).toString());
-    }
-
-    xlsxWriteTableHeader(xlsx, tblTopLeft, tblHdrData);
-
-//    QXlsx::Format fmt;
-//    fmt.setBorderColor(QColor(Qt::black));
-//    fmt.setBorderStyle(QXlsx::Format::BorderThin);
-//    fmt.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
-//    fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-//    fmt.setFontBold(true);
-//    fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+0, m_reportModel->headerData(1, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+1, m_reportModel->headerData(2, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+2, m_reportModel->headerData(3, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+3, m_reportModel->headerData(4, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+4, m_reportModel->headerData(5, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+5, m_reportModel->headerData(6, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+6, m_reportModel->headerData(7, Qt::Horizontal), fmt);
-//    xlsx.write(tblTopLeft.row(), tblTopLeft.column()+7, m_reportModel->headerData(8, Qt::Horizontal), fmt);
-
-    // xlsxWriteTable();
-
-    QXlsx::Format fmt;
+    {QXlsx::Format fmt;
     fmt.setLeftBorderColor(QColor(Qt::black));
     fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
     fmt.setRightBorderColor(QColor(Qt::black));
@@ -306,41 +264,87 @@ void ReportManager::saveStockReport()
     fmt.setBottomBorderStyle(QXlsx::Format::BorderThin);
     fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
     fmt.setTextWarp(true);
-    QXlsx::Format numFmt(fmt);
-    numFmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
     QXlsx::Format strFmt(fmt);
     strFmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
-
-    for (qint32 i=0; i<m_reportModel->rowCount(); ++i) {
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+0, m_reportModel->data(m_reportModel->index(i, 1)).toInt()   , numFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+1, m_reportModel->data(m_reportModel->index(i, 2)).toString(), strFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+2, m_reportModel->data(m_reportModel->index(i, 3)).toString(), strFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+3, m_reportModel->data(m_reportModel->index(i, 4)).toString(), strFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+4, m_reportModel->data(m_reportModel->index(i, 5)).toString(), strFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+5, m_reportModel->data(m_reportModel->index(i, 6)).toInt()   , numFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+6, m_reportModel->data(m_reportModel->index(i, 7)).toString(), strFmt);
-        xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+7, m_reportModel->data(m_reportModel->index(i, 8)).toString(), strFmt);
+    // TODO: fix this if needed moe reports (new class - tablewriter?)
+    if (m_reportType == ReportStock) {
+        QXlsx::Format numFmt(fmt);
+        numFmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
+        for (qint32 i=0; i<model->rowCount(); ++i) {
+            doc.write(topleft.row()+1+i, topleft.column()+0, model->data(model->index(i, 1)).toInt()   , numFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+1, model->data(model->index(i, 2)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+2, model->data(model->index(i, 3)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+3, model->data(model->index(i, 4)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+4, model->data(model->index(i, 5)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+5, model->data(model->index(i, 6)).toInt()   , numFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+6, model->data(model->index(i, 7)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+7, model->data(model->index(i, 8)).toString(), strFmt);
+        }
     }
-    fmt = QXlsx::Format();
+    if (m_reportType == ReportTransact) {
+        QXlsx::Format goodNumFmt(fmt);
+        goodNumFmt.setFontColor(QColor(QRgb(Constants::ColorReceipt)));
+        goodNumFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorReceiptBackground)));
+        QXlsx::Format badNumFmt(fmt);
+        badNumFmt.setFontColor(QColor(QRgb(Constants::ColorExpense)));
+        badNumFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorExpenseBackground)));
+        for (qint32 i=0; i<model->rowCount(); ++i) {
+            doc.write(topleft.row()+1+i, topleft.column()+0, model->data(model->index(i, 1)).toDate().toString(Qt::ISODate), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+1, model->data(model->index(i, 2)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+2, model->data(model->index(i, 3)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+3, model->data(model->index(i, 4)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+4, model->data(model->index(i, 5)).toString(), strFmt);
+            qint32 qty = model->data(model->index(i, 6)).toInt();
+            doc.write(topleft.row()+1+i, topleft.column()+5, qty, qty>=0?goodNumFmt:badNumFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+6, model->data(model->index(i, 7)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+7, model->data(model->index(i, 8)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+8, model->data(model->index(i, 9)).toString(), strFmt);
+        }
+    }}
+
+    QXlsx::Format fmt;
     fmt.setBorderColor(QColor(Qt::black));
     fmt.setBorderStyle(QXlsx::Format::BorderThin);
-    fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
+    fmt.setPatternBackgroundColor(QColor(QRgb(hdrCaptionBg)));
     fmt.setFontBold(true);
-    fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
     fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-    xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                     tblTopLeft.column(),
-                                     tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                     tblTopLeft.column()+3), fmt);
-    xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                     tblTopLeft.column()+6,
-                                     tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                     tblTopLeft.column()+7), fmt);
-    xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+4, "ИТОГО:", fmt);
+    fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+1+model->rowCount(),
+                                    topleft.column(),
+                                    topleft.row()+1+model->rowCount(),
+                                    topleft.column()+3), fmt);
+    doc.mergeCells(QXlsx::CellRange(topleft.row()+1+model->rowCount(),
+                                    topleft.column()+6,
+                                    topleft.row()+1+model->rowCount(),
+                                    topleft.column()+6+(model->columnCount()-1-1-6)), fmt);
+    doc.write(topleft.row()+1+model->rowCount(), topleft.column()+4, "ИТОГО:", fmt);
     fmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
-    QXlsx::CellRange sumRange(tblTopLeft.row()+1,                             tblTopLeft.column()+5,
-                              tblTopLeft.row()+1+m_reportModel->rowCount()-1, tblTopLeft.column()+5);
-    xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+5, "=SUM("+sumRange.toString()+")", fmt);
+    QXlsx::CellRange sumRange(topleft.row()+1,                             topleft.column()+5,
+                              topleft.row()+1+model->rowCount()-1, topleft.column()+5);
+    doc.write(topleft.row()+1+model->rowCount(), topleft.column()+5, "=SUM("+sumRange.toString()+")", fmt);
+}
+
+void ReportManager::saveStockReport()
+{
+//    QString fname = m_reportDir+m_exportFileName;
+    QString fname = "d:/"+m_exportFileName;
+
+    QXlsx::Document xlsx;
+
+    // doc position on the sheet
+    QXlsx::CellReference hdrTopLeft("A1");
+
+    // write dco header
+    {QVector<qint32> widths = {5, 25, 30, 45, 15, 8, 15, 10};
+    QString caption("Отчёт об остатках на складе на "+QDate::currentDate().toString(Qt::ISODate));
+    xlsxWriteDocumentHeader(xlsx, hdrTopLeft, widths, caption);}
+
+    // write table header
+    QXlsx::CellReference tblTopLeft(hdrTopLeft.row()+7, hdrTopLeft.column());
+    xlsxWriteTableHeader(xlsx, tblTopLeft, m_proxyModel);
+
+    // write table
+    xlsxWriteTable(xlsx, tblTopLeft, m_proxyModel);
 
     xlsx.saveAs(fname);
 }
@@ -350,91 +354,79 @@ void ReportManager::saveTransactReport()
     //    QString fname = m_reportDir+m_exportFileName;
         QString fname = "d:/"+m_exportFileName;
 
-
         QXlsx::Document xlsx;
+
+        // doc position on the sheet
         QXlsx::CellReference hdrTopLeft("A1");
-        QVector<qint32> widths = {12, 25, 30, 40, 15, 8, 17, 10, 15};
-        QStringList hdrData = {"Отчёт о приходе/расходе на период с "+
-                               ui->dateFrom_2->date().toString(Qt::ISODate)+" по "+
-                               ui->dateUntil_2->date().toString(Qt::ISODate),
-                               "Тема: "+ui->comboProject->currentText(),
-                               "Категория: "+ui->comboCategory->currentText(),
-                               "Группа: "+ui->comboGroup->currentText(),
-                               "Ключевое слово в наименовании: "+ui->editSearch_1->text(),
-                               "Отчёт составлен: "+QDate::currentDate().toString(Qt::ISODate)};
 
-        xlsxWriteDocumentHeader(xlsx, hdrTopLeft, widths, hdrData);
+        // write doc header
+        {QVector<qint32> widths = {12, 25, 30, 40, 15, 8, 17, 10, 15};
+        QString caption("Отчёт о приходе/расходе на период с "+
+                        ui->dateFrom_2->date().toString(Qt::ISODate)+" по "+
+                        ui->dateUntil_2->date().toString(Qt::ISODate));
+        xlsxWriteDocumentHeader(xlsx, hdrTopLeft, widths, caption);}
 
-        QXlsx::Format fmt;
+        // write table header
         QXlsx::CellReference tblTopLeft(hdrTopLeft.row()+7, hdrTopLeft.column());
-        fmt.setBorderColor(QColor(Qt::black));
-        fmt.setBorderStyle(QXlsx::Format::BorderThin);
-        fmt.setHorizontalAlignment(QXlsx::Format::AlignHCenter);
-        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-        fmt.setFontBold(true);
-        fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+0, m_reportModel->headerData(1, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+1, m_reportModel->headerData(2, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+2, m_reportModel->headerData(3, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+3, m_reportModel->headerData(4, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+4, m_reportModel->headerData(5, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+5, m_reportModel->headerData(6, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+6, m_reportModel->headerData(7, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+7, m_reportModel->headerData(8, Qt::Horizontal), fmt);
-        xlsx.write(tblTopLeft.row(), tblTopLeft.column()+8, m_reportModel->headerData(9, Qt::Horizontal), fmt);
-        fmt = QXlsx::Format();
+        xlsxWriteTableHeader(xlsx, tblTopLeft, m_proxyModel);
 
-        fmt.setLeftBorderColor(QColor(Qt::black));
-        fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
-        fmt.setRightBorderColor(QColor(Qt::black));
-        fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
-        fmt.setBottomBorderColor(QColor(Qt::lightGray));
-        fmt.setBottomBorderStyle(QXlsx::Format::BorderThin);
-        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-        fmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
-        fmt.setTextWarp(true);
+        // write table
+        xlsxWriteTable(xlsx, tblTopLeft, m_proxyModel);
 
-        QXlsx::Format goodFmt(fmt);
-        goodFmt.setFontColor(QColor(QRgb(Constants::ColorReceipt)));
-        goodFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorReceiptBackground)));
-        QXlsx::Format badFmt(fmt);
-        badFmt.setFontColor(QColor(QRgb(Constants::ColorExpense)));
-        badFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorExpenseBackground)));
-        QXlsx::Format strFmt(fmt);
-        strFmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
+        xlsx.saveAs(fname);
 
-        for (qint32 i=0; i<m_reportModel->rowCount(); ++i) {
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+0, m_reportModel->data(m_reportModel->index(i, 1)).toDate().toString(Qt::ISODate), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+1, m_reportModel->data(m_reportModel->index(i, 2)).toString(), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+2, m_reportModel->data(m_reportModel->index(i, 3)).toString(), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+3, m_reportModel->data(m_reportModel->index(i, 4)).toString(), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+4, m_reportModel->data(m_reportModel->index(i, 5)).toString(), strFmt);
-            qint32 qty = m_reportModel->data(m_reportModel->index(i, 6)).toInt();
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+5, qty, qty>=0?goodFmt:badFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+6, m_reportModel->data(m_reportModel->index(i, 7)).toString(), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+7, m_reportModel->data(m_reportModel->index(i, 8)).toString(), strFmt);
-            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+8, m_reportModel->data(m_reportModel->index(i, 9)).toString(), strFmt);
-        }
-        fmt = QXlsx::Format();
-        fmt.setBorderColor(QColor(Qt::black));
-        fmt.setBorderStyle(QXlsx::Format::BorderThin);
-        fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
-        fmt.setFontBold(true);
-        fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
-        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                         tblTopLeft.column(),
-                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                         tblTopLeft.column()+3), fmt);
-        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                         tblTopLeft.column()+6,
-                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
-                                         tblTopLeft.column()+8), fmt);
-        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+4, "ИТОГО:", fmt);
-        fmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
-        QXlsx::CellRange sumRange(tblTopLeft.row()+1,                             tblTopLeft.column()+5,
-                                  tblTopLeft.row()+1+m_reportModel->rowCount()-1, tblTopLeft.column()+5);
-        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+5, "=SUM("+sumRange.toString()+")", fmt);
+//        QXlsx::Format fmt;
+//        fmt.setLeftBorderColor(QColor(Qt::black));
+//        fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
+//        fmt.setRightBorderColor(QColor(Qt::black));
+//        fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
+//        fmt.setBottomBorderColor(QColor(Qt::lightGray));
+//        fmt.setBottomBorderStyle(QXlsx::Format::BorderThin);
+//        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
+//        fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
+//        fmt.setTextWarp(true);
+
+//        QXlsx::Format goodFmt(fmt);
+//        goodFmt.setFontColor(QColor(QRgb(Constants::ColorReceipt)));
+//        goodFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorReceiptBackground)));
+//        QXlsx::Format badFmt(fmt);
+//        badFmt.setFontColor(QColor(QRgb(Constants::ColorExpense)));
+//        badFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorExpenseBackground)));
+//        QXlsx::Format strFmt(fmt);
+//        strFmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
+
+//        for (qint32 i=0; i<m_reportModel->rowCount(); ++i) {
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+0, m_reportModel->data(m_reportModel->index(i, 1)).toDate().toString(Qt::ISODate), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+1, m_reportModel->data(m_reportModel->index(i, 2)).toString(), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+2, m_reportModel->data(m_reportModel->index(i, 3)).toString(), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+3, m_reportModel->data(m_reportModel->index(i, 4)).toString(), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+4, m_reportModel->data(m_reportModel->index(i, 5)).toString(), strFmt);
+//            qint32 qty = m_reportModel->data(m_reportModel->index(i, 6)).toInt();
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+5, qty, qty>=0?goodFmt:badFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+6, m_reportModel->data(m_reportModel->index(i, 7)).toString(), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+7, m_reportModel->data(m_reportModel->index(i, 8)).toString(), strFmt);
+//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+8, m_reportModel->data(m_reportModel->index(i, 9)).toString(), strFmt);
+//        }
+//        fmt = QXlsx::Format();
+//        fmt.setBorderColor(QColor(Qt::black));
+//        fmt.setBorderStyle(QXlsx::Format::BorderThin);
+//        fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
+//        fmt.setFontBold(true);
+//        fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
+//        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
+//        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
+//                                         tblTopLeft.column(),
+//                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
+//                                         tblTopLeft.column()+3), fmt);
+//        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
+//                                         tblTopLeft.column()+6,
+//                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
+//                                         tblTopLeft.column()+8), fmt);
+//        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+4, "ИТОГО:", fmt);
+//        fmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
+//        QXlsx::CellRange sumRange(tblTopLeft.row()+1,                             tblTopLeft.column()+5,
+//                                  tblTopLeft.row()+1+m_reportModel->rowCount()-1, tblTopLeft.column()+5);
+//        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+5, "=SUM("+sumRange.toString()+")", fmt);
 
         xlsx.saveAs(fname);
 }
@@ -466,7 +458,6 @@ void ReportManager::on_comboCategory_currentIndexChanged(int index)
     Q_UNUSED(index)
     filterGroupCombo_1(ui->comboCategory->currentData(Constants::RoleNodeId).toInt());
     ui->comboGroup->setCurrentIndex(0);
-//    emit ui->comboGroup->currentTextChanged("");
 }
 
 void ReportManager::on_comboCategory_2_currentIndexChanged(int index)

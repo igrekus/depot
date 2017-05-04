@@ -485,9 +485,11 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
 
 qint32 DataBaseManager::insertCategory(const QString &name)
 {
-    // TODO: FIXME
-    qDebug()<<"db: insert cat:" << name;
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedStr = encode->toUnicode(name.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedStr+"')");
+    q.next();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)

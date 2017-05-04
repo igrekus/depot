@@ -78,6 +78,7 @@ private slots:
 
     // control events
     void on_btnInventoryEditor_clicked();
+    void on_btnOrderEditor_clicked();
 
     void on_btnAddTransact_clicked();
     void on_btnEditTransact_clicked();
@@ -92,8 +93,7 @@ private slots:
 
     void on_treeStock_doubleClicked(const QModelIndex &index);
 
-    void on_tableTransact_doubleClicked(const QModelIndex &index);
-
+    void on_tableTransact_doubleClicked(const QModelIndex &index);    
 private:
     Ui::MainWindow *ui;
 

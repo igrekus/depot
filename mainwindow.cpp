@@ -373,6 +373,16 @@ void MainWindow::on_btnInventoryEditor_clicked()
     }
 }
 
+void MainWindow::on_btnOrderEditor_clicked()
+{
+    qDebug() << "category: "
+             << ui->comboCategory->currentData(Constants::RoleNodeId).toInt()
+             << ui->comboCategory->currentData(Qt::DisplayRole);
+    qDebug() << "project: "
+             << ui->comboProject->currentData(Constants::RoleNodeId).toInt()
+             << ui->comboProject->currentData(Qt::DisplayRole);
+}
+
 void MainWindow::on_btnAddTransact_clicked()
 {
     if (!ui->treeStock->selectionModel()->hasSelection() ||
@@ -468,8 +478,7 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
     if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemItem) {
         actTransactAdd->trigger();
     }
-//    qDebug() << "r:" << index.row() << "id:" << index.data(ROLE_NODE_ID).toInt() << "name:" << index.data(Qt::DisplayRole).toString();
-//    m_stockModel->debugInfo(index);
+    m_stockModel->debugInfo(index);
 }
 
 void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
