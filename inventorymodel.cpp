@@ -417,14 +417,16 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
 
     qint32 row = std::distance(pnode->children.begin(), row_iterator);
 
-    qint32 newId = m_dbman->insertGroup(grpName);
+    GroupItem::GroupItemBuilder b;
+    b.setName(grpName);
+    b.setCategory(pnode->inventoryItem.itemId);
 
-//    beginInsertRows(pindex, row, row + 1);
+    qint32 newId = m_dbman->insertGroup(b.build());
+
+    b.setId(newId);
+
     beginInsertRows(pindex, row, row);
-    pnode->children.insert(row, std::move(makeGroupNode(GroupItem::GroupItemBuilder()
-                                                        .setId  (newId)
-                                                        .setName(grpName)
-                                                        .build(), pnode)));
+    pnode->children.insert(row, std::move(makeGroupNode(b.build(), pnode)));
     endInsertRows();
 
     return index(row, 0, pindex);
@@ -447,13 +449,14 @@ void InventoryModel::editGroup(const QModelIndex &index, const QString &newName)
 void InventoryModel::deleteGroup(const QModelIndex &index)
 {
     InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
+    InventoryNode *parentNode = delNode->parent;
 
     m_dbman->deleteGroup(GroupItem::GroupItemBuilder()
-                         .setId  (delNode->inventoryItem.itemId)
+                         .setId(delNode->inventoryItem.itemId)
                          .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    delNode->siblings().removeAt(index.row());
+    parentNode->children.removeAt(index.row());
     endRemoveRows();
 }
 

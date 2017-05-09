@@ -190,6 +190,7 @@ void InventoryDialog::procActGroupAdd()
     QString newName = QInputDialog::getText(this, "Добавить группу",
                                          "Введите название:", QLineEdit::Normal,
                                          QString(), &ok);
+
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
         QModelIndex ind = m_inventoryModel->addGroup(pindex, newName);

@@ -62,7 +62,7 @@ public:
     void updateCategory(const CategoryItem &item);
     void deleteCategory(const CategoryItem &item);
 
-    qint32 insertGroup(const QString &name);
+    qint32 insertGroup(const GroupItem &item);
     void updateGroup(const GroupItem &item);
     void deleteGroup(const GroupItem &item);
 

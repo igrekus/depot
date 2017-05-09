@@ -486,41 +486,47 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
 qint32 DataBaseManager::insertCategory(const QString &name)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedStr = encode->toUnicode(name.toUtf8());
-    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedStr+"')");
+    QString encodedName = encode->toUnicode(name.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedName+"')");
     q.next();
+//    qDebug() << q.value(0).toInt();
     return q.value(0).toInt();
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)
 {
-    // TODO: FIXME
-    qDebug() << "db: update cat:" << item;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL updateCategory("+QString::number(item.itemId)+", '"
+                                                        +encodedName+"')");
 }
 
 void DataBaseManager::deleteCategory(const CategoryItem &item)
 {
-    // TODO: FIXME
-    qDebug() << "db: delete cat:" << item;
+    QSqlQuery q = execSimpleQuery("CALL deleteCategory("+QString::number(item.itemId)+")");
 }
 
-qint32 DataBaseManager::insertGroup(const QString &name)
+qint32 DataBaseManager::insertGroup(const GroupItem &item)
 {
-    // TODO: FIXME
-    qDebug()<<"db: insert group:" << name;
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL insertGroup('"+encodedName+"', "+QString::number(item.itemCategoryRef)+")");
+    q.next();
+//    qDebug() << q.value(0).toInt();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateGroup(const GroupItem &item)
 {
-    // TODO: FIXME
-    qDebug() << "db: update group:" << item;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL updateGroup("+QString::number(item.itemId)+", '"
+                                                     +encodedName+"')");
 }
 
 void DataBaseManager::deleteGroup(const GroupItem &item)
 {
-    // TODO: FIXME
-    qDebug() << "db: delete group:" << item;
+    QSqlQuery q = execSimpleQuery("CALL deleteGroup("+QString::number(item.itemId)+")");
 }
 
 qint32 DataBaseManager::insertProduct(const ProductItem &item)
