@@ -16,6 +16,8 @@ public:
 
     IdStringModel &setData(const IdStringList &data) {m_data = data; return *this;}
 
+    bool isEmpty();
+
     void clear();
 
     // Header:

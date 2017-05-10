@@ -7,6 +7,11 @@ TransactModel::TransactModel(DataBaseManager *dbman, DictModel *dictModel, QObje
     m_dictModel = dictModel;
 }
 
+void TransactModel::clear()
+{
+    m_data.clear();
+}
+
 void TransactModel::initModel()
 {
     // TODO: Динамическая подгруза списка после первых 1к, когда прокрутка вниз

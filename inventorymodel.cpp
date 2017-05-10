@@ -498,13 +498,15 @@ void InventoryModel::editInventory(const QModelIndex &index, const ProductItem &
 void InventoryModel::deleteInventory(const QModelIndex &index)
 {
     InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
+    InventoryNode *parentNode = delNode->parent;
 
     m_dbman->deleteProduct(ProductItem::ProductItemBuilder()
                            .setId  (delNode->inventoryItem.itemId)
                            .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    delNode->siblings().removeAt(index.row());
+//    delNode->siblings().removeAt(index.row());
+    parentNode->children.removeAt(index.row());
     endRemoveRows();
 }
 

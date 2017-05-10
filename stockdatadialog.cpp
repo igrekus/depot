@@ -17,7 +17,7 @@ void StockDataDialog::updateWidgetsWithStock(const StockItem &tmpstock)
 {
     ui->editSearchProduct->setText(tmpstock.itemName);
     ui->editProductName->setText(tmpstock.itemName);
-    ui->editProductId->setText(QString::number(tmpstock.itemProductRef));
+    ui->editProductId->setText(QString::number(tmpstock.itemProduct));
     ui->comboLocation->setCurrentText(m_dictModel->m_locationListModel->getData(tmpstock.itemLocation));
     ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(tmpstock.itemProject));
 
@@ -51,11 +51,11 @@ void StockDataDialog::initDialog()
     ui->comboLocation->setModel(m_dictModel->m_locationListModel);
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
-    m_oldData = m_dbman->getStockByProductId(m_data.itemProductRef);
+    m_oldData = m_dbman->getStockByProductId(m_data.itemProduct);
 //    m_oldData.itemName = m_data.itemName;
 
     if (m_data.itemId == 0) {
-        updateWidgetsWithProduct(m_data.itemProductRef);
+        updateWidgetsWithProduct(m_data.itemProduct);
     } else {
         updateWidgetsWithStock(m_data);
     }

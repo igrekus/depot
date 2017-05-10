@@ -3,6 +3,7 @@
 
 /*
  TODO:
+    - !!!rewrite deletes to bool toggle!!!
     - вынести обработку условий запроса из клиента в хранимую процедуру
 
       - обработчик ошибок через throw, сделать в одном месте -- где?;
@@ -186,6 +187,13 @@ void MainWindow::refreshStock()
     m_stockModel->initModel();
 }
 
+void MainWindow::refreshTransact()
+{
+    m_transactModel->clear();
+    m_transactModel->initModel();
+}
+
+
 TransactItem MainWindow::makeTransactItemFromStockItem(const StockItem &stock)
 {
     return (TransactItem::TransactItemBuilder()
@@ -368,6 +376,8 @@ void MainWindow::on_btnInventoryEditor_clicked()
 
     dialog.exec();
 
+    ui->comboCategory->setCurrentIndex(0);
+
     if (dialog.treeUpdated) {
         refreshStock();
     }
@@ -459,7 +469,7 @@ void MainWindow::on_btnReloadData_clicked()
 {
     qDebug() << "add test";
     refreshStock();
-//    testAddGrp();
+    refreshTransact();
 }
 
 void MainWindow::on_btnReport_clicked()
@@ -475,15 +485,15 @@ void MainWindow::on_btnReport_clicked()
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {
+    m_stockModel->debugInfo(index);
     if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemItem) {
         actTransactAdd->trigger();
     }
-    m_stockModel->debugInfo(index);
 }
 
 void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 {
-    Q_UNUSED(index)
+    qDebug() << m_transactModel->getTransactItemByIndex(index);
     actTransactEdit->trigger();
 }
 

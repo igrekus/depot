@@ -19,22 +19,12 @@ class DictModel : public QObject
     Q_OBJECT
 public:
 
-//    LinkedDict m_dictCategory;
-//    LinkedDict m_dictGroup;
-//    LinkedDict m_dictProduct;
-
-//    HashDict m_mapCategory;    // список категорий
-//    HashDict m_mapGroup;       // групп
-//    HashDict m_mapLocation;    // мест хранения на складе
-//    HashDict m_mapProject;     // проектов
-//    HashDict m_mapStaff;       // сотрудников
-
     IdMap m_mapGroupToCategory;
 
     MapModel *m_categoryListModel;
     MapModel *m_projectListModel;
-    MapModel *m_locationListModel;
     MapModel *m_groupListModel;
+    MapModel *m_locationListModel;
     MapModel *m_staffListModel;
 //    MapModel *m_miscTagListModel;
 
@@ -44,7 +34,17 @@ public:
 
     explicit DictModel(DataBaseManager *dbman, QObject *parent = 0);
 
-    void initModel();       // throws SqlError exception
+    void initModel();       // SqlError exception
+
+    // обновление словарей
+    // TODO: FIX переделать на вставку/изменение/удаление поэлементно, если будет слишком большая нагрузка на БД
+    void updateMapGroupToCategory();
+    void updateCategoryList();
+    void updateProjectList();
+    void updateGroupList();
+    void updateProductList();
+    void updateLocationList();
+    void updateStaffList();
 
 signals:
 

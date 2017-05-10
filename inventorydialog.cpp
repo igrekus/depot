@@ -71,6 +71,9 @@ void InventoryDialog::initDialog()
 void InventoryDialog::procActRefreshView()
 {
     qint32 trwidth = ui->treeInventory->frameGeometry().width()-30;
+    if (trwidth < 200) {
+        trwidth = ui->grpInventory->frameGeometry().width()-50;
+    }
     ui->treeInventory->hide();
     ui->treeInventory->setColumnWidth(0, trwidth*0.20);
     ui->treeInventory->setColumnWidth(1, trwidth*0.05);
@@ -126,6 +129,9 @@ void InventoryDialog::procActCategoryAdd()
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
         QModelIndex ind = m_inventoryModel->addCategory(newName);
+
+        m_dictModel->updateCategoryList();
+
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
@@ -147,6 +153,9 @@ void InventoryDialog::procActCategoryEdit()
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
         m_inventoryModel->editCategory(index, newName);
+
+        m_dictModel->updateCategoryList();
+
         treeUpdated = true;
     }
 }
@@ -168,6 +177,9 @@ void InventoryDialog::procActCategoryDelete()
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteCategory(index);
+
+        m_dictModel->updateCategoryList();
+
         treeUpdated = true;
     }
 }
@@ -194,6 +206,10 @@ void InventoryDialog::procActGroupAdd()
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
         QModelIndex ind = m_inventoryModel->addGroup(pindex, newName);
+
+        m_dictModel->updateGroupList();
+        m_dictModel->updateMapGroupToCategory();
+
         ui->treeInventory->selectionModel()->clear();
         ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
@@ -214,6 +230,10 @@ void InventoryDialog::procActGroupEdit()
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
         m_inventoryModel->editGroup(index, newName);
+
+        m_dictModel->updateGroupList();
+//        m_dictModel->updateMapGroupToCategory();
+
         treeUpdated = true;
     }
 }
@@ -235,6 +255,10 @@ void InventoryDialog::procActGroupDelete()
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteGroup(index);
+
+        m_dictModel->updateGroupList();
+        m_dictModel->updateMapGroupToCategory();
+
         treeUpdated = true;
     }
 }
@@ -269,6 +293,9 @@ void InventoryDialog::procActInventoryAdd()
     }
 
     QModelIndex ind = m_inventoryModel->addInventory(pindex, dialog.getData());
+
+    m_dictModel->updateProductList();
+
     ui->treeInventory->selectionModel()->clear();
     ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
@@ -291,6 +318,9 @@ void InventoryDialog::procActInventoryCopy()
     }
 
     QModelIndex ind = m_inventoryModel->addInventory(cur.parent(), dialog.getData());
+
+    m_dictModel->updateProductList();
+
     ui->treeInventory->selectionModel()->clear();
     ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
@@ -312,6 +342,8 @@ void InventoryDialog::procActInventoryEdit()
     }
 
     m_inventoryModel->editInventory(cur, dialog.getData());
+
+    m_dictModel->updateProductList();
 }
 
 void InventoryDialog::procActInventoryDelete()
@@ -324,6 +356,8 @@ void InventoryDialog::procActInventoryDelete()
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
         m_inventoryModel->deleteInventory(index);
+
+        m_dictModel->updateProductList();
     }
 }
 

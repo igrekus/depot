@@ -368,7 +368,7 @@ int StockModel::findRow(const StockNode *stockNode) const
 
 QModelIndex StockModel::addStock(const StockItem &item)
 {
-    QPair<qint32, qint32> grpcat = m_dbman->getProductParents(item.itemProductRef);
+    QPair<qint32, qint32> grpcat = m_dbman->getProductParents(item.itemProduct);
 
     auto catIter = std::find_if(m_nodes.begin(), m_nodes.end(),
                                 [&grpcat](const StockNode &it) -> bool {
@@ -440,7 +440,7 @@ void StockModel::debugInfo(const QModelIndex &index)
     StockNode *node = static_cast<StockNode *>(index.internalPointer());
     qint32 row = findRow(node);
 
-    qDebug() << "node: row:" << row << "parent:" << node->parent
+    qDebug() << "stock debug:\nrow:" << row << "parent:" << node->parent
              << "child:" << node->children.size()
              << "data:" << node->stockItem;
 }

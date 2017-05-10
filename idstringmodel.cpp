@@ -13,10 +13,14 @@ QVariant IdStringModel::headerData(int section, Qt::Orientation orientation, int
     return QVariant(QString());
 }
 
+bool IdStringModel::isEmpty()
+{
+    return m_data.isEmpty();
+}
+
 void IdStringModel::clear()
 {
     beginRemoveRows(QModelIndex(), 0, m_data.count());
-    m_data.clear();
     m_data.clear();
     endRemoveRows();
 }

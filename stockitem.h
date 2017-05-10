@@ -16,7 +16,7 @@ public:
     QString itemSerialn;
     qint32  itemProject;
     qint32  itemLocation;
-    qint32  itemProductRef;
+    qint32  itemProduct;
 
     StockItem():
         AbstractTreeItem(),
@@ -24,7 +24,7 @@ public:
         itemSerialn(),
         itemProject(),
         itemLocation(),
-        itemProductRef()
+        itemProduct()
     {}
     StockItem(qint32 id, const QString &name, Constants::TreeItemType type, Constants::TreeItemLevel level, qint32 amount, const QString &serialn, const qint32 proj, const qint32 loc, const qint32 prod):
         AbstractTreeItem(id,
@@ -35,7 +35,7 @@ public:
         itemSerialn     (serialn),
         itemProject     (proj),
         itemLocation    (loc),
-        itemProductRef  (prod)
+        itemProduct     (prod)
     {}
     StockItem(const StockItem &copy):
         AbstractTreeItem(copy),
@@ -43,7 +43,7 @@ public:
         itemSerialn     (copy.itemSerialn),
         itemProject     (copy.itemProject),
         itemLocation    (copy.itemLocation),
-        itemProductRef  (copy.itemProductRef)
+        itemProduct     (copy.itemProduct)
     {}
     ~StockItem(){}
 
@@ -57,7 +57,7 @@ public:
             itemSerialn    = right.itemSerialn;
             itemProject    = right.itemProject;
             itemLocation   = right.itemLocation;
-            itemProductRef = right.itemProductRef;
+            itemProduct    = right.itemProduct;
         }
         return *this;
     }
@@ -71,7 +71,7 @@ public:
                 itemSerialn    == right.itemSerialn &&
                 itemProject    == right.itemProject &&
                 itemLocation   == right.itemLocation&&
-                itemProductRef == right.itemProductRef);
+                itemProduct    == right.itemProduct);
     }
 
     friend QDebug operator<<(QDebug dbg, const StockItem &right) {
@@ -84,7 +84,7 @@ public:
                       << " sn:"   << right.itemSerialn
                       << " proj:" << right.itemProject
                       << " loc:"  << right.itemLocation
-                      << " prod:" << right.itemProductRef
+                      << " prod:" << right.itemProduct
                       << ")";
         return dbg.maybeSpace();
     }
@@ -114,7 +114,7 @@ public:
             stockSerialn   (copy.itemSerialn),
             stockProject   (copy.itemProject),
             stockLocation  (copy.itemLocation),
-            stockProductRef(copy.itemProductRef)
+            stockProductRef(copy.itemProduct)
         {}
 
         StockItemBuilder& setId       (const qint32    id)        { this->stockId         = id;        return *this; }

@@ -57,6 +57,7 @@ public:
     void initApplication();
     void createActions();
     void refreshStock();
+    void refreshTransact();
 //    void createStatusBar();
 
     TransactItem makeTransactItemFromStockItem(const StockItem &stock);

@@ -531,50 +531,120 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 
 qint32 DataBaseManager::insertProduct(const ProductItem &item)
 {
-    qDebug()<<"db: insert product:"<<item;
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+
+    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+
+    QSqlQuery q = execSimpleQuery("CALL insertProduct('"
+                                  +encodedName    +"', '"
+                                  +encodedFullname+"', '"
+                                  +encodedSerialn +"', '"
+                                  +encodedUnit    +"', '"
+                                  +encodedMisctag +"', "
+                                  +QString::number(item.itemGroupRef)+", "
+                                  +QString::number(item.itemCategoryRef)+")");
+    q.next();
+//    qDebug() << q.value(0).toInt();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateProduct(const ProductItem &item)
 {
-    qDebug()<<"db update product:"<<item;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+
+    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+
+    QSqlQuery q = execSimpleQuery("CALL updateProduct("
+                                  +QString::number(item.itemId)+", '"
+                                  +encodedName    +"', '"
+                                  +encodedFullname+"', '"
+                                  +encodedSerialn +"', '"
+                                  +encodedUnit    +"', '"
+                                  +encodedMisctag +"', "
+                                  +QString::number(item.itemGroupRef)+", "
+                                  +QString::number(item.itemCategoryRef)+")");
 }
 
 void DataBaseManager::deleteProduct(const ProductItem &item)
 {
-    qDebug()<<"db delete prodcut:"<<item;
+    QSqlQuery q = execSimpleQuery("CALL deleteProduct("+QString::number(item.itemId)+")");
 }
 
 qint32 DataBaseManager::insertStock(const StockItem &item)
 {
-    qDebug()<<"db insert stock:"<<item;
-    return 100;
+    QSqlQuery q = execSimpleQuery("CALL insertStock("
+                                  +QString::number(item.itemAmount)+", "
+                                  +QString::number(item.itemProduct)+", "
+                                  +QString::number(item.itemLocation)+", "
+                                  +QString::number(item.itemProject)+")");
+    q.next();
+    qDebug() << q.value(0).toInt();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateStock(const StockItem &item)
 {
-    qDebug()<<"db update stock:"<<item;
+    QSqlQuery q = execSimpleQuery("CALL updateStock("
+                                  +QString::number(item.itemId)+", "
+                                  +QString::number(item.itemAmount)+", "
+                                  +QString::number(item.itemProduct)+", "
+                                  +QString::number(item.itemLocation)+", "
+                                  +QString::number(item.itemProject)+")");
 }
 
 void DataBaseManager::deleteStock(const StockItem &item)
 {
-    qDebug()<<"db delete stock:"<<item;
+    // TODO: FIX: transact foreign key fail
+    QSqlQuery q = execSimpleQuery("CALL deleteStock("+QString::number(item.itemId)+")");
 }
 
 qint32 DataBaseManager::insertTransact(const TransactItem &item)
 {
-    qDebug()<<"db insert transact:"<<item;
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+
+    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+
+    QSqlQuery q = execSimpleQuery("CALL insertTransact('"
+                                  +item.itemDate.toString(Qt::ISODate)+"', "
+                                  +QString::number(item.itemDiff)+", '"
+                                  +encodedNote+"', "
+                                  +QString::number(item.itemStockRef)+", "
+                                  +QString::number(item.itemStaffRef)+", "
+                                  +QString::number(item.itemProjectRef)+", "
+                                  +QString::number(item.itemBillRef)+")");
+    q.next();
+//    qDebug() << q.value(0).toInt();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateTransact(const TransactItem &item)
 {
-    qDebug()<<"db update transact:"<<item;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+
+    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+
+    QSqlQuery q = execSimpleQuery("CALL updateTransact("
+                                  +QString::number(item.itemId)+", '"
+                                  +item.itemDate.toString(Qt::ISODate)+"', "
+                                  +QString::number(item.itemDiff)+", '"
+                                  +encodedNote+"', "
+                                  +QString::number(item.itemStockRef)+", "
+                                  +QString::number(item.itemStaffRef)+", "
+                                  +QString::number(item.itemProjectRef)+", "
+                                  +QString::number(item.itemBillRef)+")");
 }
 
 void DataBaseManager::deleteTransact(const TransactItem &item)
 {
-    qDebug()<<"db delete transact:"<<item;
+    QSqlQuery q = execSimpleQuery("CALL deleteTransact("+QString::number(item.itemId)+")");
 }
 
 void DataBaseManager::convertDB()

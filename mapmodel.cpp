@@ -9,7 +9,7 @@ MapModel::MapModel(QObject *parent)
 void MapModel::initModel(const HashDict &data)
 {
     qint32 cnt = data.id.values().size() - 1;
-    if (cnt <=0)
+    if (cnt <= 0)
         cnt = 0;
     beginInsertRows(QModelIndex(), 0, cnt);
     m_mapData = data;

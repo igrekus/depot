@@ -14,7 +14,7 @@
    <string>Склад</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout_4">
+   <layout class="QVBoxLayout" name="verticalLayout_5">
     <item>
      <layout class="QGridLayout" name="gridLayout">
       <item row="0" column="1">
@@ -41,6 +41,9 @@
         </item>
         <item>
          <widget class="QComboBox" name="comboCategory">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -207,6 +210,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="pushButton_4">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Требование-накладная</string>
             </property>
@@ -214,6 +220,9 @@
           </item>
           <item>
            <widget class="QPushButton" name="btnOrderEditor">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
             <property name="text">
              <string>Заказ на сборку</string>
             </property>
@@ -261,11 +270,22 @@
        </layout>
       </item>
       <item>
-       <widget class="QPushButton" name="btnInventoryEditor">
-        <property name="text">
-         <string>Номенклатура &amp;A</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QPushButton" name="btnInventoryEditor">
+          <property name="text">
+           <string>Номенклатура &amp;A</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="btnDictEditor">
+          <property name="text">
+           <string>Словари</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>

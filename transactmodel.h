@@ -36,6 +36,8 @@ public:
     explicit TransactModel(DataBaseManager *dbman, DictModel *dictModel,QObject *parent = nullptr);
     ~TransactModel(){}
 
+    void clear();
+
     void initModel();
 
     // Header:
