@@ -97,7 +97,7 @@ void MainWindow::initApplication()
 
     m_stockModel->initModel();
     m_dictModel->initModel();
-    m_transactModel->initModel();
+//    m_transactModel->initModel();
 
     ui->treeStock->setModel(m_stockModel);
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);

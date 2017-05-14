@@ -21,7 +21,8 @@ void DataBaseManager::connectToDatabase()
     db.setPort(3306);
     db.setUserName("root");
     db.setPassword("");
-    db.setDatabaseName("depot");
+//    db.setDatabaseName("depot");
+    db.setDatabaseName("wh");
 
     db.open();
 //    if (!db.open()) {
@@ -78,7 +79,8 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
 #ifdef AT_WORK
         tmplist.append(CategoryItem::CategoryItemBuilder()
                        .setId  (                  q.value(0).toInt())
-                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
+                       .setName(q.value(1).toString().toLocal8Bit())
+//                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .build());
 #endif
     }
@@ -110,7 +112,8 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
 #ifdef AT_WORK
         tmplist.append(GroupItem::GroupItemBuilder()
                        .setId  (                  q.value(0).toInt())
-                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
+                       .setName(q.value(1).toString().toLocal8Bit())
+//                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .build());
 #endif
     }
@@ -160,7 +163,7 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
     return tmplist;
 }
 
-ProductItem::ProductList DataBaseManager::getProductList(const qint32 catId, const qint32 groupId)
+ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 catId, const qint32 groupId)
 {
 #ifdef AT_WORK
     QTextCodec *decode = QTextCodec::codecForName("UTF-8");
@@ -178,11 +181,16 @@ ProductItem::ProductList DataBaseManager::getProductList(const qint32 catId, con
 #ifdef AT_WORK
         tmplist.append(ProductItem::ProductItemBuilder()
                        .setId      (                  q.value(0).toInt())
-                       .setName    (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-                       .setFullname(decode->toUnicode(q.value(2).toString().toLocal8Bit()))
-                       .setSerialn (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-                       .setUnit    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
-                       .setMiscTag (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+//                       .setName    (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
+//                       .setFullname(decode->toUnicode(q.value(2).toString().toLocal8Bit()))
+//                       .setSerialn (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+//                       .setUnit    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
+//                       .setMiscTag (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setName    (q.value(1).toString().toLocal8Bit())
+                       .setFullname(q.value(2).toString().toLocal8Bit())
+                       .setSerialn (q.value(3).toString().toLocal8Bit())
+                       .setUnit    (q.value(4).toString().toLocal8Bit())
+                       .setMiscTag (q.value(5).toString().toLocal8Bit())
                        .setGroup   (                  q.value(6).toInt())
                        .setCategory(                  q.value(7).toInt())
                        .build());

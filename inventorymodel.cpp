@@ -126,7 +126,7 @@ void InventoryModel::buildProductLevel()
 // TODO: endinsertrows
     for (InventoryNode &it : m_nodes) {
         for (InventoryNode &jt : it.children) {
-            ProductItem::ProductList list = m_dbman->getProductList(it.inventoryItem.itemId, jt.inventoryItem.itemId);
+            ProductItem::ProductList list = m_dbman->getProductListByGroup(it.inventoryItem.itemId, jt.inventoryItem.itemId);
             for (const ProductItem &kt : list) {
                 jt.children.append(std::move(makeProductNode(kt, &jt)));
             }

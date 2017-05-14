@@ -34,7 +34,7 @@ public:
     CategoryItem::CategoryList getCategoryList();
     GroupItem::GroupList getGroupList(const qint32 catId);
     StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
-    ProductItem::ProductList getProductList(const qint32 catId, const qint32 groupId);
+    ProductItem::ProductList getProductListByGroup(const qint32 catId, const qint32 groupId);
     TransactItem::TransactList getTransactList();
 
     IdStringList getIdProductList();
