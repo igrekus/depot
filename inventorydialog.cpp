@@ -65,6 +65,8 @@ void InventoryDialog::initDialog()
     ui->treeInventory->setUniformRowHeights(false);
     ui->treeInventory->setAlternatingRowColors(true);
 
+    ui->treeInventory->hideColumn(1);
+
     actRefreshView->trigger();
 }
 
@@ -76,10 +78,10 @@ void InventoryDialog::procActRefreshView()
     }
     ui->treeInventory->hide();
     ui->treeInventory->setColumnWidth(0, trwidth*0.20);
-    ui->treeInventory->setColumnWidth(1, trwidth*0.05);
+//    ui->treeInventory->setColumnWidth(1, trwidth*0.05);
     ui->treeInventory->setColumnWidth(2, trwidth*0.35);
     ui->treeInventory->setColumnWidth(3, trwidth*0.05);
-    ui->treeInventory->setColumnWidth(4, trwidth*0.05);
+    ui->treeInventory->setColumnWidth(4, trwidth*0.10); //+5
     ui->treeInventory->setColumnWidth(5, trwidth*0.30);
     ui->treeInventory->show();
 }

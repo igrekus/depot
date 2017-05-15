@@ -143,7 +143,7 @@ void InventoryModel::initModel()
 
 QVariant InventoryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Категория", "Код", "Наименование", "Ед. измерения", "Серийный №", "Полное наименование"};
+    const QStringList headers = {"Категория/Код изделия ", "Код", "Наименование", "Ед. измерения", "Серийный №", "Полное наименование"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers[section];
     }
@@ -219,8 +219,8 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case CategoryColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
-//                return tmpitem.itemId;
-                return QVariant();
+                return tmpitem.itemId;
+//                return QVariant();
             } else {
                 return tmpitem.itemName;
             }

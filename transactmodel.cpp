@@ -26,7 +26,7 @@ void TransactModel::initModel()
 
 QVariant TransactModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Дата", "Наименование", "Изменение", "Сотрудник", "Тема", "Примечание"};
+    const QStringList headers = {"Дата", "Наименование", "+/-", "Сотрудник", "Тема", "Примечание"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers.at(section);
     }
