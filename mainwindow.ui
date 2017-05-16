@@ -33,32 +33,6 @@
          </spacer>
         </item>
         <item>
-         <widget class="QLabel" name="lblCategory">
-          <property name="text">
-           <string>Категория: </string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QComboBox" name="comboCategory">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>100</width>
-            <height>0</height>
-           </size>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QLabel" name="lblProject">
           <property name="text">
            <string>Тема:</string>
@@ -68,7 +42,7 @@
         <item>
          <widget class="QComboBox" name="comboProject">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>

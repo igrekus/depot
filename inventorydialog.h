@@ -5,6 +5,9 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QStyledItemDelegate>
+#include <QPainter>
+#include <QSortFilterProxyModel>
 
 #include <databasemanager.h>
 #include <inventorymodel.h>
@@ -27,7 +30,17 @@ class InventoryDialog : public QDialog
 
 public:
 
+    class TextDelegate : public QStyledItemDelegate
+    {
+    public:
+        explicit TextDelegate(QObject * parent = 0) : QStyledItemDelegate(parent) {Q_UNUSED(parent)}
+        ~TextDelegate() {}
+        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
+    };
+
     InventoryModel *m_inventoryModel;
+
+    QSortFilterProxyModel *m_searchProxyModel;
 
     DataBaseManager *m_dbman;
     DictModel *m_dictModel;

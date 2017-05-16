@@ -59,12 +59,23 @@ void InventoryDialog::initDialog()
     m_inventoryModel->setDictModel(m_dictModel);
     m_inventoryModel->initModel();
 
+    // TODO: proxy crashes because of double click debug info
+    m_searchProxyModel = new QSortFilterProxyModel(this);
+    m_searchProxyModel->setSourceModel(m_inventoryModel);
+    m_searchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_searchProxyModel->setFilterWildcard("");
+    m_searchProxyModel->setDynamicSortFilter(false);
+
     ui->treeInventory->setModel(m_inventoryModel);
+//    ui->treeInventory->setModel(m_searchProxyModel);
     ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
     ui->treeInventory->setAlternatingRowColors(true);
-
+    ui->treeInventory->setItemDelegateForColumn(2, new TextDelegate(ui->treeInventory));
+    ui->treeInventory->setItemDelegateForColumn(3, new TextDelegate(ui->treeInventory));
+    ui->treeInventory->setItemDelegateForColumn(4, new TextDelegate(ui->treeInventory));
+    ui->treeInventory->setItemDelegateForColumn(5, new TextDelegate(ui->treeInventory));
     ui->treeInventory->hideColumn(1);
 
     actRefreshView->trigger();
@@ -509,6 +520,65 @@ void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
     qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
 }
 
+
+// ---------------------- column delegate ----------------------------
+void InventoryDialog::TextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+{
+//    QStyleOptionViewItem opt = option;
+    painter->save();
+    painter->setPen(QColor(Qt::lightGray));
+
+    if (index.column() != 0 ) {
+        painter->drawLine(QLine(option.rect.x()-1, option.rect.y(),
+                                option.rect.x()-1, option.rect.y()+option.rect.height()));
+    }
+    QStyledItemDelegate::paint(painter, option, index);
+//    option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
+
+//    bool mouseOver = (option.state & QStyle::State_MouseOver);
+//    bool cellSelected = (option.state & QStyle::State_Selected);
+
+//    if (mouseOver) {
+//        QBrush br(QColor(208, 224, 240, 150));
+//        painter->fillRect(option.rect, br);
+//    }
+
+//    QPalette pal = option.palette;
+//    if (cellSelected) {
+//        pal.setColor(QPalette::ButtonText, Qt::black);
+//    }
+//    else {
+//        pal.setColor(QPalette::ButtonText, Qt::black);
+//    }
+
+//    // TODO: immediately invoked lambda
+//    QString text;
+//    if (index.column() != 3) {
+//        text = index.data(Qt::DisplayRole).toString();
+//    } else {
+//        text = index.data(Qt::DisplayRole).toDateTime().toString(Qt::LocalDate);
+//    }
+
+//    QString search = index.data(ROLE_SEARCHSTR).toString();
+//    if (text.contains(search, Qt::CaseInsensitive)) {
+//        qint32 pos = text.indexOf(search, 0, Qt::CaseInsensitive);
+//        qint32 len = search.size();
+//        QString hlstr = text.mid(pos, len);
+
+//        QFontMetrics fm = painter->fontMetrics();
+
+//        QRect trect = fm.boundingRect(hlstr);
+//        QRect shiftrect = fm.boundingRect(text.left(pos));
+
+//        shiftrect.moveTo(option.rect.topLeft());
+//        trect.moveTo(shiftrect.topRight());
+//        painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
+//    }
+
+//    option.widget->style()->drawItemText(painter, option.rect.adjusted(+4, 0, 0, 0),
+//                                         1, pal, true, text, QPalette::ButtonText);
+    painter->restore();
+}
 
 // ------------------------- utility routines -----------------
 

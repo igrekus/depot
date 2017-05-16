@@ -268,7 +268,10 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             return tmpitem.itemSerialn;
             break;
         }
-        case ProjectColumn: {
+        case ProjectColumn: {            
+            if (tmpitem.itemProject == 0) {
+                return QVariant(QString("INVALID PROJECT"));
+            }
             return m_dictModel->m_projectListModel->getData(tmpitem.itemProject);
             break;
         }

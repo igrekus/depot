@@ -4,7 +4,19 @@
 /*
  TODO:
     - !!!rewrite deletes to bool toggle!!!
-    - вынести обработку условий запроса из клиента в хранимую процедуру
+    - Транзакции изменяют остаток на складе
+    - сортировка категорий:
+      .Материалы
+      .Оборудование
+      .Оснастки
+      .Полуфабрикаты
+      .Готовые изделия
+      .После испытаний
+    - поиск в главном окне и окне создания номенклатуры:
+    http://stackoverflow.com/questions/250890/using-qsortfilterproxymodel-with-a-tree-model
+    lazy: http://stackoverflow.com/questions/25733990/qsortfilterproxymodel-and-lazily-populated-treeviews
+    - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
+
 
       - обработчик ошибок через throw, сделать в одном месте -- где?;
 
@@ -116,10 +128,8 @@ void MainWindow::initApplication()
     ui->tableTransact->horizontalHeader()->setHighlightSections(false);
     ui->tableTransact->horizontalHeader()->setFixedHeight(20);
 
-    ui->comboCategory->setModel(m_dictModel->m_categoryListModel);
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
-    ui->comboCategory->setCurrentIndex(0);
     ui->comboProject->setCurrentIndex(0);
 
     actRefreshView->trigger();
@@ -318,6 +328,8 @@ void MainWindow::procActTransactAdd()
 
     QModelIndex index = m_transactModel->addTransact(dialog.getData());
 
+    // TODO: FIXNOW update stock with transact diff
+
     ui->tableTransact->selectionModel()->clear();
     ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
     // TODO: select new record
@@ -376,8 +388,6 @@ void MainWindow::on_btnInventoryEditor_clicked()
 
     dialog.exec();
 
-    ui->comboCategory->setCurrentIndex(0);
-
     if (dialog.treeUpdated) {
         refreshStock();
     }
@@ -385,9 +395,6 @@ void MainWindow::on_btnInventoryEditor_clicked()
 
 void MainWindow::on_btnOrderEditor_clicked()
 {
-    qDebug() << "category: "
-             << ui->comboCategory->currentData(Constants::RoleNodeId).toInt()
-             << ui->comboCategory->currentData(Qt::DisplayRole);
     qDebug() << "project: "
              << ui->comboProject->currentData(Constants::RoleNodeId).toInt()
              << ui->comboProject->currentData(Qt::DisplayRole);
