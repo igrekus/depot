@@ -4,6 +4,8 @@
 /*
  TODO:
     - !!!rewrite deletes to bool toggle!!!
+    - возможность менять кол-во в редакторе позиций на складе
+    - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
     - Транзакции изменяют остаток на складе
     - сортировка категорий:
       .Материалы
@@ -15,7 +17,6 @@
     - поиск в главном окне и окне создания номенклатуры:
     http://stackoverflow.com/questions/250890/using-qsortfilterproxymodel-with-a-tree-model
     lazy: http://stackoverflow.com/questions/25733990/qsortfilterproxymodel-and-lazily-populated-treeviews
-    - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
 
 
       - обработчик ошибок через throw, сделать в одном месте -- где?;
@@ -109,7 +110,7 @@ void MainWindow::initApplication()
 
     m_stockModel->initModel();
     m_dictModel->initModel();
-//    m_transactModel->initModel();
+    m_transactModel->initModel();
 
     ui->treeStock->setModel(m_stockModel);
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);

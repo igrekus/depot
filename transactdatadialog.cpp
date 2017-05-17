@@ -93,9 +93,9 @@ void TransactDataDialog::changeEvent(QEvent *e)
 
 void TransactDataDialog::on_spinDiff_valueChanged(int arg1)
 {
-    if (arg1 > 0) {
-        ui->editNote->setText("Приход");
-    }
+//    if (arg1 > 0) {
+//        ui->editNote->setText("Приход");
+//    }
 //    else {
 //        ui->editNote->clear();
 //    }
