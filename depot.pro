@@ -37,7 +37,8 @@ SOURCES += main.cpp\
     stockdatadialog.cpp \
     idstringmodel.cpp \
     reportmanager.cpp \
-    reportrequest.cpp
+    reportrequest.cpp \
+    recursivefilterproxymodel.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -63,7 +64,8 @@ HEADERS  += mainwindow.h \
     stockdatadialog.h \
     idstringmodel.h \
     reportmanager.h \
-    reportrequest.h
+    reportrequest.h \
+    recursivefilterproxymodel.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

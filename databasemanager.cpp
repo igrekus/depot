@@ -24,10 +24,16 @@ void DataBaseManager::connectToDatabase()
 //    db.setDatabaseName("depot");
     db.setDatabaseName("wh");
 
-    db.open();
-//    if (!db.open()) {
-//        throw db.lastError();
-//    }
+//    db.setHostName("10.10.15.9");
+//    db.setPort(3306);
+//    db.setUserName("root");
+//    db.setPassword("123456");
+//    db.setDatabaseName("wh");
+
+//    db.open();
+    if (!db.open()) {
+        throw db.lastError();
+    }
 
     qDebug() << "ok";
 }
@@ -653,6 +659,21 @@ void DataBaseManager::updateTransact(const TransactItem &item)
 void DataBaseManager::deleteTransact(const TransactItem &item)
 {
     QSqlQuery q = execSimpleQuery("CALL deleteTransact("+QString::number(item.itemId)+")");
+}
+
+TransactItem DataBaseManager::makeTransactItemFromStockItem(const StockItem &stock)
+{
+    return (TransactItem::TransactItemBuilder()
+//            .setId(0)                           // new transact
+            .setName(stock.itemName)
+            .setDate(QDate::currentDate())
+//            .setDiff(0)
+//            .setNote(QString())
+            .setStock(stock.itemId)               // ref to appropriate stock item
+//            .setStaff(0)
+            .setProject(stock.itemProject)
+//            .setBill(0)
+            .build());
 }
 
 void DataBaseManager::convertDB()

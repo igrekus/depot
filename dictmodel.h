@@ -32,7 +32,7 @@ public:
 
     DataBaseManager *m_dbman;
 
-    explicit DictModel(DataBaseManager *dbman, QObject *parent = 0);
+    explicit DictModel(DataBaseManager *dbman, QObject *parent = nullptr);
 
     void initModel();       // SqlError exception
 

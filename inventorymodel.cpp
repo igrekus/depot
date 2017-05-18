@@ -329,6 +329,14 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
+    case Constants::RoleSearchString: {
+        return QVariant(QString(tmpnode->inventoryItem.itemId+";"+
+                                tmpnode->inventoryItem.itemName+";"+
+                                tmpnode->inventoryItem.itemUnit+";"+
+                                tmpnode->inventoryItem.itemSerialn+";"+
+                                tmpnode->inventoryItem.itemFullname+";"));
+    break;
+    }
     default:
         break;
     }

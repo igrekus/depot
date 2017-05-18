@@ -60,7 +60,6 @@ public:
     void refreshTransact();
 //    void createStatusBar();
 
-    TransactItem makeTransactItemFromStockItem(const StockItem &stock);
 private slots:
 
     // обработка action
@@ -95,6 +94,8 @@ private slots:
     void on_treeStock_doubleClicked(const QModelIndex &index);
 
     void on_tableTransact_doubleClicked(const QModelIndex &index);    
+    void on_editSearch_textChanged(const QString &arg1);
+
 private:
     Ui::MainWindow *ui;
 
@@ -104,6 +105,9 @@ private:
     DictModel  *m_dictModel;
     StockModel *m_stockModel;
     TransactModel *m_transactModel;
+
+    RecursiveFilterProxyModel *m_stockSearchProxyModel;
+    RecursiveFilterProxyModel *m_transactSearchProxyModel;
 
     // actions
     QAction *actRefreshView;

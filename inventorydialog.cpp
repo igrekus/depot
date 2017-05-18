@@ -59,15 +59,15 @@ void InventoryDialog::initDialog()
     m_inventoryModel->setDictModel(m_dictModel);
     m_inventoryModel->initModel();
 
-    // TODO: proxy crashes because of double click debug info
-    m_searchProxyModel = new QSortFilterProxyModel(this);
+    m_searchProxyModel = new RecursiveFilterProxyModel(this);
     m_searchProxyModel->setSourceModel(m_inventoryModel);
     m_searchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_searchProxyModel->setFilterWildcard("");
-    m_searchProxyModel->setDynamicSortFilter(false);
+    m_searchProxyModel->setFilterRole(Constants::RoleSearchString);
+//    m_searchProxyModel->setDynamicSortFilter(false);
 
-    ui->treeInventory->setModel(m_inventoryModel);
-//    ui->treeInventory->setModel(m_searchProxyModel);
+//    ui->treeInventory->setModel(m_inventoryModel);
+    ui->treeInventory->setModel(m_searchProxyModel);
     ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
@@ -89,10 +89,10 @@ void InventoryDialog::procActRefreshView()
     }
     ui->treeInventory->hide();
     ui->treeInventory->setColumnWidth(0, trwidth*0.20);
-//    ui->treeInventory->setColumnWidth(1, trwidth*0.05);
+//    ui->treeInventory->setColumnWidth(1, trwidth*0.05); // -5
     ui->treeInventory->setColumnWidth(2, trwidth*0.35);
     ui->treeInventory->setColumnWidth(3, trwidth*0.05);
-    ui->treeInventory->setColumnWidth(4, trwidth*0.10); //+5
+    ui->treeInventory->setColumnWidth(4, trwidth*0.10);   // +5
     ui->treeInventory->setColumnWidth(5, trwidth*0.30);
     ui->treeInventory->show();
 }
@@ -146,7 +146,7 @@ void InventoryDialog::procActCategoryAdd()
         m_dictModel->updateCategoryList();
 
         ui->treeInventory->selectionModel()->clear();
-        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
     }
 }
@@ -165,7 +165,7 @@ void InventoryDialog::procActCategoryEdit()
                                             &ok);
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        m_inventoryModel->editCategory(index, newName);
+        m_inventoryModel->editCategory(m_searchProxyModel->mapToSource(index), newName);
 
         m_dictModel->updateCategoryList();
 
@@ -189,7 +189,7 @@ void InventoryDialog::procActCategoryDelete()
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
-        m_inventoryModel->deleteCategory(index);
+        m_inventoryModel->deleteCategory(m_searchProxyModel->mapToSource(index));
 
         m_dictModel->updateCategoryList();
 
@@ -218,13 +218,13 @@ void InventoryDialog::procActGroupAdd()
 
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        QModelIndex ind = m_inventoryModel->addGroup(pindex, newName);
+        QModelIndex ind = m_inventoryModel->addGroup(m_searchProxyModel->mapToSource(pindex), newName);
 
         m_dictModel->updateGroupList();
         m_dictModel->updateMapGroupToCategory();
 
         ui->treeInventory->selectionModel()->clear();
-        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
     }
 }
@@ -242,7 +242,7 @@ void InventoryDialog::procActGroupEdit()
                                             &ok);
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        m_inventoryModel->editGroup(index, newName);
+        m_inventoryModel->editGroup(m_searchProxyModel->mapToSource(index), newName);
 
         m_dictModel->updateGroupList();
 //        m_dictModel->updateMapGroupToCategory();
@@ -267,7 +267,7 @@ void InventoryDialog::procActGroupDelete()
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
-        m_inventoryModel->deleteGroup(index);
+        m_inventoryModel->deleteGroup(m_searchProxyModel->mapToSource(index));
 
         m_dictModel->updateGroupList();
         m_dictModel->updateMapGroupToCategory();
@@ -305,19 +305,19 @@ void InventoryDialog::procActInventoryAdd()
         return;
     }
 
-    QModelIndex ind = m_inventoryModel->addInventory(pindex, dialog.getData());
+    QModelIndex ind = m_inventoryModel->addInventory(m_searchProxyModel->mapToSource(pindex), dialog.getData());
 
     m_dictModel->updateProductList();
 
     ui->treeInventory->selectionModel()->clear();
-    ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 void InventoryDialog::procActInventoryCopy()
 {
-    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
-    ProductItem CopyProduct = m_inventoryModel->getProductItemByIndex(cur);
+    ProductItem CopyProduct = m_inventoryModel->getProductItemByIndex(m_searchProxyModel->mapToSource(index));
     CopyProduct.itemId = 0;
 
     InventoryDataDialog dialog(this);
@@ -330,19 +330,19 @@ void InventoryDialog::procActInventoryCopy()
         return;
     }
 
-    QModelIndex ind = m_inventoryModel->addInventory(cur.parent(), dialog.getData());
+    QModelIndex ind = m_inventoryModel->addInventory(m_searchProxyModel->mapToSource(index.parent()), dialog.getData());
 
     m_dictModel->updateProductList();
 
     ui->treeInventory->selectionModel()->clear();
-    ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 void InventoryDialog::procActInventoryEdit()
 {
-    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
-    ProductItem oldProduct = m_inventoryModel->getProductItemByIndex(cur);
+    ProductItem oldProduct = m_inventoryModel->getProductItemByIndex(m_searchProxyModel->mapToSource(index));
 
     InventoryDataDialog dialog(this);
 
@@ -354,7 +354,7 @@ void InventoryDialog::procActInventoryEdit()
         return;
     }
 
-    m_inventoryModel->editInventory(cur, dialog.getData());
+    m_inventoryModel->editInventory(m_searchProxyModel->mapToSource(index), dialog.getData());
 
     m_dictModel->updateProductList();
 }
@@ -368,7 +368,7 @@ void InventoryDialog::procActInventoryDelete()
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
-        m_inventoryModel->deleteInventory(index);
+        m_inventoryModel->deleteInventory(m_searchProxyModel->mapToSource(index));
 
         m_dictModel->updateProductList();
     }
@@ -405,8 +405,23 @@ void InventoryDialog::procActRegisterStock()
     }
 
     newStockItem = dialog.getData();
+    if (newStockItem.itemAmount<0)
+        newStockItem.itemAmount=0;
 
-    m_dbman->insertStock(newStockItem);
+    // TODO: check stock for dupes
+    qint32 newStockId = m_dbman->insertStock(newStockItem);
+
+    if (newStockItem.itemAmount>0) {
+        TransactItem newTransact(TransactItem::TransactItemBuilder()
+                                 .setDate(QDate::currentDate())
+                                 .setDiff(newStockItem.itemAmount)
+                                 .setNote(QString("Поступление"))
+                                 .setStock(newStockId)
+                                 .setStaff(22)         // TODO: FIX: add default staff
+                                 .setProject(newStockItem.itemProject)
+                                 .build());
+        m_dbman->insertTransact(newTransact);
+    }
 
     treeUpdated = true;
 
@@ -498,7 +513,6 @@ void InventoryDialog::on_btnDelete_clicked()
     actDelete->trigger();
 }
 
-
 void InventoryDialog::on_btnRegisterStock_clicked()
 {
     if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
@@ -511,16 +525,23 @@ void InventoryDialog::on_btnRegisterStock_clicked()
     actRegisterStock->trigger();
 }
 
-
 void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 {
     if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
         actInventoryEdit->trigger();
     }
-    qDebug() << m_inventoryModel->getInventoryItemByIndex(index);
+    qDebug() << m_inventoryModel->getInventoryItemByIndex(m_searchProxyModel->mapToSource(index));
 }
 
-
+void InventoryDialog::on_editSearch_textChanged(const QString &arg1)
+{
+//    if (arg1.size() < 3) {
+//        m_searchProxyModel->setFilterWildcard(QString());
+//    } else {
+//        m_searchProxyModel->setFilterWildcard(arg1);
+//    }
+    m_searchProxyModel->setFilterWildcard(arg1);
+}
 // ---------------------- column delegate ----------------------------
 void InventoryDialog::TextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
@@ -648,3 +669,4 @@ QString Utility::rndString(qint32 len)
     }
     return out;
 }
+

@@ -3,21 +3,20 @@
 
 /*
  TODO:
-    - !!!rewrite deletes to bool toggle!!!
-    - возможность менять кол-во в редакторе позиций на складе
-    - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
     - Транзакции изменяют остаток на складе
-    - сортировка категорий:
-      .Материалы
-      .Оборудование
-      .Оснастки
-      .Полуфабрикаты
-      .Готовые изделия
-      .После испытаний
-    - поиск в главном окне и окне создания номенклатуры:
-    http://stackoverflow.com/questions/250890/using-qsortfilterproxymodel-with-a-tree-model
-    lazy: http://stackoverflow.com/questions/25733990/qsortfilterproxymodel-and-lazily-populated-treeviews
+      + add
+      - edit
+      - delete
 
+    - поиск по темам
+    - выделение только искомой строки
+    - раскрытие дерева для показа искомого текста (от 2-3 букв в поиске)
+    - формат даты дд.мм.гггг
+    - починить кодировку в отчёте: QIdentityProxyModel
+    - контрастный цвет текста в окне дерева
+
+    - !!!rewrite deletes to bool toggle!!!
+    - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
 
       - обработчик ошибок через throw, сделать в одном месте -- где?;
 
@@ -92,6 +91,13 @@ MainWindow::MainWindow(QWidget *parent) :
     m_dictModel = new DictModel(m_dbman, this);
     m_stockModel = new StockModel(m_dbman, m_dictModel, this);
     m_transactModel = new TransactModel(m_dbman, m_dictModel, this);
+
+    m_stockSearchProxyModel = new RecursiveFilterProxyModel(this);
+    m_stockSearchProxyModel->setSourceModel(m_stockModel);
+    m_stockSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);
+    m_transactSearchProxyModel->setSourceModel(m_transactModel);
+    m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
 
 MainWindow::~MainWindow()
@@ -112,7 +118,8 @@ void MainWindow::initApplication()
     m_dictModel->initModel();
     m_transactModel->initModel();
 
-    ui->treeStock->setModel(m_stockModel);
+//    ui->treeStock->setModel(m_stockModel);
+    ui->treeStock->setModel(m_stockSearchProxyModel);
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeStock->setUniformRowHeights(false);
@@ -120,7 +127,8 @@ void MainWindow::initApplication()
     ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
 
-    ui->tableTransact->setModel(m_transactModel);
+//    ui->tableTransact->setModel(m_transactModel);
+    ui->tableTransact->setModel(m_transactSearchProxyModel);
     ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -204,22 +212,6 @@ void MainWindow::refreshTransact()
     m_transactModel->initModel();
 }
 
-
-TransactItem MainWindow::makeTransactItemFromStockItem(const StockItem &stock)
-{
-    return (TransactItem::TransactItemBuilder()
-//            .setId(0)                           // new transact
-            .setName(stock.itemName)
-            .setDate(QDate::currentDate())
-//            .setDiff(0)
-//            .setNote(QString())
-            .setStock(stock.itemId)             // ref to appropriate stock item
-//            .setStaff(0)
-            .setProject(stock.itemProject)
-//            .setBill(0)
-            .build());
-}
-
 // -------------------- Action Processing -----------------------------
 void MainWindow::procActRefreshView()
 {
@@ -273,15 +265,16 @@ void MainWindow::procActStockAdd()
 
     m_stockModel->addStock(newStockItem);
 //    qDebug() << pindex;
-    statusBar()->showMessage("Позиция добавлена на склад.", 10000);
+//    statusBar()->showMessage("Позиция добавлена на склад.", 10000);
 //    refreshStock(); // TODO: search and add to the correct branch
 }
 
 void MainWindow::procActStockEdit()
 {    
-    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex selectedIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex sourceIndex = m_stockSearchProxyModel->mapToSource(selectedIndex);
 
-    StockItem oldStockItem = m_stockModel->getStockItemByIndex(cur);
+    StockItem oldStockItem = m_stockModel->getStockItemByIndex(sourceIndex);
 
     StockDataDialog dialog(this);
     dialog.setData(oldStockItem)
@@ -295,12 +288,13 @@ void MainWindow::procActStockEdit()
 
     oldStockItem = dialog.getData();
 
-    m_stockModel->editStock(cur, oldStockItem);
+    m_stockModel->editStock(sourceIndex, oldStockItem);
 }
 
 void MainWindow::procActStockDelete()
 {
-    QModelIndex index = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex selectedIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex index = m_stockSearchProxyModel->mapToSource(selectedIndex);
     qint32 res = QMessageBox::question(this,
                                        "Внимание!",
                                        "Вы действительно хотите удалить выбранную позицию?",
@@ -313,13 +307,14 @@ void MainWindow::procActStockDelete()
 
 void MainWindow::procActTransactAdd()
 {
-    QModelIndex stockIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
-    StockItem stock = m_stockModel->getStockItemByIndex(stockIndex);
+    QModelIndex selectedIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
+    QModelIndex stockIndex = m_stockSearchProxyModel->mapToSource(selectedIndex);
+    StockItem stockItem = m_stockModel->getStockItemByIndex(stockIndex);
 
-    TransactItem newTransItem = makeTransactItemFromStockItem(stock);
+    TransactItem newTransactItem = m_dbman->makeTransactItemFromStockItem(stockItem);
 
     TransactDataDialog dialog(this);
-    dialog.setData(newTransItem)
+    dialog.setData(newTransactItem)
           .setDictModel(m_dictModel)
           .initDialog();
 
@@ -327,18 +322,23 @@ void MainWindow::procActTransactAdd()
         return;
     }
 
-    QModelIndex index = m_transactModel->addTransact(dialog.getData());
+    newTransactItem = dialog.getData();
+    QModelIndex index = m_transactModel->addTransact(newTransactItem);
 
-    // TODO: FIXNOW update stock with transact diff
+    stockItem.itemAmount += newTransactItem.itemDiff;
+    m_stockModel->editStock(stockIndex, stockItem);
+
+    QModelIndex indexToSelect = m_transactSearchProxyModel->mapFromSource(index);
 
     ui->tableTransact->selectionModel()->clear();
-    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    // TODO: select new record
+    ui->tableTransact->selectionModel()->setCurrentIndex(indexToSelect, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 void MainWindow::procActTransactEdit()
 {
-    QModelIndex index = ui->tableTransact->selectionModel()->selectedIndexes().first();
+    // TODO: affect stock item
+    QModelIndex selectedIndex = ui->tableTransact->selectionModel()->selectedIndexes().first();
+    QModelIndex index = m_transactSearchProxyModel->mapToSource(selectedIndex);
     TransactItem oldTransItem = m_transactModel->getTransactItemByIndex(index);
 
     TransactDataDialog dialog(this);
@@ -355,8 +355,9 @@ void MainWindow::procActTransactEdit()
 
 void MainWindow::procActTransactDelete()
 {
-    QItemSelectionModel *selection = ui->tableTransact->selectionModel();
-    QModelIndex index = selection->selectedIndexes().first();
+    // TODO: affect stock item
+    QModelIndex selectedIndex = ui->tableTransact->selectionModel()->selectedIndexes().first();
+    QModelIndex index = m_transactSearchProxyModel->mapToSource(selectedIndex);
 
     qint32 res = QMessageBox::question(this,
                                        "Внимание!",
@@ -368,7 +369,7 @@ void MainWindow::procActTransactDelete()
     }
 
     ui->tableTransact->selectionModel()->clear();
-    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 // -------------------- Misc Events -----------------------------------
@@ -391,6 +392,7 @@ void MainWindow::on_btnInventoryEditor_clicked()
 
     if (dialog.treeUpdated) {
         refreshStock();
+        refreshTransact();
     }
 }
 
@@ -493,7 +495,7 @@ void MainWindow::on_btnReport_clicked()
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {
-    m_stockModel->debugInfo(index);
+    qDebug() << m_stockModel->getStockItemByIndex(m_stockSearchProxyModel->mapToSource(index));
     if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemItem) {
         actTransactAdd->trigger();
     }
@@ -501,8 +503,19 @@ void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 
 void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 {
-    qDebug() << m_transactModel->getTransactItemByIndex(index);
+    qDebug() << m_transactModel->getTransactItemByIndex(m_transactSearchProxyModel->mapToSource(index));
     actTransactEdit->trigger();
+}
+
+void MainWindow::on_editSearch_textChanged(const QString &arg1)
+{
+    m_transactSearchProxyModel->setFilterWildcard(arg1);
+    m_stockSearchProxyModel->setFilterWildcard(arg1);
+    if (arg1.size()>=2) {
+        ui->treeStock->expandAll();
+    } else {
+        ui->treeStock->collapseAll();
+    }
 }
 
 // -------------------- Delegates -------------------------------------
@@ -656,4 +669,3 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
 // -------------------- Testing routines ------------------------------
 
 // -------------------- Utility ---------------------------------------
-

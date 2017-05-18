@@ -79,6 +79,7 @@ public:
     void deleteTransact(const TransactItem &item);
 
     // utility
+    TransactItem makeTransactItemFromStockItem(const StockItem &stock);
     void convertDB();
 
 signals:

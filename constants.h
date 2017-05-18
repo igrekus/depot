@@ -13,7 +13,8 @@ enum Role {
     RoleLevelId         = Qt::UserRole+1,
     RoleNodeType        = Qt::UserRole+2,
     RoleNodeId          = Qt::UserRole+3,
-    RoleNodeHasChildren = Qt::UserRole+4
+    RoleNodeHasChildren = Qt::UserRole+4,
+    RoleSearchString    = Qt::UserRole+5
 };
 
 enum TreeItemType {
@@ -36,7 +37,8 @@ enum Color {
     ColorReceipt = 0xff006100,
     ColorExpense = 0xff9c0006,
     ColorReceiptBackground = 0xffBAFAAD,
-    ColorExpenseBackground = 0xffFFD3C9
+    ColorExpenseBackground = 0xffFFD3C9,
+    ColorSearchBackground  = 0xffFFFF71
 };
 
 }

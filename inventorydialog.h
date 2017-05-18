@@ -15,6 +15,7 @@
 #include <linkeddict.h>
 #include <dictmodel.h>
 #include <stockdatadialog.h>
+#include <recursivefilterproxymodel.h>
 
 namespace Ui {
 class InventoryDialog;
@@ -40,7 +41,8 @@ public:
 
     InventoryModel *m_inventoryModel;
 
-    QSortFilterProxyModel *m_searchProxyModel;
+    RecursiveFilterProxyModel *m_searchProxyModel;
+//    QSortFilterProxyModel *m_searchProxyModel;
 
     DataBaseManager *m_dbman;
     DictModel *m_dictModel;
@@ -114,6 +116,7 @@ private slots:
     void on_btnDelete_clicked();
     void on_treeInventory_doubleClicked(const QModelIndex &index);
     void on_btnRegisterStock_clicked();
+    void on_editSearch_textChanged(const QString &arg1);
 
 private:
     Ui::InventoryDialog *ui;
