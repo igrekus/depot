@@ -34,17 +34,17 @@ bool RecursiveFilterProxyModel::filterAcceptsRow(int sourceRow, const QModelInde
     return QSortFilterProxyModel::filterAcceptsRow(sourceRow, sourceParent);
 }
 
-QVariant RecursiveFilterProxyModel::data(const QModelIndex &index, int role) const
-{
-    if (!filterRegExp().isEmpty()) {
-        if (role == Qt::BackgroundRole) {
-            QModelIndex sourceIndex = mapToSource(index);
-            if (filterAcceptsRow(sourceIndex.row(), sourceIndex.parent())) {
-                if (sourceIndex.data(Qt::DisplayRole).toString().contains(filterRegExp())) {
-                    return QVariant(QBrush(QColor(QRgb(Constants::ColorSearchBackground))));
-                }
-            }
-        }
-    }
-    return QSortFilterProxyModel::data(index, role);
-}
+//QVariant RecursiveFilterProxyModel::data(const QModelIndex &index, int role) const
+//{
+//    if (!filterRegExp().isEmpty()) {
+//        if (role == Qt::BackgroundRole) {
+//            QModelIndex sourceIndex = mapToSource(index);
+//            if (filterAcceptsRow(sourceIndex.row(), sourceIndex.parent())) {
+//                if (sourceIndex.data(Qt::DisplayRole).toString().contains(filterRegExp())) {
+//                    return QVariant(QBrush(QColor(QRgb(Constants::ColorSearchBackground))));
+//                }
+//            }
+//        }
+//    }
+//    return QSortFilterProxyModel::data(index, role);
+//}

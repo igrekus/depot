@@ -8,6 +8,7 @@ ReportManager::ReportManager(QWidget *parent) :
     ui->setupUi(this);
 
     m_reportDir = QCoreApplication::applicationDirPath()+"/reports/";
+    qDebug() << "report dir:" << QCoreApplication::applicationDirPath()+"/reports/";
 }
 
 ReportManager::~ReportManager()
@@ -66,12 +67,14 @@ void ReportManager::initDialog()
     m_filteredGroupModel_1 = new MapModel(this);
     m_filteredGroupModel_2 = new MapModel(this);
     m_reportModel = new QSqlQueryModel(this);
+    m_decoderModel = new DecoderProxyModel(this);
     m_proxyModel = new QSortFilterProxyModel(this);
 
-    m_proxyModel->setSourceModel(m_reportModel);
-//    m_proxyModel->setSortLocaleAware(true);
+    m_decoderModel->setSourceModel(m_reportModel);
+    m_proxyModel->setSourceModel(m_decoderModel);
 
     ui->tableView->setModel(m_proxyModel);
+//    ui->tableView->setModel(m_decoderModel);
     ui->tableView->verticalHeader()->hide();
     ui->tableView->verticalHeader()->setDefaultSectionSize(14);
     ui->tableView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -79,6 +82,8 @@ void ReportManager::initDialog()
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->horizontalHeader()->setHighlightSections(false);
     ui->tableView->horizontalHeader()->setFixedHeight(20);
+//    ui->tableView->setSortingEnabled(true);
+//    ui->tableView->sortByColumn(1, Qt::DescendingOrder);
 
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
     ui->comboProject->setCurrentIndex(0);
@@ -326,8 +331,9 @@ void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
 
 void ReportManager::saveStockReport()
 {
-//    QString fname = m_reportDir+m_exportFileName;
-    QString fname = "d:/"+m_exportFileName;
+    // TODO: FIX: refactor this crap
+    QString fname = m_reportDir+m_exportFileName;
+//    QString fname = "d:/"+m_exportFileName;
 
     QXlsx::Document xlsx;
 
@@ -372,61 +378,6 @@ void ReportManager::saveTransactReport()
 
         // write table
         xlsxWriteTable(xlsx, tblTopLeft, m_proxyModel);
-
-        xlsx.saveAs(fname);
-
-//        QXlsx::Format fmt;
-//        fmt.setLeftBorderColor(QColor(Qt::black));
-//        fmt.setLeftBorderStyle(QXlsx::Format::BorderThin);
-//        fmt.setRightBorderColor(QColor(Qt::black));
-//        fmt.setRightBorderStyle(QXlsx::Format::BorderThin);
-//        fmt.setBottomBorderColor(QColor(Qt::lightGray));
-//        fmt.setBottomBorderStyle(QXlsx::Format::BorderThin);
-//        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-//        fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
-//        fmt.setTextWarp(true);
-
-//        QXlsx::Format goodFmt(fmt);
-//        goodFmt.setFontColor(QColor(QRgb(Constants::ColorReceipt)));
-//        goodFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorReceiptBackground)));
-//        QXlsx::Format badFmt(fmt);
-//        badFmt.setFontColor(QColor(QRgb(Constants::ColorExpense)));
-//        badFmt.setPatternBackgroundColor(QColor(QRgb(Constants::ColorExpenseBackground)));
-//        QXlsx::Format strFmt(fmt);
-//        strFmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
-
-//        for (qint32 i=0; i<m_reportModel->rowCount(); ++i) {
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+0, m_reportModel->data(m_reportModel->index(i, 1)).toDate().toString(Qt::ISODate), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+1, m_reportModel->data(m_reportModel->index(i, 2)).toString(), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+2, m_reportModel->data(m_reportModel->index(i, 3)).toString(), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+3, m_reportModel->data(m_reportModel->index(i, 4)).toString(), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+4, m_reportModel->data(m_reportModel->index(i, 5)).toString(), strFmt);
-//            qint32 qty = m_reportModel->data(m_reportModel->index(i, 6)).toInt();
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+5, qty, qty>=0?goodFmt:badFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+6, m_reportModel->data(m_reportModel->index(i, 7)).toString(), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+7, m_reportModel->data(m_reportModel->index(i, 8)).toString(), strFmt);
-//            xlsx.write(tblTopLeft.row()+1+i, tblTopLeft.column()+8, m_reportModel->data(m_reportModel->index(i, 9)).toString(), strFmt);
-//        }
-//        fmt = QXlsx::Format();
-//        fmt.setBorderColor(QColor(Qt::black));
-//        fmt.setBorderStyle(QXlsx::Format::BorderThin);
-//        fmt.setPatternBackgroundColor(QColor(QRgb(0xffDDDDDD)));
-//        fmt.setFontBold(true);
-//        fmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
-//        fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
-//        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-//                                         tblTopLeft.column(),
-//                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
-//                                         tblTopLeft.column()+3), fmt);
-//        xlsx.mergeCells(QXlsx::CellRange(tblTopLeft.row()+1+m_reportModel->rowCount(),
-//                                         tblTopLeft.column()+6,
-//                                         tblTopLeft.row()+1+m_reportModel->rowCount(),
-//                                         tblTopLeft.column()+8), fmt);
-//        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+4, "ИТОГО:", fmt);
-//        fmt.setHorizontalAlignment(QXlsx::Format::AlignRight);
-//        QXlsx::CellRange sumRange(tblTopLeft.row()+1,                             tblTopLeft.column()+5,
-//                                  tblTopLeft.row()+1+m_reportModel->rowCount()-1, tblTopLeft.column()+5);
-//        xlsx.write(tblTopLeft.row()+1+m_reportModel->rowCount(), tblTopLeft.column()+5, "=SUM("+sumRange.toString()+")", fmt);
 
         xlsx.saveAs(fname);
 }
@@ -502,6 +453,7 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Место");
         ui->tableView->hideColumn(0);
+//        ui->tableView->sortByColumn(4, Qt::AscendingOrder);
         resizeStockTable();
         m_reportType = ReportStock;
         break;
@@ -519,6 +471,7 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Сотрудник");
         m_reportModel->setHeaderData(9, Qt::Horizontal, "Примечание");
         ui->tableView->hideColumn(0);
+//        ui->tableView->sortByColumn(1, Qt::DescendingOrder);
         resizeTransactTable();
         m_reportType = ReportTransact;
         break;
@@ -537,16 +490,22 @@ void ReportManager::on_btnExport_clicked()
                              "Нет данных для экспорта в Excel.");
         return;
     }
+
+    QDir reportDir(m_reportDir);
+    if (!reportDir.exists())
+        reportDir.mkpath(reportDir.absolutePath());
+
     if (m_reportType == ReportStock) {
         saveStockReport();
         QMessageBox::information(this,
                                  "Информация",
-                                 "Отчёт экспортирован успешно.");
+                                 "Отчёт об остатках успешно экспортирован.");
     }
     if (m_reportType == ReportTransact) {
         saveTransactReport();
         QMessageBox::information(this,
                                  "Информация",
-                                 "Отчёт экспортирован успешно.");
+                                 "Отчёт расходах успешно экспортирован.");
     }
+    QDesktopServices::openUrl(QUrl::fromLocalFile(reportDir.absolutePath()));
 }

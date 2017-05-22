@@ -3,8 +3,6 @@
 
 #include <QObject>
 #include <QSortFilterProxyModel>
-#include <QBrush>
-#include <constants.h>
 
 class RecursiveFilterProxyModel : public QSortFilterProxyModel
 {
@@ -15,7 +13,7 @@ public:
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
+//    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 };
 
 #endif // RECURSIVEFILTERPROXYMODEL_H

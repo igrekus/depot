@@ -8,11 +8,6 @@
       - edit
       - delete
 
-    - поиск по темам
-    - выделение только искомой строки
-    - раскрытие дерева для показа искомого текста (от 2-3 букв в поиске)
-    - формат даты дд.мм.гггг
-    - починить кодировку в отчёте: QIdentityProxyModel
     - контрастный цвет текста в окне дерева
 
     - !!!rewrite deletes to bool toggle!!!
@@ -60,8 +55,7 @@ method chain:
         customer.newOrder()
                 .with(6, "TAL")
                 .with(5, "HPK").skippable()
-                .with(3, "LGV")
-                .priorityRush();
+                .with(3, "LGV").priorityRush();
     }
 
 data validation:
@@ -92,9 +86,10 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stockModel = new StockModel(m_dbman, m_dictModel, this);
     m_transactModel = new TransactModel(m_dbman, m_dictModel, this);
 
-    m_stockSearchProxyModel = new RecursiveFilterProxyModel(this);
+    m_stockSearchProxyModel = new ProjectRecursiveFilterProxyModel(this);
     m_stockSearchProxyModel->setSourceModel(m_stockModel);
     m_stockSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
     m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);
     m_transactSearchProxyModel->setSourceModel(m_transactModel);
     m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -118,7 +113,6 @@ void MainWindow::initApplication()
     m_dictModel->initModel();
     m_transactModel->initModel();
 
-//    ui->treeStock->setModel(m_stockModel);
     ui->treeStock->setModel(m_stockSearchProxyModel);
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -127,7 +121,6 @@ void MainWindow::initApplication()
     ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
     ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
 
-//    ui->tableTransact->setModel(m_transactModel);
     ui->tableTransact->setModel(m_transactSearchProxyModel);
     ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -136,6 +129,7 @@ void MainWindow::initApplication()
     ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->horizontalHeader()->setHighlightSections(false);
     ui->tableTransact->horizontalHeader()->setFixedHeight(20);
+//    ui->tableTransact->setItemDelegate(new TextDelegate(ui->tableTransact));
 
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
@@ -210,6 +204,13 @@ void MainWindow::refreshTransact()
 {
     m_transactModel->clear();
     m_transactModel->initModel();
+}
+
+void MainWindow::searchExpand()
+{
+    if (ui->editSearch->text().size()>2) {
+        ui->treeStock->expandAll();
+    }
 }
 
 // -------------------- Action Processing -----------------------------
@@ -508,19 +509,31 @@ void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 }
 
 void MainWindow::on_editSearch_textChanged(const QString &arg1)
-{
+{    
     m_transactSearchProxyModel->setFilterWildcard(arg1);
     m_stockSearchProxyModel->setFilterWildcard(arg1);
-    if (arg1.size()>=2) {
-        ui->treeStock->expandAll();
-    } else {
+    if (arg1.isEmpty()) {
         ui->treeStock->collapseAll();
+        return;
     }
+
+    searchExpand();
+}
+
+void MainWindow::on_comboProject_currentIndexChanged(int index)
+{
+    Q_UNUSED(index)
+//    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
+    m_stockSearchProxyModel->setFilterProjectId(ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+    m_stockSearchProxyModel->invalidate();
+
+    searchExpand();
 }
 
 // -------------------- Delegates -------------------------------------
 void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
+    // TODO: FIX: refactor this crap
     QStyleOptionViewItem opt = option;
 
     painter->save();
@@ -557,8 +570,28 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
             icon = iconClosedFolder;
         }
         painter->drawImage(iconPos, icon.scaled(iconSize, Qt::KeepAspectRatio, Qt::FastTransformation));
+
+        QString searchStr = qobject_cast<const QSortFilterProxyModel *>(index.model())->filterRegExp().pattern();
+        QString text = index.data(Qt::DisplayRole).toString();
+        if (text.contains(searchStr, Qt::CaseInsensitive)) {
+            qint32 pos = text.indexOf(searchStr, 0, Qt::CaseInsensitive);
+            qint32 len = searchStr.size();
+            QString hlstr = text.mid(pos, len);
+
+            QFontMetrics fm = painter->fontMetrics();
+
+            QRect trect = fm.boundingRect(hlstr);
+            QRect shiftrect = fm.boundingRect(text.left(pos));
+
+            shiftrect.moveTo(option.rect.topLeft());
+            trect.moveTo(shiftrect.topRight());
+            painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
+        }
+
         if (cellSelected) {
-            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.brightText().color());
+            pal.setColor(QPalette::ButtonText, pal.text().color());
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
@@ -576,8 +609,8 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
         QPalette pal = option.palette;
 
         QPoint iconPos(option.rect.topLeft());
-        QSize iconSize(option.rect.size());
         iconPos.rx() += 3 + 10;
+        QSize iconSize(option.rect.size());
 
         QImage icon;
         if (!hasChildren) {
@@ -589,8 +622,27 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
         }
         painter->drawImage(iconPos, icon.scaled(iconSize, Qt::KeepAspectRatio, Qt::FastTransformation));
 
+        QString searchStr = qobject_cast<const QSortFilterProxyModel *>(index.model())->filterRegExp().pattern();
+        QString text = index.data(Qt::DisplayRole).toString();
+        if (text.contains(searchStr, Qt::CaseInsensitive)) {
+            qint32 pos = text.indexOf(searchStr, 0, Qt::CaseInsensitive);
+            qint32 len = searchStr.size();
+            QString hlstr = text.mid(pos, len);
+
+            QFontMetrics fm = painter->fontMetrics();
+
+            QRect trect = fm.boundingRect(hlstr);
+            QRect shiftrect = fm.boundingRect(text.left(pos));
+
+            shiftrect.moveTo(option.rect.topLeft());
+            trect.moveTo(shiftrect.topRight());
+            painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
+        }
+
         if (cellSelected) {
-            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.brightText().color());
+            pal.setColor(QPalette::ButtonText, pal.text().color());
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
@@ -612,20 +664,35 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
         painter->drawLine(QLine(option.rect.x()+41, option.rect.y(),
                                 option.rect.x()+41, option.rect.y()+option.rect.height()));
 
+        QString searchStr = qobject_cast<const QSortFilterProxyModel *>(index.model())->filterRegExp().pattern();
+        QString text = index.data(Qt::DisplayRole).toString();
+        if (text.contains(searchStr, Qt::CaseInsensitive)) {
+            qint32 pos = text.indexOf(searchStr, 0, Qt::CaseInsensitive);
+            qint32 len = searchStr.size();
+            QString hlstr = text.mid(pos, len);
+
+            QFontMetrics fm = painter->fontMetrics();
+
+            QRect trect = fm.boundingRect(hlstr);
+            QRect shiftrect = fm.boundingRect(text.left(pos));
+
+            shiftrect.moveTo(option.rect.topLeft());
+            trect.moveTo(shiftrect.topRight());
+            painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
+        }
+
         if (cellSelected) {
-            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 20, 0, 0, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
+//            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.brightText().color());
+            pal.setColor(QPalette::ButtonText, pal.text().color());
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());
-            option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 20, 0, 0, 0),
-                                                 1, pal, true,
-                                                 index.data(Qt::DisplayRole).toString(),
-                                                 QPalette::ButtonText);
         }
+        option.widget->style()->drawItemText(painter, option.rect.adjusted(+25 + 20, 0, 0, 0),
+                                             1, pal, true,
+                                             index.data(Qt::DisplayRole).toString(),
+                                             QPalette::ButtonText);
         break;
     }
     }
@@ -651,9 +718,28 @@ void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewIt
         painter->drawLine(QLine(option.rect.x()+1, option.rect.y(),
                                 option.rect.x()+1, option.rect.y()+option.rect.height()));
 
+        QString searchStr = qobject_cast<const QSortFilterProxyModel *>(index.model())->filterRegExp().pattern();
+        QString text = index.data(Qt::DisplayRole).toString();
+        if (text.contains(searchStr, Qt::CaseInsensitive)) {
+            qint32 pos = text.indexOf(searchStr, 0, Qt::CaseInsensitive);
+            qint32 len = searchStr.size();
+            QString hlstr = text.mid(pos, len);
+
+            QFontMetrics fm = painter->fontMetrics();
+
+            QRect trect = fm.boundingRect(hlstr);
+            QRect shiftrect = fm.boundingRect(text.left(pos));
+
+            shiftrect.moveTo(option.rect.topLeft());
+            trect.moveTo(shiftrect.topRight());
+            painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
+        }
+
         QPalette pal = option.palette;
         if (cellSelected) {
-            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+//            pal.setColor(QPalette::ButtonText, pal.brightText().color());
+//            pal.setColor(QPalette::ButtonText, pal.highlightedText().color());
+            pal.setColor(QPalette::ButtonText, pal.text().color());
         }
         else {
             pal.setColor(QPalette::ButtonText, pal.text().color());

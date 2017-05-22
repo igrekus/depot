@@ -353,6 +353,9 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
+    case Constants::RoleProjectId: {
+        return tmpitem.itemProject;
+    }
     default:
         break;
     }

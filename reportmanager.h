@@ -7,11 +7,15 @@
 #include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
 #include <QMessageBox>
+#include <QUrl>
+#include <QDesktopServices>
+#include <QDir>
 
 #include <databasemanager.h>
 #include <dictmodel.h>
 #include <mapmodel.h>
 #include <reportrequest.h>
+#include <decoderproxymodel.h>
 
 #include "xlsxdocument.h"
 #include "xlsxworkbook.h"
@@ -47,6 +51,7 @@ public:
 
     QSqlQueryModel *m_reportModel;
     QSortFilterProxyModel *m_proxyModel;
+    DecoderProxyModel *m_decoderModel;
 
     QString m_reportDir;
     QString m_exportFileName;

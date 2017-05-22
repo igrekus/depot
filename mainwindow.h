@@ -9,6 +9,7 @@
 #include <QInputDialog>
 #include <QItemSelectionModel>
 #include <QMessageBox>
+#include <QRegExp>
 
 #include <reportmanager.h>
 #include <mapmodel.h>
@@ -20,6 +21,8 @@
 #include <inventorydialog.h>
 #include <transactdatadialog.h>
 #include <stockdatadialog.h>
+#include <recursivefilterproxymodel.h>
+#include <projectrecursivefilterproxymodel.h>
 
 namespace Ui {
 class MainWindow;
@@ -60,6 +63,8 @@ public:
     void refreshTransact();
 //    void createStatusBar();
 
+    void searchExpand();
+
 private slots:
 
     // обработка action
@@ -92,9 +97,10 @@ private slots:
     void on_btnReport_clicked();
 
     void on_treeStock_doubleClicked(const QModelIndex &index);
-
     void on_tableTransact_doubleClicked(const QModelIndex &index);    
+
     void on_editSearch_textChanged(const QString &arg1);
+    void on_comboProject_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
@@ -106,7 +112,7 @@ private:
     StockModel *m_stockModel;
     TransactModel *m_transactModel;
 
-    RecursiveFilterProxyModel *m_stockSearchProxyModel;
+    ProjectRecursiveFilterProxyModel *m_stockSearchProxyModel;
     RecursiveFilterProxyModel *m_transactSearchProxyModel;
 
     // actions

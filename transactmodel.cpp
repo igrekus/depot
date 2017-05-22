@@ -56,7 +56,7 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
     case Qt::DisplayRole: {
         switch (index.column()) {
         case ColumnDate: {
-            return QVariant(m_data.at(index.row()).itemDate.toString(Qt::ISODate));
+            return QVariant(m_data.at(index.row()).itemDate.toString("dd.MM.yyyy"));
             break;
         }
         case ColumnProduct: {
