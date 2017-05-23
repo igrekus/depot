@@ -104,6 +104,10 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
             return Qt::AlignCenter;
             break;
         }
+        case ColumnProject: {
+            return Qt::AlignCenter;
+            break;
+        }
         }
     }
     case Qt::BackgroundRole: {

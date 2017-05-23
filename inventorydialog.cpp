@@ -72,11 +72,12 @@ void InventoryDialog::initDialog()
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeInventory->setUniformRowHeights(false);
     ui->treeInventory->setAlternatingRowColors(true);
-    ui->treeInventory->setItemDelegateForColumn(2, new TextDelegate(ui->treeInventory));
-    ui->treeInventory->setItemDelegateForColumn(3, new TextDelegate(ui->treeInventory));
-    ui->treeInventory->setItemDelegateForColumn(4, new TextDelegate(ui->treeInventory));
-    ui->treeInventory->setItemDelegateForColumn(5, new TextDelegate(ui->treeInventory));
-    ui->treeInventory->hideColumn(1);
+    ui->treeInventory->setItemDelegate(new DelegateHighligtableTreeText(ui->treeInventory));
+//    ui->treeInventory->setItemDelegateForColumn(2, new TextDelegate(ui->treeInventory));
+//    ui->treeInventory->setItemDelegateForColumn(3, new TextDelegate(ui->treeInventory));
+//    ui->treeInventory->setItemDelegateForColumn(4, new TextDelegate(ui->treeInventory));
+//    ui->treeInventory->setItemDelegateForColumn(5, new TextDelegate(ui->treeInventory));
+    ui->treeInventory->hideColumn(1); // hide "code" column
 
     actRefreshView->trigger();
 }
@@ -89,7 +90,7 @@ void InventoryDialog::procActRefreshView()
     }
     ui->treeInventory->hide();
     ui->treeInventory->setColumnWidth(0, trwidth*0.20);
-//    ui->treeInventory->setColumnWidth(1, trwidth*0.05); // -5
+//    ui->treeInventory->setColumnWidth(1, trwidth*0.05); // -5, hidden code column
     ui->treeInventory->setColumnWidth(2, trwidth*0.35);
     ui->treeInventory->setColumnWidth(3, trwidth*0.05);
     ui->treeInventory->setColumnWidth(4, trwidth*0.10);   // +5
@@ -258,7 +259,7 @@ void InventoryDialog::procActGroupDelete()
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Нельзя удалить непустую группу. "
-                             "Сначала удалите все позиции хранения.");
+                             "Сначала удалите всю номенклатуру.");
         return;
     }
     qint32 res = QMessageBox::question(this,
@@ -364,7 +365,7 @@ void InventoryDialog::procActInventoryDelete()
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
     qint32 res = QMessageBox::question(this,
                                        "Внимание!",
-                                       "Вы действительно хотите удалить выбранную группу?",
+                                       "Вы действительно хотите удалить выбранную номенклатуру?",
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
@@ -535,12 +536,11 @@ void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
 
 void InventoryDialog::on_editSearch_textChanged(const QString &arg1)
 {
-//    if (arg1.size() < 3) {
-//        m_searchProxyModel->setFilterWildcard(QString());
-//    } else {
-//        m_searchProxyModel->setFilterWildcard(arg1);
-//    }
+    if (arg1.size() == 0)
+        ui->treeInventory->collapseAll();
     m_searchProxyModel->setFilterWildcard(arg1);
+    if (arg1.size() > 2)
+        ui->treeInventory->expandAll();
 }
 // ---------------------- column delegate ----------------------------
 void InventoryDialog::TextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const

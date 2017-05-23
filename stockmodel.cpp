@@ -166,7 +166,7 @@ void StockModel::clear()
 
 QVariant StockModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"№", "Наименование", "Остаток", "№ партии", "Тема", "Место хранения"};
+    const QStringList headers = {"Каталог", "Наименование", "Единица", "Остаток", "№ партии", "Тема", "Место хранения", "Полное наименование"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers[section];
     }
@@ -242,41 +242,54 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case NumberColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
-                return tmpitem.itemId;
-            } else {
-                return tmpitem.itemName;
+                return tmpitem.itemProduct;
             }
+            return tmpitem.itemName;
             break;
         }
         case NameColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemName;
-            } else {
-                return QVariant();
+            }
+            break;
+        }
+        case UnitColumn: {
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemUnit;
             }
             break;
         }
         case AmountColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemAmount;
-            } else {
-                return QVariant();
             }
             break;
         }
         case SerialnColumn: {
-            return tmpitem.itemSerialn;
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemSerialn;
+            }
             break;
         }
         case ProjectColumn: {            
-            if (tmpitem.itemProject == 0) {
-                return QVariant(QString("INVALID PROJECT"));
+            if (tmpitem.itemType == Constants::ItemItem) {
+                if (tmpitem.itemProject == 0) {
+                    return QVariant(QString("INVALID PROJECT"));
+                }
+                return m_dictModel->m_projectListModel->getData(tmpitem.itemProject);
             }
-            return m_dictModel->m_projectListModel->getData(tmpitem.itemProject);
             break;
         }
         case LocationColumn: {
-            return m_dictModel->m_locationListModel->getData(tmpitem.itemLocation);
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return m_dictModel->m_locationListModel->getData(tmpitem.itemLocation);
+            }
+            break;
+        }
+        case FullnameColumn: {
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemFullname;
+            }
             break;
         }
         case ColumnCount:
@@ -286,71 +299,17 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         break;
     }
     case Constants::RoleLevelId: {
-        switch (index.column()) {
-        case NumberColumn:
-        case NameColumn:
-        case AmountColumn:
-        case SerialnColumn:
-        case ProjectColumn:
-        case LocationColumn: {
-            return tmpitem.itemLevel;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
-        break;
+        return tmpitem.itemLevel;
     }
     case Constants::RoleNodeType: {
-        switch (index.column()) {
-        case NumberColumn:
-        case NameColumn:
-        case AmountColumn:
-        case SerialnColumn:
-        case ProjectColumn:
-        case LocationColumn: {
-            return tmpitem.itemType;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return tmpitem.itemType;
         break;
     }
     case Constants::RoleNodeId: {
-        switch (index.column()) {
-        case NumberColumn:
-        case NameColumn:
-        case AmountColumn:
-        case SerialnColumn:
-        case ProjectColumn:
-        case LocationColumn: {
-            return tmpitem.itemId;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
-        break;
+        return tmpitem.itemId;
     }
     case Constants::RoleNodeHasChildren: {
-        switch (index.column()) {
-        case NumberColumn:
-        case NameColumn:
-        case AmountColumn:
-        case SerialnColumn:
-        case ProjectColumn:
-        case LocationColumn: {
-            return !tmpnode->children.isEmpty();
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return !tmpnode->children.isEmpty();
         break;
     }
     case Constants::RoleProjectId: {

@@ -10,6 +10,7 @@
 #include <QItemSelectionModel>
 #include <QMessageBox>
 #include <QRegExp>
+#include <QCompleter>
 
 #include <reportmanager.h>
 #include <mapmodel.h>
@@ -23,6 +24,7 @@
 #include <stockdatadialog.h>
 #include <recursivefilterproxymodel.h>
 #include <projectrecursivefilterproxymodel.h>
+#include <delegatehighligtabltreetext.h>
 
 namespace Ui {
 class MainWindow;
@@ -38,19 +40,19 @@ public:
     static QImage iconClosedFolder;
     static QImage iconDisabledFolder;
 
-    class BranchDelegate : public QStyledItemDelegate
+    class StockBranchDelegate : public QStyledItemDelegate
     {
     public:
-        BranchDelegate(QObject *parent = nullptr) {Q_UNUSED(parent)}
-        ~BranchDelegate() {}
+        StockBranchDelegate(QObject *parent = nullptr) {Q_UNUSED(parent)}
+        ~StockBranchDelegate() {}
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     };
 
-    class TextDelegate : public QStyledItemDelegate
+    class StockTextDelegate : public QStyledItemDelegate
     {
     public:
-        TextDelegate(QObject *parent = nullptr) {Q_UNUSED(parent)}
-        ~TextDelegate() {}
+        StockTextDelegate(QObject *parent = nullptr) {Q_UNUSED(parent)}
+        ~StockTextDelegate() {}
         void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
     };
 
@@ -114,6 +116,9 @@ private:
 
     ProjectRecursiveFilterProxyModel *m_stockSearchProxyModel;
     RecursiveFilterProxyModel *m_transactSearchProxyModel;
+
+    // combo completers
+    QCompleter *projectCompleter;
 
     // actions
     QAction *actRefreshView;

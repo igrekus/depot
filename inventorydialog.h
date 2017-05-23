@@ -16,6 +16,7 @@
 #include <dictmodel.h>
 #include <stockdatadialog.h>
 #include <recursivefilterproxymodel.h>
+#include <delegatehighligtabltreetext.h>
 
 namespace Ui {
 class InventoryDialog;

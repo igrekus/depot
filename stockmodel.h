@@ -25,10 +25,12 @@ public:
         RamificationColumn = 0,
         NumberColumn = RamificationColumn,
         NameColumn,
+        UnitColumn,
         AmountColumn,
         SerialnColumn,
         ProjectColumn,
         LocationColumn,
+        FullnameColumn,
         ColumnCount
     };
     Q_ENUM(Columns)

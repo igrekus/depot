@@ -3,21 +3,34 @@
 
 /*
  TODO:
+    Убрать описание горячих клавиш из кнопок
+
+    Склад:
+    - ввести уровень надкотегорий
+
+    Номенклатура:
+    - сделать сортировку при добавлении
+
+    Транзакции:
     - Транзакции изменяют остаток на складе
       + add
       - edit
       - delete
 
-    - контрастный цвет текста в окне дерева
+    Отчёты:
 
     - !!!rewrite deletes to bool toggle!!!
     - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
 
       - обработчик ошибок через throw, сделать в одном месте -- где?;
 
-Если в классе только слоты и нет сигналов, и используется new signal/slots syntax (connect в компайл-тайм к указателю на метод / лямбде вместо макросов SIGNAL/SLOT), то класс не должен иметь макрос Q_OBJECT и для него не будет сгенерирован *_moc.cpp.
+Если в классе только слоты и нет сигналов, и используется new signal/slots syntax (connect в компайл-тайм к
+указателю на метод / лямбде вместо макросов SIGNAL/SLOT), то класс не должен иметь макрос Q_OBJECT и для него не
+будет сгенерирован *_moc.cpp.
 
-Весь Qt позволяет подписываться на события и просто функциями. А учётом того, что этой функций может быть и лямбда, мы легко получаем механизм подписки на события любым своим (не входящий в метасистему Qt и соответственно хоть с шаблонами, хоть с чем угодно) классом в виде конструкции connect(sender, signal, [=]{reciver_object.handler();}).
+Весь Qt позволяет подписываться на события и просто функциями. А учётом того, что этой функций может быть и лямбда,
+мы легко получаем механизм подписки на события любым своим (не входящий в метасистему Qt и соответственно хоть с
+шаблонами, хоть с чем угодно) классом в виде конструкции connect(sender, signal, [=]{reciver_object.handler();}).
 
 rework model:
       - store navigational data in the nodes (self row, parent row, etc.):
@@ -117,9 +130,11 @@ void MainWindow::initApplication()
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeStock->setUniformRowHeights(false);
-    ui->treeStock->setIndentation(0);
-    ui->treeStock->setItemDelegate(new TextDelegate(ui->treeStock));
-    ui->treeStock->setItemDelegateForColumn(0, new BranchDelegate(ui->treeStock));
+    ui->treeStock->setAlternatingRowColors(true);
+    ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
+//    ui->treeStock->setIndentation(0);
+//    ui->treeStock->setItemDelegate(new StockTextDelegate(ui->treeStock));
+//    ui->treeStock->setItemDelegateForColumn(0, new StockBranchDelegate(ui->treeStock));
 
     ui->tableTransact->setModel(m_transactSearchProxyModel);
     ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -129,10 +144,20 @@ void MainWindow::initApplication()
     ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->horizontalHeader()->setHighlightSections(false);
     ui->tableTransact->horizontalHeader()->setFixedHeight(20);
-//    ui->tableTransact->setItemDelegate(new TextDelegate(ui->tableTransact));
+    ui->tableTransact->setItemDelegate(new DelegateHighligtableTableText(ui->tableTransact));
+
+    projectCompleter = new QCompleter(this);
+    projectCompleter->setModel(m_dictModel->m_projectListModel);
+//    projectCompleter->setCompletionRole(Qt::DisplayRole);
+//    projectCompleter->setCompletionColumn(0);
+    projectCompleter->setCaseSensitivity(Qt::CaseInsensitive);
+    projectCompleter->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
+    projectCompleter->setMaxVisibleItems(20);
+    projectCompleter->setFilterMode(Qt::MatchContains);
 
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
-
+    ui->comboProject->setInsertPolicy(QComboBox::NoInsert);
+    ui->comboProject->setCompleter(projectCompleter);
     ui->comboProject->setCurrentIndex(0);
 
     actRefreshView->trigger();
@@ -219,14 +244,19 @@ void MainWindow::procActRefreshView()
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
     ui->treeStock->setColumnWidth(0, trwidth*0.15);
-    ui->treeStock->setColumnWidth(1, trwidth*0.45);
-    ui->treeStock->setColumnWidth(2, trwidth*0.10);
-    ui->treeStock->setColumnWidth(3, trwidth*0.10);
-    ui->treeStock->setColumnWidth(4, trwidth*0.13);
+    ui->treeStock->setColumnWidth(1, trwidth*0.35);
+    ui->treeStock->setColumnWidth(2, trwidth*0.05);
+    ui->treeStock->setColumnWidth(3, trwidth*0.05);
+    ui->treeStock->setColumnWidth(4, trwidth*0.05);
     ui->treeStock->setColumnWidth(5, trwidth*0.07);
+    ui->treeStock->setColumnWidth(6, trwidth*0.08);
+    ui->treeStock->setColumnWidth(7, trwidth*0.20);
     ui->treeStock->show();
 
     qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;
+    if (tbwidth < 200) {
+        tbwidth = ui->tabTransact->frameGeometry().width()+150;
+    }
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
     ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
@@ -516,7 +546,6 @@ void MainWindow::on_editSearch_textChanged(const QString &arg1)
         ui->treeStock->collapseAll();
         return;
     }
-
     searchExpand();
 }
 
@@ -531,7 +560,7 @@ void MainWindow::on_comboProject_currentIndexChanged(int index)
 }
 
 // -------------------- Delegates -------------------------------------
-void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void MainWindow::StockBranchDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     // TODO: FIX: refactor this crap
     QStyleOptionViewItem opt = option;
@@ -699,7 +728,7 @@ void MainWindow::BranchDelegate::paint(QPainter *painter, const QStyleOptionView
     painter->restore();
 }
 
-void MainWindow::TextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
+void MainWindow::StockTextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
 {
     QStyleOptionViewItem opt = option;
 

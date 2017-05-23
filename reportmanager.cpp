@@ -156,8 +156,8 @@ void ReportManager::resizeStockTable()
     ui->tableView->setColumnWidth(1, trwidth*0.05);
     ui->tableView->setColumnWidth(2, trwidth*0.15);
     ui->tableView->setColumnWidth(3, trwidth*0.15);
-    ui->tableView->setColumnWidth(4, trwidth*0.38);
-    ui->tableView->setColumnWidth(5, trwidth*0.05);
+    ui->tableView->setColumnWidth(4, trwidth*0.33);
+    ui->tableView->setColumnWidth(5, trwidth*0.10);
     ui->tableView->setColumnWidth(6, trwidth*0.05);
     ui->tableView->setColumnWidth(7, trwidth*0.12);
     ui->tableView->setColumnWidth(8, trwidth*0.05);
@@ -166,17 +166,17 @@ void ReportManager::resizeStockTable()
 
 void ReportManager::resizeTransactTable()
 {
-    qint32 trwidth = ui->tableView->frameGeometry().width()-30;
+    qint32 trwidth = ui->tableView->frameGeometry().width()-35;
     ui->tableView->hide();
-    ui->tableView->setColumnWidth(1, trwidth*0.10);
+    ui->tableView->setColumnWidth(1, trwidth*0.06);
     ui->tableView->setColumnWidth(2, trwidth*0.10);
     ui->tableView->setColumnWidth(3, trwidth*0.10);
     ui->tableView->setColumnWidth(4, trwidth*0.25);
-    ui->tableView->setColumnWidth(5, trwidth*0.05);
+    ui->tableView->setColumnWidth(5, trwidth*0.10);
     ui->tableView->setColumnWidth(6, trwidth*0.05);
-    ui->tableView->setColumnWidth(7, trwidth*0.12);
-    ui->tableView->setColumnWidth(8, trwidth*0.10);
-    ui->tableView->setColumnWidth(9, trwidth*0.15);
+    ui->tableView->setColumnWidth(7, trwidth*0.07);
+    ui->tableView->setColumnWidth(8, trwidth*0.07);
+    ui->tableView->setColumnWidth(9, trwidth*0.22);
     ui->tableView->show();
 }
 
@@ -448,7 +448,7 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(2, Qt::Horizontal, "Категория");
         m_reportModel->setHeaderData(3, Qt::Horizontal, "Группа");
         m_reportModel->setHeaderData(4, Qt::Horizontal, "Наименование");
-        m_reportModel->setHeaderData(5, Qt::Horizontal, "Сер. №");
+        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии/серии");
         m_reportModel->setHeaderData(6, Qt::Horizontal, "Остаток");
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Место");
@@ -465,7 +465,7 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(2, Qt::Horizontal, "Категория");
         m_reportModel->setHeaderData(3, Qt::Horizontal, "Группа");
         m_reportModel->setHeaderData(4, Qt::Horizontal, "Наименование");
-        m_reportModel->setHeaderData(5, Qt::Horizontal, "Сер. №");
+        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии/серии");
         m_reportModel->setHeaderData(6, Qt::Horizontal, "+/-");
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Сотрудник");

@@ -39,7 +39,7 @@ enum Color {
     ColorExpense = 0xff9c0006,
     ColorReceiptBackground = 0xffBAFAAD,
     ColorExpenseBackground = 0xffFFD3C9,
-    ColorSearchBackground  = 0xffFFFF71
+    ColorSearchHighligh  = 0xffFFFF71
 };
 
 }

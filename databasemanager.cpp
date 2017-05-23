@@ -134,7 +134,6 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
 
     StockItem::StockList tmplist;
 
-//    QSqlQuery q = execSimpleQuery("CALL getStockByCategoryAndGroup("+QString::number(catId)+", "+QString::number(groupId)+")");
     Q_UNUSED(catId)
     QSqlQuery q = execSimpleQuery("CALL getStockByGroup("+QString::number(groupId)+")");
     while (q.next()) {
@@ -154,15 +153,17 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qin
 
 #ifdef AT_WORK
         tmplist.append(StockItem::StockItemBuilder()
-                       .setId         (                  q.value(0).toInt())
-                       .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-                       .setType       (                  Constants::ItemItem)
-                       .setLevel      (                  Constants::Level_2)
-                       .setAmount     (                  q.value(2).toInt())
-                       .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-                       .setProject    (                  q.value(4).toString().toInt())
-                       .setLocation   (                  q.value(5).toString().toInt())
-                       .setProduct    (                  q.value(6).toString().toInt())
+                       .setId         (q.value(0).toInt())
+                       .setName       (q.value(1).toString().toLocal8Bit())
+                       .setType       (Constants::ItemItem)
+                       .setLevel      (Constants::Level_2)
+                       .setAmount     (q.value(2).toInt())
+                       .setSerialn    (q.value(3).toString().toLocal8Bit())
+                       .setProject    (q.value(4).toInt())
+                       .setLocation   (q.value(5).toInt())
+                       .setProduct    (q.value(6).toInt())
+                       .setFullname   (q.value(7).toString().toLocal8Bit())
+                       .setUnit       (q.value(8).toString().toLocal8Bit())
                        .build());
 #endif
     }

@@ -40,7 +40,9 @@ SOURCES += main.cpp\
     reportrequest.cpp \
     recursivefilterproxymodel.cpp \
     projectrecursivefilterproxymodel.cpp \
-    decoderproxymodel.cpp
+    decoderproxymodel.cpp \
+    delegatehighligtabletabletext.cpp \
+    delegatehighligtabltreetext.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -69,7 +71,9 @@ HEADERS  += mainwindow.h \
     reportrequest.h \
     recursivefilterproxymodel.h \
     projectrecursivefilterproxymodel.h \
-    decoderproxymodel.h
+    decoderproxymodel.h \
+    delegatehighligtabletabletext.h \
+    delegatehighligtabltreetext.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \
