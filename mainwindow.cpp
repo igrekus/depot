@@ -130,7 +130,7 @@ void MainWindow::initApplication()
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeStock->setUniformRowHeights(false);
-    ui->treeStock->setAlternatingRowColors(true);
+//    ui->treeStock->setAlternatingRowColors(true);
     ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
 //    ui->treeStock->setIndentation(0);
 //    ui->treeStock->setItemDelegate(new StockTextDelegate(ui->treeStock));
@@ -547,6 +547,7 @@ void MainWindow::on_editSearch_textChanged(const QString &arg1)
         return;
     }
     searchExpand();
+    actRefreshView->trigger();
 }
 
 void MainWindow::on_comboProject_currentIndexChanged(int index)
