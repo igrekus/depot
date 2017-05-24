@@ -130,6 +130,7 @@ void MainWindow::initApplication()
     ui->treeStock->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeStock->setUniformRowHeights(false);
+    ui->treeStock->header()->setDefaultAlignment(Qt::AlignCenter); // Qt::TextWordWrap
 //    ui->treeStock->setAlternatingRowColors(true);
     ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
 //    ui->treeStock->setIndentation(0);
@@ -140,6 +141,7 @@ void MainWindow::initApplication()
     ui->tableTransact->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    ui->tableTransact->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
     ui->tableTransact->verticalHeader()->setVisible(false);
     ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->horizontalHeader()->setHighlightSections(false);
@@ -255,7 +257,7 @@ void MainWindow::procActRefreshView()
 
     qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;
     if (tbwidth < 200) {
-        tbwidth = ui->tabTransact->frameGeometry().width()+150;
+        tbwidth = ui->tabTransact->frameGeometry().width()+550;
     }
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);

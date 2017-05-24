@@ -5,6 +5,7 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include <QSortFilterProxyModel>
+#include <QStyle>
 
 #include <constants.h>
 #include <delegatehighligtabletabletext.h>
@@ -19,43 +20,40 @@ public:
     ~DelegateHighligtableTreeText(){}
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const {
-//        p->save();
-//        p->setClipRect(opt->rect);
+        painter->save();
+//        painter->setClipRect(option.rect);
 
-//        option.widget->style()->proxy()
-//        QRect checkRect = proxy()->subElementRect(SE_ItemViewItemCheckIndicator, vopt, widget);
-//        QRect iconRect = proxy()->subElementRect(SE_ItemViewItemDecoration, vopt, widget);
-//        QRect textRect = proxy()->subElementRect(SE_ItemViewItemText, vopt, widget);        // -------- !!!
+//        const QStyle *proxy = option.widget->style()->proxy();
+
 //        // draw the background
-//        proxy()->drawPrimitive(PE_PanelItemViewItem, opt, p, widget);
+//        QStyleOptionViewItem opt = option;
+//        proxy->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
 
-//        // draw the icon
-//        QIcon::Mode mode = QIcon::Normal;
-//        if (!(vopt->state & QStyle::State_Enabled))
-//            mode = QIcon::Disabled;
-//        else if (vopt->state & QStyle::State_Selected)
-//            mode = QIcon::Selected;
-//        QIcon::State state = vopt->state & QStyle::State_Open ? QIcon::On : QIcon::Off;
-//        vopt->icon.paint(p, iconRect, vopt->decorationAlignment, mode, state);
+////        // draw the icon
+////        QRect iconRect = proxy()->subElementRect(SE_ItemViewItemDecoration, vopt, widget);
+////        QIcon::Mode mode = QIcon::Normal;
+////        if (!(vopt->state & QStyle::State_Enabled))
+////            mode = QIcon::Disabled;
+////        else if (vopt->state & QStyle::State_Selected)
+////            mode = QIcon::Selected;
+////        QIcon::State state = vopt->state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+////        vopt->icon.paint(p, iconRect, vopt->decorationAlignment, mode, state);
 
-//        // draw the focus rect
-//         if (vopt->state & QStyle::State_HasFocus) {
-//            QStyleOptionFocusRect o;
-//            o.QStyleOption::operator=(*vopt);
-//            o.rect = proxy()->subElementRect(SE_ItemViewItemFocusRect, vopt, widget);
-//            o.state |= QStyle::State_KeyboardFocusChange;
-//            o.state |= QStyle::State_Item;
-//            QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
-//                          ? QPalette::Normal : QPalette::Disabled;
-//            o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
-//                                         ? QPalette::Highlight : QPalette::Window);
-//            proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, widget);
+//        // draw the text
+//        QRect textRect = proxy->subElementRect(QStyle::SE_ItemViewItemText, &opt);
+//        if (!opt.text.isEmpty()) {
+//            QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled
+//                                      ? QPalette::Normal : QPalette::Disabled;
+//            if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
+//                cg = QPalette::Inactive;
+//            if (opt.state & QStyle::State_Selected) {
+//                painter->setPen(opt.palette.color(cg, QPalette::HighlightedText));
+//            } else {
+//                painter->setPen(opt.palette.color(cg, QPalette::Text));
+//            }
+//            proxy->drawItemText(painter, textRect, 0, opt.palette, true, opt.text);
 //        }
 
-//         p->restore();
-
-
-        painter->save();
         drawHighlight(painter, option, index);
         painter->setPen(QColor(Qt::lightGray).lighter(100));
 //        if (index.row() == 0 || !index.parent().isValid()) {

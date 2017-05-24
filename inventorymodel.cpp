@@ -143,7 +143,7 @@ void InventoryModel::initModel()
 
 QVariant InventoryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Категория/Код изделия ", "Код", "Наименование", "Ед. измерения", "Серийный №", "Полное наименование"};
+    const QStringList headers = {"Категория/Код изделия ", "Код", "Наименование", "Единица", "№ партии", "Полное наименование"};
     if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
         return headers[section];
     }

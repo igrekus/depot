@@ -192,7 +192,7 @@
           <item>
            <widget class="QPushButton" name="btnReport">
             <property name="text">
-             <string>Отчет &amp;R</string>
+             <string>Отчет</string>
             </property>
            </widget>
           </item>
@@ -236,7 +236,7 @@
           <item>
            <widget class="QPushButton" name="btnReloadData">
             <property name="text">
-             <string>Обновить &amp;Q</string>
+             <string>Обновить</string>
             </property>
            </widget>
           </item>
@@ -262,12 +262,15 @@
         <item>
          <widget class="QPushButton" name="btnInventoryEditor">
           <property name="text">
-           <string>Номенклатура &amp;A</string>
+           <string>Номенклатура</string>
           </property>
          </widget>
         </item>
         <item>
          <widget class="QPushButton" name="btnDictEditor">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>Словари</string>
           </property>

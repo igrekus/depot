@@ -56,21 +56,21 @@
        <item>
         <widget class="QPushButton" name="btnAddCategory">
          <property name="text">
-          <string>+ Кат. &amp;A</string>
+          <string>+ Категория</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnAddGroup">
          <property name="text">
-          <string>+ Груп. &amp;S</string>
+          <string>+ Группа</string>
          </property>
         </widget>
        </item>
        <item>
         <widget class="QPushButton" name="btnAddInventory">
          <property name="text">
-          <string>+ Ном. &amp;D</string>
+          <string>+ Номенклатура</string>
          </property>
         </widget>
        </item>
@@ -100,7 +100,7 @@
        <item>
         <widget class="QPushButton" name="btnEdit">
          <property name="text">
-          <string>Изменить &amp;E</string>
+          <string>Изменить</string>
          </property>
         </widget>
        </item>
@@ -130,7 +130,10 @@
        <item>
         <widget class="QPushButton" name="btnRegisterStock">
          <property name="text">
-          <string>+ Склад</string>
+          <string>На склад</string>
+         </property>
+         <property name="flat">
+          <bool>false</bool>
          </property>
         </widget>
        </item>
