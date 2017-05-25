@@ -3,7 +3,10 @@
 
 /*
  TODO:
-    Убрать описание горячих клавиш из кнопок
+    Редактор словарей
+    - темы
+    - сотрудники
+    - места хранения
 
     Склад:
     - ввести уровень надкотегорий
@@ -133,6 +136,7 @@ void MainWindow::initApplication()
     ui->treeStock->header()->setDefaultAlignment(Qt::AlignCenter); // Qt::TextWordWrap
 //    ui->treeStock->setAlternatingRowColors(true);
     ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
+    ui->treeStock->header()->setStretchLastSection(true);
 //    ui->treeStock->setIndentation(0);
 //    ui->treeStock->setItemDelegate(new StockTextDelegate(ui->treeStock));
 //    ui->treeStock->setItemDelegateForColumn(0, new StockBranchDelegate(ui->treeStock));
@@ -142,10 +146,11 @@ void MainWindow::initApplication()
     ui->tableTransact->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->tableTransact->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableTransact->horizontalHeader()->setDefaultAlignment(Qt::AlignCenter);
-    ui->tableTransact->verticalHeader()->setVisible(false);
-    ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->horizontalHeader()->setHighlightSections(false);
     ui->tableTransact->horizontalHeader()->setFixedHeight(20);
+    ui->tableTransact->horizontalHeader()->setStretchLastSection(true);
+    ui->tableTransact->verticalHeader()->setVisible(false);
+    ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->setItemDelegate(new DelegateHighligtableTableText(ui->tableTransact));
 
     projectCompleter = new QCompleter(this);
@@ -257,15 +262,15 @@ void MainWindow::procActRefreshView()
 
     qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;
     if (tbwidth < 200) {
-        tbwidth = ui->tabTransact->frameGeometry().width()+550;
+        tbwidth = ui->tabTransact->frameGeometry().width()+570;
     }
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
     ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
-    ui->tableTransact->setColumnWidth(2, tbwidth*0.07);
+    ui->tableTransact->setColumnWidth(2, tbwidth*0.05);
     ui->tableTransact->setColumnWidth(3, tbwidth*0.13);
     ui->tableTransact->setColumnWidth(4, tbwidth*0.10);
-    ui->tableTransact->setColumnWidth(5, tbwidth*0.20);
+    ui->tableTransact->setColumnWidth(5, tbwidth*0.22);
     ui->tableTransact->show();
 }
 

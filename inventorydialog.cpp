@@ -73,6 +73,7 @@ void InventoryDialog::initDialog()
     ui->treeInventory->setUniformRowHeights(false);
 //    ui->treeInventory->setAlternatingRowColors(true);
     ui->treeInventory->setItemDelegate(new DelegateHighligtableTreeText(ui->treeInventory));
+    ui->treeInventory->header()->setStretchLastSection(true);
 //    ui->treeInventory->setItemDelegateForColumn(2, new TextDelegate(ui->treeInventory));
 //    ui->treeInventory->setItemDelegateForColumn(3, new TextDelegate(ui->treeInventory));
 //    ui->treeInventory->setItemDelegateForColumn(4, new TextDelegate(ui->treeInventory));

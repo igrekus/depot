@@ -66,6 +66,9 @@
           <property name="currentIndex">
            <number>-1</number>
           </property>
+          <property name="maxVisibleItems">
+           <number>20</number>
+          </property>
           <property name="frame">
            <bool>true</bool>
           </property>

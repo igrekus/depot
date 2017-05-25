@@ -18,9 +18,7 @@ void TransactModel::initModel()
     qDebug()<<"building transact list";
     TransactItem::TransactList tmplist = m_dbman->getTransactList();
     beginInsertRows(QModelIndex(), 0, tmplist.size()-1);
-    for (const TransactItem it : tmplist) {
-        m_data.append(it);
-    }
+    m_data = std::move(tmplist.toList());
     endInsertRows();
 }
 
