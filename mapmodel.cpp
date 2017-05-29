@@ -55,6 +55,30 @@ void MapModel::addItemAtPosition(const qint32 pos, const qint32 id, const QStrin
     endInsertRows();
 }
 
+void MapModel::editItem(const qint32 id, const QString &name)
+{
+    qint32 row = m_strList.indexOf(m_mapData.id.value(id));
+
+    m_mapData.di.remove(m_mapData.id.value(id));
+    m_mapData.id.replace(id, name);
+    m_mapData.di.insert(name, id);
+
+    m_strList.replace(row, name);
+    dataChanged(index(row, 0, QModelIndex()), index(row, 0, QModelIndex()));
+}
+
+void MapModel::removeItem(const qint32 id)
+{
+    qint32 row = m_strList.indexOf(m_mapData.id.value(id));
+
+    m_mapData.di.remove(m_mapData.id.value(id));
+    m_mapData.id.remove(id);
+
+    beginRemoveRows(QModelIndex(), row, row);
+    m_strList.removeAt(row);
+    endRemoveRows();
+}
+
 QString MapModel::getData(const qint32 id)
 {
     return m_mapData.id.value(id);

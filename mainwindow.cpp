@@ -3,6 +3,9 @@
 
 /*
  TODO:
+
+    db update\insert bug
+
     Редактор словарей
     - темы
     - сотрудники
@@ -250,14 +253,14 @@ void MainWindow::procActRefreshView()
 {
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
-    ui->treeStock->setColumnWidth(0, trwidth*0.15);
+    ui->treeStock->setColumnWidth(0, trwidth*0.25);
     ui->treeStock->setColumnWidth(1, trwidth*0.35);
     ui->treeStock->setColumnWidth(2, trwidth*0.05);
     ui->treeStock->setColumnWidth(3, trwidth*0.05);
     ui->treeStock->setColumnWidth(4, trwidth*0.05);
     ui->treeStock->setColumnWidth(5, trwidth*0.07);
     ui->treeStock->setColumnWidth(6, trwidth*0.08);
-    ui->treeStock->setColumnWidth(7, trwidth*0.20);
+    ui->treeStock->setColumnWidth(7, trwidth*0.10);
     ui->treeStock->show();
 
     qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;
@@ -418,6 +421,7 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 }
 
 // -------------------- Control Events --------------------------------
+// -------------------- buttons ---------------------------------------
 void MainWindow::on_btnInventoryEditor_clicked()
 {
     InventoryDialog dialog(this);
@@ -530,6 +534,25 @@ void MainWindow::on_btnReport_clicked()
 
     dialog.exec();
 }
+
+void MainWindow::on_btnDictEditor_clicked()
+{
+    DictEditorDialog dialog;
+
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
+
+    m_dictModel->updateLocationList();
+    m_dictModel->updateStaffList();
+    m_dictModel->updateProjectList();
+
+    ui->comboProject->setCurrentIndex(0);
+}
+
+// ---------------------- other controls ------------------------------
 
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {

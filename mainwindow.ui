@@ -272,7 +272,7 @@
         <item>
          <widget class="QPushButton" name="btnDictEditor">
           <property name="enabled">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="text">
            <string>Словари</string>

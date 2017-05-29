@@ -23,6 +23,10 @@ public:
 
     void addItem(const qint32 id, const QString &str);
     void addItemAtPosition(const qint32 pos, const qint32 id, const QString &str);
+    void editItem(const qint32 id, const QString &name);
+    void removeItem(const qint32 id);
+
+//    void removeItem(const qint32 pos);
 
     QString getData(const qint32 id);
     qint32 getId(const QString &data);

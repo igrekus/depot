@@ -25,6 +25,7 @@
 #include <recursivefilterproxymodel.h>
 #include <projectrecursivefilterproxymodel.h>
 #include <delegatehighligtabltreetext.h>
+#include <dicteditordialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -97,6 +98,7 @@ private slots:
 
     void on_btnReloadData_clicked();
     void on_btnReport_clicked();
+    void on_btnDictEditor_clicked();
 
     void on_treeStock_doubleClicked(const QModelIndex &index);
     void on_tableTransact_doubleClicked(const QModelIndex &index);    

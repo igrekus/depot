@@ -8,6 +8,7 @@
 #include <QSqlQuery>
 #include <QTextCodec>
 #include <QDate>
+#include <QMessageBox>
 
 #include <categoryitem.h>
 #include <groupitem.h>
@@ -77,6 +78,10 @@ public:
     qint32 insertTransact(const TransactItem &item);
     void updateTransact(const TransactItem &item);
     void deleteTransact(const TransactItem &item);
+
+    qint32 insertDictRecord(const QString &table, const QString &name);
+    void updateDictRecord(const QString &table, const qint32 recId, const QString &name);
+    void deleteDictRecord(const QString &table, const qint32 recId);
 
     // utility
     TransactItem makeTransactItemFromStockItem(const StockItem &stock);

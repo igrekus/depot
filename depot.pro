@@ -42,7 +42,8 @@ SOURCES += main.cpp\
     projectrecursivefilterproxymodel.cpp \
     decoderproxymodel.cpp \
     delegatehighligtabletabletext.cpp \
-    delegatehighligtabltreetext.cpp
+    delegatehighligtabltreetext.cpp \
+    dicteditordialog.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -73,14 +74,16 @@ HEADERS  += mainwindow.h \
     projectrecursivefilterproxymodel.h \
     decoderproxymodel.h \
     delegatehighligtabletabletext.h \
-    delegatehighligtabltreetext.h
+    delegatehighligtabltreetext.h \
+    dicteditordialog.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \
     inventorydatadialog.ui \
     transactdatadialog.ui \
     stockdatadialog.ui \
-    reportmanager.ui
+    reportmanager.ui \
+    dicteditordialog.ui
 
 RESOURCES += \
     resource.qrc

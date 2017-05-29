@@ -21,7 +21,6 @@ void DataBaseManager::connectToDatabase()
     db.setPort(3306);
     db.setUserName("root");
     db.setPassword("");
-//    db.setDatabaseName("depot");
     db.setDatabaseName("wh");
 
 //    db.setHostName("10.10.15.9");
@@ -45,6 +44,9 @@ QSqlQuery DataBaseManager::execSimpleQuery(const QString &qry)
     query.exec(qry);
     qDebug().noquote() << ">" << query.lastQuery() << "|" << query.lastError()
                        << "| rows: " << query.numRowsAffected();
+    if (!query.lastQuery().contains("get")) {
+        QMessageBox::information(nullptr, QString("info"), "db message: "+query.lastQuery()+" "+query.lastError().text());
+    }
     Q_ASSERT(query.isActive());
     return query;
 }
@@ -92,7 +94,6 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList()
     }
     return tmplist;
 }
-
 
 GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
 {
@@ -208,62 +209,37 @@ ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 cat
 
 TransactItem::TransactList DataBaseManager::getTransactList()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
     TransactItem::TransactList tmplist;
 
-    // TODO: неправильный запрос, запрашивать сток
-//    QSqlQuery q = execSimpleQuery("CALL getTransactList1k()");
     QSqlQuery q = execSimpleQuery("CALL getTransactListFull()");
 
     while (q.next()) {
-#ifndef AT_WORK
-        tmplist.append(TransactItem::TransactItemBuilder()
-                       .setId     (q.value(0).toInt())
-                       .setDate   (q.value(1).toDate())
-                       .setDiff   (q.value(2).toInt())
-                       .setNote   (q.value(3).toString())
-                       .setStaff  (q.value(4).toString())
-                       .setName   (q.value(5).toString())
-                       .setBillRef(q.value(6).toInt())
-                       .build());
-#endif
-
-#ifdef AT_WORK
         tmplist.append(TransactItem::TransactItemBuilder()
                        .setId     (                  q.value(0).toInt())
                        .setDate   (                  q.value(1).toDate())
                        .setDiff   (                  q.value(2).toInt())
-                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+//                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+                       .setNote   (q.value(3).toString().toLocal8Bit())
                        .setStaff  (                  q.value(4).toInt())
-                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+//                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setName   (q.value(5).toString().toLocal8Bit())
                        .setProject(                  q.value(6).toInt())
                        .setStock  (                  q.value(7).toInt())
                        .setBill   (                  q.value(8).toInt())
                        .build());
-#endif
     }
     return tmplist;
 }
 
 IdStringList DataBaseManager::getIdProductList()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
     IdStringList tmplist;
     QSqlQuery q = execSimpleQuery("CALL getIdProductList()");
-//    QSqlQuery q = execSimpleQuery("CALL getIdProductList100()");
     while (q.next()) {
         QPair<qint32, QString> tmppair;
-        tmppair.first  =                   q.value(0).toInt();
-        tmppair.second = decode->toUnicode(q.value(1).toString().toLocal8Bit());
+        tmppair.first  = q.value(0).toInt();
+        tmppair.second = q.value(1).toString().toLocal8Bit();
         tmplist.append(tmppair);
-//        if (tmppair.second.contains("атаре"))
-//            qDebug() << tmppair;
     }
     return tmplist;
 }
@@ -569,13 +545,20 @@ qint32 DataBaseManager::insertProduct(const ProductItem &item)
 
 void DataBaseManager::updateProduct(const ProductItem &item)
 {
-    QTextCodec *encode = QTextCodec::codecForLocale();
+//    QTextCodec *encode = QTextCodec::codecForLocale();
+    QTextCodec *encode = QTextCodec::codecForName("Windows-1251");
 
     QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
     QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
     QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
     QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
     QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+
+//    QString encodedName     = encode->toUnicode(item.itemName.toLocal8Bit());
+//    QString encodedFullname = encode->toUnicode(item.itemFullname.toLocal8Bit());
+//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toLocal8Bit());
+//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toLocal8Bit());
+//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toLocal8Bit());
 
     QSqlQuery q = execSimpleQuery("CALL updateProduct("
                                   +QString::number(item.itemId)+", '"
@@ -662,6 +645,25 @@ void DataBaseManager::deleteTransact(const TransactItem &item)
     QSqlQuery q = execSimpleQuery("CALL deleteTransact("+QString::number(item.itemId)+")");
 }
 
+qint32 DataBaseManager::insertDictRecord(const QString &table, const QString &name)
+{
+    qDebug() << "db add dict:" << table << name;
+    return 100;
+}
+
+void DataBaseManager::updateDictRecord(const QString &table, const qint32 recId, const QString &name)
+{
+    if (recId != 0)
+        qDebug() << "db edit dict:" << table << recId << name;
+}
+
+void DataBaseManager::deleteDictRecord(const QString &table, const qint32 recId)
+{
+    if (recId != 0)
+        qDebug() << "db del dict" << table << recId;
+}
+
+// ------------------------------- utility -----------------------------------
 TransactItem DataBaseManager::makeTransactItemFromStockItem(const StockItem &stock)
 {
     return (TransactItem::TransactItemBuilder()

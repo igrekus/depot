@@ -313,6 +313,8 @@ void InventoryDialog::procActInventoryAdd()
 
     ui->treeInventory->selectionModel()->clear();
     ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+    treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryCopy()
@@ -338,6 +340,8 @@ void InventoryDialog::procActInventoryCopy()
 
     ui->treeInventory->selectionModel()->clear();
     ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+    treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryEdit()
@@ -359,6 +363,8 @@ void InventoryDialog::procActInventoryEdit()
     m_inventoryModel->editInventory(m_searchProxyModel->mapToSource(index), dialog.getData());
 
     m_dictModel->updateProductList();
+
+    treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryDelete()
@@ -373,6 +379,8 @@ void InventoryDialog::procActInventoryDelete()
         m_inventoryModel->deleteInventory(m_searchProxyModel->mapToSource(index));
 
         m_dictModel->updateProductList();
+
+        treeUpdated = true;
     }
 }
 
