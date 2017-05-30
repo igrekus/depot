@@ -44,9 +44,9 @@ QSqlQuery DataBaseManager::execSimpleQuery(const QString &qry)
     query.exec(qry);
     qDebug().noquote() << ">" << query.lastQuery() << "|" << query.lastError()
                        << "| rows: " << query.numRowsAffected();
-    if (!query.lastQuery().contains("get")) {
-        QMessageBox::information(nullptr, QString("info"), "db message: "+query.lastQuery()+" "+query.lastError().text());
-    }
+//    if (!query.lastQuery().contains("get")) {
+//        QMessageBox::information(nullptr, QString("info"), "db message: "+query.lastQuery()+" "+query.lastError().text());
+//    }
     Q_ASSERT(query.isActive());
     return query;
 }
@@ -67,142 +67,82 @@ QSqlQuery DataBaseManager::execParametrizedQuery(const QString &qry, const QVari
     return query;
 }
 
-CategoryItem::CategoryList DataBaseManager::getCategoryList()
+ClassItem::ClassList DataBaseManager::getClassList()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    CategoryItem::CategoryList tmplist;
-    QSqlQuery q = execSimpleQuery("CALL getCategoryList()");
-
+    // TODO: refactor with functors
+    ClassItem::ClassList tmplist;
+    QSqlQuery q = execSimpleQuery("CALL getClassList()");
     while (q.next()) {
-#ifndef AT_WORK
-        tmplist.append(CategoryItem::CategoryItemBuilder()
+        tmplist.append(ClassItem::ClassItemBuilder()
                        .setId  (q.value(0).toInt())
-                       .setName(q.value(1).toString())
-                       .build());
-#endif
-
-#ifdef AT_WORK
-        tmplist.append(CategoryItem::CategoryItemBuilder()
-                       .setId  (                  q.value(0).toInt())
                        .setName(q.value(1).toString().toLocal8Bit())
-//                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
                        .build());
-#endif
+    }
+    return tmplist;
+}
+
+CategoryItem::CategoryList DataBaseManager::getCategoryList(const qint32 classId)
+{
+    CategoryItem::CategoryList tmplist;
+    QSqlQuery q = execSimpleQuery("CALL getCategoryListByClass("+QString::number(classId)+")");
+    while (q.next()) {
+        tmplist.append(CategoryItem::CategoryItemBuilder()
+                       .setId   (q.value(0).toInt())
+                       .setName (q.value(1).toString().toLocal8Bit())
+                       .build());
     }
     return tmplist;
 }
 
 GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
     GroupItem::GroupList tmplist;
-//    QVariantList params;
-
-//    params.append(QVariant(catId));
-
-//    QSqlQuery q = execParametrizedQuery("CALL getGroupListByCategory(?)", params);
     QSqlQuery q = execSimpleQuery("CALL getGroupListByCategory("+QString::number(catId)+");");
-
     while (q.next()) {
-#ifndef AT_WORK
         tmplist.append(GroupItem::GroupItemBuilder()
-                       .setId  (q.value(0).toInt())
-                       .setName(q.value(1).toString())
+                       .setId      (q.value(0).toInt())
+                       .setName    (q.value(1).toString().toLocal8Bit())
                        .build());
-#endif
-
-#ifdef AT_WORK
-        tmplist.append(GroupItem::GroupItemBuilder()
-                       .setId  (                  q.value(0).toInt())
-                       .setName(q.value(1).toString().toLocal8Bit())
-//                       .setName(decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-                       .build());
-#endif
     }
     return tmplist;
 }
 
 StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qint32 groupId)
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    StockItem::StockList tmplist;
-
     Q_UNUSED(catId)
+    StockItem::StockList tmplist;
     QSqlQuery q = execSimpleQuery("CALL getStockByGroup("+QString::number(groupId)+")");
     while (q.next()) {
-
-#ifndef AT_WORK
         tmplist.append(StockItem::StockItemBuilder()
-                       .setId         (q.value(0).toInt())
-                       .setName       (q.value(1).toString())
-                       .setType       (StockItem::ItemStock)
-                       .setLevel      (StockItem::Level_2)
-                       .setAmount     (q.value(2).toInt())
-                       .setSerialn    (q.value(3).toString())
-                       .setProject    (q.value(4).toString())
-                       .setLocation   (q.value(5).toString())
+                       .setId      (q.value(0).toInt())
+                       .setName    (q.value(1).toString().toLocal8Bit())
+                       .setType    (Constants::ItemItem)
+                       .setLevel   (Constants::Level_3)
+                       .setAmount  (q.value(2).toInt())
+                       .setSerialn (q.value(3).toString().toLocal8Bit())
+                       .setProject (q.value(4).toInt())
+                       .setLocation(q.value(5).toInt())
+                       .setProduct (q.value(6).toInt())
+                       .setFullname(q.value(7).toString().toLocal8Bit())
+                       .setUnit    (q.value(8).toString().toLocal8Bit())
                        .build());
-#endif
-
-#ifdef AT_WORK
-        tmplist.append(StockItem::StockItemBuilder()
-                       .setId         (q.value(0).toInt())
-                       .setName       (q.value(1).toString().toLocal8Bit())
-                       .setType       (Constants::ItemItem)
-                       .setLevel      (Constants::Level_2)
-                       .setAmount     (q.value(2).toInt())
-                       .setSerialn    (q.value(3).toString().toLocal8Bit())
-                       .setProject    (q.value(4).toInt())
-                       .setLocation   (q.value(5).toInt())
-                       .setProduct    (q.value(6).toInt())
-                       .setFullname   (q.value(7).toString().toLocal8Bit())
-                       .setUnit       (q.value(8).toString().toLocal8Bit())
-                       .build());
-#endif
     }
     return tmplist;
 }
 
-ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 catId, const qint32 groupId)
+ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 groupId)
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
     ProductItem::ProductList tmplist;
-
-    Q_UNUSED(catId)
     QSqlQuery q = execSimpleQuery("CALL getProductByGroup("+QString::number(groupId)+")");
     while (q.next()) {
-
-#ifndef AT_WORK
-#endif
-
-#ifdef AT_WORK
         tmplist.append(ProductItem::ProductItemBuilder()
-                       .setId      (                  q.value(0).toInt())
-//                       .setName    (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-//                       .setFullname(decode->toUnicode(q.value(2).toString().toLocal8Bit()))
-//                       .setSerialn (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-//                       .setUnit    (decode->toUnicode(q.value(4).toString().toLocal8Bit()))
-//                       .setMiscTag (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setId      (q.value(0).toInt())
                        .setName    (q.value(1).toString().toLocal8Bit())
                        .setFullname(q.value(2).toString().toLocal8Bit())
                        .setSerialn (q.value(3).toString().toLocal8Bit())
                        .setUnit    (q.value(4).toString().toLocal8Bit())
                        .setMiscTag (q.value(5).toString().toLocal8Bit())
-                       .setGroup   (                  q.value(6).toInt())
-                       .setCategory(                  q.value(7).toInt())
                        .build());
-#endif
     }
     return tmplist;
 }
@@ -210,22 +150,19 @@ ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 cat
 TransactItem::TransactList DataBaseManager::getTransactList()
 {
     TransactItem::TransactList tmplist;
-
     QSqlQuery q = execSimpleQuery("CALL getTransactListFull()");
 
     while (q.next()) {
         tmplist.append(TransactItem::TransactItemBuilder()
-                       .setId     (                  q.value(0).toInt())
-                       .setDate   (                  q.value(1).toDate())
-                       .setDiff   (                  q.value(2).toInt())
-//                       .setNote   (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
+                       .setId     (q.value(0).toInt())
+                       .setDate   (q.value(1).toDate())
+                       .setDiff   (q.value(2).toInt())
                        .setNote   (q.value(3).toString().toLocal8Bit())
-                       .setStaff  (                  q.value(4).toInt())
-//                       .setName   (decode->toUnicode(q.value(5).toString().toLocal8Bit()))
+                       .setStaff  (q.value(4).toInt())
                        .setName   (q.value(5).toString().toLocal8Bit())
-                       .setProject(                  q.value(6).toInt())
-                       .setStock  (                  q.value(7).toInt())
-                       .setBill   (                  q.value(8).toInt())
+                       .setProject(q.value(6).toInt())
+                       .setStock  (q.value(7).toInt())
+                       .setBill   (q.value(8).toInt())
                        .build());
     }
     return tmplist;
@@ -246,207 +183,86 @@ IdStringList DataBaseManager::getIdProductList()
 
 StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
     QSqlQuery q = execSimpleQuery("CALL getStockByProductId("+QString::number(prodId)+")");
 
     if (!q.next()) {
         return StockItem::StockItemBuilder().build();
     }
-#ifdef AT_WORK
+
     return StockItem::StockItemBuilder()
-           .setId         (                  q.value(0).toInt())
-           .setName       (decode->toUnicode(q.value(1).toString().toLocal8Bit()))
-           .setType       (                  Constants::ItemItem)
-           .setLevel      (                  Constants::Level_2)
-           .setAmount     (                  q.value(2).toInt())
-           .setSerialn    (decode->toUnicode(q.value(3).toString().toLocal8Bit()))
-           .setProject    (                  q.value(4).toString().toInt())
-           .setLocation   (                  q.value(5).toString().toInt())
-           .setProduct    (                  q.value(6).toString().toInt())
+           .setId         (q.value(0).toInt())
+           .setName       (q.value(1).toString().toLocal8Bit())
+           .setType       (Constants::ItemItem)
+           .setLevel      (Constants::Level_3)
+           .setAmount     (q.value(2).toInt())
+           .setSerialn    (q.value(3).toString().toLocal8Bit())
+           .setProject    (q.value(4).toString().toInt())
+           .setLocation   (q.value(5).toString().toInt())
+           .setProduct    (q.value(6).toString().toInt())
            .build();
-#endif
 }
 
-QPair<qint32, qint32> DataBaseManager::getProductParents(const qint32 prodId)
+DataBaseManager::ProductParents DataBaseManager::getProductParents(const qint32 prodId)
 {
     QSqlQuery q = execSimpleQuery("CALL getProductParents("+QString::number(prodId)+")");
 
-    QPair<qint32, qint32> tmppair;
+    ProductParents p;
     if (!q.next()) {
-        tmppair.first=0;
-        tmppair.second=0;
-        return tmppair;
+        return p;
     }
-    tmppair.first =q.value(0).toInt();
-    tmppair.second=q.value(1).toInt();
-    return tmppair;
+    p.parentClass    = q.value(0).toInt();
+    p.parentCategory = q.value(1).toInt();
+    p.parentGroup    = q.value(2).toInt();
+    return p;
+}
+
+HashDict DataBaseManager::fillHashDict(QSqlQuery &&q) {
+    HashDict tmphash;
+    while (q.next()) {
+        tmphash.id.insert(q.value(0).toInt(),
+                          q.value(1).toString().toLocal8Bit());
+        tmphash.di.insert(q.value(1).toString().toLocal8Bit(),
+                          q.value(0).toInt());
+    }
+    return tmphash;
 }
 
 HashDict DataBaseManager::getMapLocation()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getLocationList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    return fillHashDict(std::move(execSimpleQuery("CALL getLocationList()")));
 }
 
 HashDict DataBaseManager::getMapProject()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getProjectList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    return fillHashDict(std::move(execSimpleQuery("CALL getProjectList()")));
 }
 
 HashDict DataBaseManager::getMapMiscTag()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getMiscTagList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    return fillHashDict(std::move(execSimpleQuery("CALL getMiscTagList()")));
 }
 
 HashDict DataBaseManager::getMapCategory()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getCategoryList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    // TODO: move to getListX method?
+    return fillHashDict(std::move(execSimpleQuery("CALL getCategoryList()")));
 }
 
 HashDict DataBaseManager::getMapGroup()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getGroupList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    // TODO: move to getListX method?
+    return fillHashDict(std::move(execSimpleQuery("CALL getGroupList()")));
 }
 
 HashDict DataBaseManager::getMapStaff()
 {
-#ifdef AT_WORK
-    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-#endif
-
-    HashDict tmphash;
-    QSqlQuery q = execSimpleQuery("CALL getStaffList()");
-    while (q.next()) {
-#ifndef AT_WORK
-        tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString());
-        tmphash.di.insert(q.value(1).toString(),
-                          q.value(0).toInt());
-#endif
-
-#ifdef AT_WORK
-        tmphash.id.insert(                  q.value(0).toInt(),
-                          decode->toUnicode(q.value(1).toString().toLocal8Bit()));
-        tmphash.di.insert(decode->toUnicode(q.value(1).toString().toLocal8Bit()),
-                                            q.value(0).toInt());
-#endif
-    }
-    return tmphash;
+    return fillHashDict(std::move(execSimpleQuery("CALL getStaffList()")));
 }
 
 IdMap DataBaseManager::getMapGroupToCategory()
 {
     IdMap tmpmap;
-
     QSqlQuery q = execSimpleQuery("CALL getGroupToCategoryMap()");
-
     while (q.next()) {
         tmpmap.insert(q.value(1).toInt(), q.value(0).toInt());
     }
@@ -499,12 +315,13 @@ void DataBaseManager::deleteCategory(const CategoryItem &item)
 
 qint32 DataBaseManager::insertGroup(const GroupItem &item)
 {
-    QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
-    QSqlQuery q = execSimpleQuery("CALL insertGroup('"+encodedName+"', "+QString::number(item.itemCategoryRef)+")");
-    q.next();
-//    qDebug() << q.value(0).toInt();
-    return q.value(0).toInt();
+    // REFACTOR
+    return 100;
+//    QTextCodec *encode = QTextCodec::codecForLocale();
+//    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+//    QSqlQuery q = execSimpleQuery("CALL insertGroup('"+encodedName+"', "+QString::number(item.itemCategoryRef)+")");
+//    q.next();
+//    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateGroup(const GroupItem &item)
@@ -522,53 +339,49 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 
 qint32 DataBaseManager::insertProduct(const ProductItem &item)
 {
-    QTextCodec *encode = QTextCodec::codecForLocale();
+    // REFACTOR
+    return 100;
+//    QTextCodec *encode = QTextCodec::codecForLocale();
 
-    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
 
-    QSqlQuery q = execSimpleQuery("CALL insertProduct('"
-                                  +encodedName    +"', '"
-                                  +encodedFullname+"', '"
-                                  +encodedSerialn +"', '"
-                                  +encodedUnit    +"', '"
-                                  +encodedMisctag +"', "
-                                  +QString::number(item.itemGroupRef)+", "
-                                  +QString::number(item.itemCategoryRef)+")");
-    q.next();
-//    qDebug() << q.value(0).toInt();
-    return q.value(0).toInt();
+//    QSqlQuery q = execSimpleQuery("CALL insertProduct('"
+//                                  +encodedName    +"', '"
+//                                  +encodedFullname+"', '"
+//                                  +encodedSerialn +"', '"
+//                                  +encodedUnit    +"', '"
+//                                  +encodedMisctag +"', "
+//                                  +QString::number(item.itemGroupRef)+", "
+//                                  +QString::number(item.itemCategoryRef)+")");
+//    q.next();
+//    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateProduct(const ProductItem &item)
 {
+    // REFACTOR
 //    QTextCodec *encode = QTextCodec::codecForLocale();
-    QTextCodec *encode = QTextCodec::codecForName("Windows-1251");
+////    QTextCodec *encode = QTextCodec::codecForName("Windows-1251");
 
-    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
 
-//    QString encodedName     = encode->toUnicode(item.itemName.toLocal8Bit());
-//    QString encodedFullname = encode->toUnicode(item.itemFullname.toLocal8Bit());
-//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toLocal8Bit());
-//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toLocal8Bit());
-//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toLocal8Bit());
-
-    QSqlQuery q = execSimpleQuery("CALL updateProduct("
-                                  +QString::number(item.itemId)+", '"
-                                  +encodedName    +"', '"
-                                  +encodedFullname+"', '"
-                                  +encodedSerialn +"', '"
-                                  +encodedUnit    +"', '"
-                                  +encodedMisctag +"', "
-                                  +QString::number(item.itemGroupRef)+", "
-                                  +QString::number(item.itemCategoryRef)+")");
+//    QSqlQuery q = execSimpleQuery("CALL updateProduct("
+//                                  +QString::number(item.itemId)+", '"
+//                                  +encodedName    +"', '"
+//                                  +encodedFullname+"', '"
+//                                  +encodedSerialn +"', '"
+//                                  +encodedUnit    +"', '"
+//                                  +encodedMisctag +"', "
+//                                  +QString::number(item.itemGroupRef)+", "
+//                                  +QString::number(item.itemCategoryRef)+")");
 }
 
 void DataBaseManager::deleteProduct(const ProductItem &item)
@@ -645,22 +458,84 @@ void DataBaseManager::deleteTransact(const TransactItem &item)
     QSqlQuery q = execSimpleQuery("CALL deleteTransact("+QString::number(item.itemId)+")");
 }
 
-qint32 DataBaseManager::insertDictRecord(const QString &table, const QString &name)
+qint32 DataBaseManager::insertDictRecord(const qint32 &tableId, const QString &name)
 {
-    qDebug() << "db add dict:" << table << name;
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(name.toUtf8());
+    QSqlQuery q;
+    // TODO: FIXME refactor this crap
+    switch (tableId) {
+    case 0:
+        q = execSimpleQuery("CALL insertLocation('"+encodedName+"')");
+        break;
+    case 1:
+        q = execSimpleQuery("CALL insertStaff('"+encodedName+"')");
+        break;
+    case 2:
+        q = execSimpleQuery("CALL insertProject('"+encodedName+"')");
+        break;
+    }
+    q.next();
+    return q.value(0).toInt();
 }
 
-void DataBaseManager::updateDictRecord(const QString &table, const qint32 recId, const QString &name)
+void DataBaseManager::updateDictRecord(const qint32 &tableId, const qint32 recId, const QString &name)
 {
-    if (recId != 0)
-        qDebug() << "db edit dict:" << table << recId << name;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(name.toUtf8());
+    QSqlQuery q;
+    switch (tableId) {
+    case 0:
+        q = execSimpleQuery("CALL updateLocation("+QString::number(recId)+", '"
+                                                  +encodedName+"')");
+        break;
+    case 1:
+        q = execSimpleQuery("CALL updateStaff("+QString::number(recId)+", '"
+                                               +encodedName+"')");
+        break;
+    case 2:
+        q = execSimpleQuery("CALL updateProject("+QString::number(recId)+", '"
+                                                 +encodedName+"')");
+        break;
+    }
 }
 
-void DataBaseManager::deleteDictRecord(const QString &table, const qint32 recId)
+void DataBaseManager::deleteDictRecord(const qint32 &tableId, const qint32 recId)
 {
-    if (recId != 0)
-        qDebug() << "db del dict" << table << recId;
+    // TODO: refactor with functors
+    QSqlQuery q;
+    switch (tableId) {
+    case 0:
+        q = execSimpleQuery("CALL deleteLocation("+QString::number(recId)+")");
+        break;
+    case 1:
+        q = execSimpleQuery("CALL deleteStaff("+QString::number(recId)+")");
+        break;
+    case 2:
+        q = execSimpleQuery("CALL deleteProject("+QString::number(recId)+")");
+        break;
+    }
+}
+
+bool DataBaseManager::checkLocationFk(const qint32 locId)
+{
+    QSqlQuery q = execSimpleQuery("CALL checkLocationStockFk("+QString::number(locId)+")");
+    q.next();
+    return q.value(0).toBool();
+}
+
+bool DataBaseManager::checkStaffFk(const qint32 staffId)
+{
+    QSqlQuery q = execSimpleQuery("CALL checkStaffTransactFk("+QString::number(staffId)+")");
+    q.next();
+    return q.value(0).toBool();
+}
+
+bool DataBaseManager::checkProjectFk(const qint32 projId)
+{
+    QSqlQuery q = execSimpleQuery("CALL checkProjectStockTransactFk("+QString::number(projId)+")");
+    q.next();
+    return q.value(0).toBool();
 }
 
 // ------------------------------- utility -----------------------------------
@@ -677,71 +552,4 @@ TransactItem DataBaseManager::makeTransactItemFromStockItem(const StockItem &sto
             .setProject(stock.itemProject)
 //            .setBill(0)
             .build());
-}
-
-void DataBaseManager::convertDB()
-{
-#ifdef AT_WORK
-//    QTextCodec *decode = QTextCodec::codecForName("UTF-8");
-//    QTextCodec *encode = QTextCodec::codecForLocale();
-#endif
-
-#ifndef AT_WORK
-#endif
-
-#ifdef AT_WORK
-#endif
-// ------------ read sqlite, write mysql --------------
-/*
-    qDebug() << "connecting to db...";
-
-    QSqlDatabase lite = QSqlDatabase::addDatabase("QSQLITE", "lite");
-
-    lite.setDatabaseName("C:\\sqlite.db");
-    lite.open();
-
-    QSqlQuery lq("     SELECT `sklad`.`date`, `product`.`productname`, `sklad`.`amount`, `sklad`.`kto_vz`"
-                 "       FROM `sklad`"
-                 " INNER JOIN `product` ON `sklad`.`id_product` = `product`.`id`"
-                 "   ORDER BY `sklad`.`date` ASC", lite);
-
-    QVector<QString> dates;
-    QVector<QString> names;
-    QVector<qint32> amounts;
-    QVector<QString> persons;
-    while(lq.next()) {
-        dates   << lq.value(0).toDate().toString(Qt::ISODate);
-        names   << lq.value(1).toString();
-        amounts << lq.value(2).toInt();
-        persons << lq.value(3).toString();
-    }
-
-    QSqlQuery mq(" SELECT `product`.`product_id`, `product`.`product_name`"
-                 "   FROM `product`");
-
-    QSqlQuery wq;
-    QMap<QString, qint32> mproduct;
-    while (mq.next()) {
-        mproduct.insert(decode->toUnicode(mq.value(1).toString().toLocal8Bit()),
-                        mq.value(0).toInt());
-    }
-
-    for (qint32 i=0; i<dates.size(); ++i) {
-        if (mproduct.contains(names.at(i))) {
-            wq.prepare(" INSERT INTO `transact` "
-                       " (`transact_id`, `transact_date`, `transact_diff`, `transact_note`, `transact_productRef`)"
-                       " VALUES (NULL, :date, :diff, :note, :prod) ");
-            wq.bindValue(":date", dates.at(i));
-            wq.bindValue(":diff", amounts.at(i));
-            wq.bindValue(":note", encode->toUnicode(persons.at(i).toUtf8()));
-            wq.bindValue(":prod", mproduct.value(names.at(i)));
-            wq.exec();
-//            qDebug() << i << dates.at(i) << mproduct.value(names.at(i)) << names.at(i) << amounts.at(i);
-        }
-    }
-    qDebug() << wq.lastError();
-    qDebug() << lq.lastError();
-/**/
-// ---------------------------------------
-// ------------ update mysql -------------
 }

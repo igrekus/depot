@@ -21,7 +21,7 @@ class DictEditorDialog : public QDialog
 
 public:
     QStringList dictList = {"Место хранения", "Сотрудники", "Тема"};
-    QStringList tableList = {"location", "staff", "project_tag"};
+//    QStringList tableList = {"location", "staff", "project_tag"};
     qint32 m_dictTableId = 0;
 
     DataBaseManager *m_dbman;
@@ -50,6 +50,8 @@ private slots:
     void on_btnAdd_clicked();
     void on_btnEdit_clicked();
     void on_btnDelete_clicked();
+
+    void on_listDict_doubleClicked(const QModelIndex &index);
 
 private:
     Ui::DictEditorDialog *ui;

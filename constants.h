@@ -19,7 +19,8 @@ enum Role {
 };
 
 enum TreeItemType {
-    ItemCategory = 0,
+    ItemClass = 0,
+    ItemCategory,
     ItemGroup,
     ItemItem
 };
@@ -27,7 +28,8 @@ enum TreeItemType {
 enum TreeItemLevel {
     LevelRoot = 0,
     Level_1,
-    Level_2
+    Level_2,
+    Level_3
 };
 
 enum DataValues {

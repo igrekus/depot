@@ -24,41 +24,36 @@ public:
 
     CategoryItem &operator=(const CategoryItem &right) {
         if (this != &right) {
-            itemId   = right.itemId;
-            itemName = right.itemName;
+            itemId       = right.itemId;
+            itemName     = right.itemName;
         }
         return *this;
     }
 
     bool operator==(const CategoryItem &right) const {
-        return (itemId   == right.itemId &&
-                itemName == right.itemName);
+        return (itemId       == right.itemId   &&
+                itemName     == right.itemName);
     }
 
     friend QDebug operator<<(QDebug dbg, const CategoryItem &right) {
         dbg.nospace() << "Category("
                       << "id:"    << right.itemId
                       << " name:" << right.itemName
-                      << ")";
+                      << ")" ;
         return dbg.maybeSpace();
     }
     using CategoryList = QVector<CategoryItem>;
 
     class CategoryItemBuilder {
     public:
-        qint32  catId = 0;
+        qint32  catId   = 0;
         QString catName = QString();
 
-        CategoryItemBuilder& setId  (const qint32   id)   { this->catId   = id;   return *this; }
-        CategoryItemBuilder& setName(const QString &name) { this->catName = name; return *this; }
-//        Builder& setProductP(){          // pre-defined category, if needed
-//			this->i = 42;
-//			this->f = -1.0f/12.0f;
-//			this->c = '@';
-//			return *this;
-//		}
+        CategoryItemBuilder& setId   (const qint32   id)   { this->catId   = id;   return *this; }
+        CategoryItemBuilder& setName (const QString &name) { this->catName = name; return *this; }
         CategoryItem build() {
-            return CategoryItem(this->catId, this->catName);
+            return CategoryItem(this->catId,
+                                this->catName);
         }
     };
 };

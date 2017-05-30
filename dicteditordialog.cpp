@@ -31,21 +31,21 @@ void DictEditorDialog::loadDict(MapModel *dict)
 
 void DictEditorDialog::addRecord(MapModel *dict, const qint32 tableId, const QString &newname)
 {
-    qint32 newId = m_dbman->insertDictRecord(tableList.at(tableId), newname);
+    qint32 newId = m_dbman->insertDictRecord(tableId, newname);
 
     dict->addItem(newId, newname);
 }
 
 void DictEditorDialog::editRecord(MapModel *dict, const qint32 tableId, const qint32 recId, const QString &newname)
 {
-    m_dbman->updateDictRecord(tableList.at(tableId), recId, newname);
+    m_dbman->updateDictRecord(tableId, recId, newname);
 
     dict->editItem(recId, newname);
 }
 
 void DictEditorDialog::deleteRecord(MapModel *dict, const qint32 tableId, const qint32 recId)
 {
-    m_dbman->deleteDictRecord(tableList.at(tableId), recId);
+    m_dbman->deleteDictRecord(tableId, recId);
 
     dict->removeItem(recId);
 }
@@ -102,13 +102,40 @@ void DictEditorDialog::on_btnEdit_clicked()
 
 void DictEditorDialog::on_btnDelete_clicked()
 {
-    // TODO: FK checks
     if (!ui->listDict->selectionModel()->hasSelection()) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите запись для удаления.");
         return;
     }
+    // db FK checks
+    switch (m_dictTableId) {
+    case 0:
+        if (m_dbman->checkLocationFk(ui->listDict->currentIndex().data(Constants::RoleNodeId).toInt())) {
+            QMessageBox::warning(this,
+                                 "Ошибка!",
+                                 "Нельзя удалить место хранения, зарегистрированное на складе.");
+            return;
+        }
+        break;
+    case 1:
+        if (m_dbman->checkStaffFk(ui->listDict->currentIndex().data(Constants::RoleNodeId).toInt())) {
+            QMessageBox::warning(this,
+                                 "Ошибка!",
+                                 "Нельзя удалить сотрудника, на которого есть записи о приходе/расходе.");
+            return;
+        }
+        break;
+    case 2:
+        if (m_dbman->checkProjectFk(ui->listDict->currentIndex().data(Constants::RoleNodeId).toInt())) {
+            QMessageBox::warning(this,
+                                 "Ошибка!",
+                                 "Нельзя удалить работу, на которую зарегистрировано место хранения на складе или есть записи о приходе/расходе.");
+            return;
+        }
+        break;
+    }
+    // confirmation
     qint32 res = QMessageBox::question(this,
                                        "Внимание!",
                                        "Вы действительно хотите удалить выбранную запись о приходе/расходе?",
@@ -118,4 +145,9 @@ void DictEditorDialog::on_btnDelete_clicked()
         deleteRecord(m_currentListModel, m_dictTableId,
                      ui->listDict->currentIndex().data(Constants::RoleNodeId).toInt());
     }
+}
+
+void DictEditorDialog::on_listDict_doubleClicked(const QModelIndex &index)
+{
+    ui->btnEdit->click();
 }

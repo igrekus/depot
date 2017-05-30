@@ -39,9 +39,9 @@ void InventoryDataDialog::updateWidgets()
     ui->editSerialn->setText(m_data.itemSerialn);
     ui->editUnit->setText(m_data.itemUnit);
 
-    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
-    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
-
+    // REFACTOR
+//    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
+//    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
 }
 
 void InventoryDataDialog::initDialog()
@@ -80,6 +80,7 @@ void InventoryDataDialog::changeEvent(QEvent *e)
 
 ProductItem InventoryDataDialog::collectData()
 {
+    // REFACTOR
     return (ProductItem::ProductItemBuilder()
             .setId(m_data.itemId)
             .setName(ui->editName->text())
@@ -87,8 +88,8 @@ ProductItem InventoryDataDialog::collectData()
             .setSerialn(ui->editSerialn->text())
             .setUnit(ui->editUnit->text())
             .setMiscTag(ui->editMiscTag->text())
-            .setGroup(ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
-            .setCategory(ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
+//            .setGroup(ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
+//            .setCategory(ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
             .build());
 }
 

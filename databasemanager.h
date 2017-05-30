@@ -19,11 +19,25 @@
 #include <linkeddict.h>
 #include <constants.h>
 #include <reportrequest.h>
+#include <classitem.h>
 
 class DataBaseManager : public QObject
 {
     Q_OBJECT
 public:
+
+    struct ProductParents {
+        qint32 parentClass    = 0;
+        qint32 parentCategory = 0;
+        qint32 parentGroup    = 0;
+
+        ProductParents():
+            parentClass(),
+            parentCategory(),
+            parentGroup()
+        {}
+    };
+
     explicit DataBaseManager(QObject *parent = 0);
 
     void connectToDatabase();
@@ -32,18 +46,20 @@ public:
     QSqlQuery execParametrizedQuery(const QString &qry, const QVariantList &params);
 
     // списки итемов
-    CategoryItem::CategoryList getCategoryList();
+    ClassItem::ClassList getClassList();
+    CategoryItem::CategoryList getCategoryList(const qint32 classId);
     GroupItem::GroupList getGroupList(const qint32 catId);
     StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
-    ProductItem::ProductList getProductListByGroup(const qint32 catId, const qint32 groupId);
+    ProductItem::ProductList getProductListByGroup(const qint32 groupId);
     TransactItem::TransactList getTransactList();
 
     IdStringList getIdProductList();
 
     StockItem getStockByProductId(const qint32 prodId);
-    QPair<qint32, qint32> getProductParents(const qint32 prodId);
+    ProductParents getProductParents(const qint32 prodId);
 
     // словари
+    HashDict fillHashDict(QSqlQuery &&q);
     HashDict getMapLocation();
     HashDict getMapProject();
     HashDict getMapMiscTag();
@@ -79,13 +95,17 @@ public:
     void updateTransact(const TransactItem &item);
     void deleteTransact(const TransactItem &item);
 
-    qint32 insertDictRecord(const QString &table, const QString &name);
-    void updateDictRecord(const QString &table, const qint32 recId, const QString &name);
-    void deleteDictRecord(const QString &table, const qint32 recId);
+    qint32 insertDictRecord(const qint32 &tableId, const QString &name);
+    void updateDictRecord(const qint32 &tableId, const qint32 recId, const QString &name);
+    void deleteDictRecord(const qint32 &tableId, const qint32 recId);
+
+    // проверки на наличие
+    bool checkLocationFk(const qint32 locId);
+    bool checkStaffFk(const qint32 staffId);
+    bool checkProjectFk(const qint32 projId);
 
     // utility
     TransactItem makeTransactItemFromStockItem(const StockItem &stock);
-    void convertDB();
 
 signals:
 

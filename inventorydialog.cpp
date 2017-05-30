@@ -291,9 +291,10 @@ void InventoryDialog::procActInventoryAdd()
         return QModelIndex();
     }();
 // TODO: fix ind.parent chain;
+    // REFACTOR: new dialog data struct
     ProductItem dummyProduct = ProductItem::ProductItemBuilder()
-                               .setGroup(pindex.data(Constants::RoleNodeId).toInt())
-                               .setCategory(pindex.parent().data(Constants::RoleNodeId).toInt())
+//                               .setGroup(pindex.data(Constants::RoleNodeId).toInt())
+//                               .setCategory(pindex.parent().data(Constants::RoleNodeId).toInt())
                                .setUnit("шт")
                                .build();
 

@@ -56,7 +56,7 @@ StockModel::~StockModel()
 
 }
 
-StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
+StockModel::StockNode StockModel:: makeClassNode(const ClassItem &item)
 {
     return StockModel::StockNode(StockItem::StockItemBuilder()
                                  .setId   (item.itemId)
@@ -66,13 +66,24 @@ StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item)
                                  .build());
 }
 
+StockModel::StockNode StockModel::makeCategoryNode(const CategoryItem &item, StockNode *parent)
+{
+    return StockModel::StockNode(StockItem::StockItemBuilder()
+                                 .setId   (item.itemId)
+                                 .setName (item.itemName)
+                                 .setType (Constants::ItemCategory)
+                                 .setLevel(Constants::Level_1)
+                                 .build(),
+                                 parent);
+}
+
 StockModel::StockNode StockModel::makeGroupNode(const GroupItem &item, StockNode *parent)
 {
     return StockModel::StockNode(StockItem::StockItemBuilder()
                                  .setId   (item.itemId)
                                  .setName (item.itemName)
                                  .setType (Constants::ItemGroup)
-                                 .setLevel(Constants::Level_1)
+                                 .setLevel(Constants::Level_2)
                                  .build(),
                                  parent);
 }
@@ -82,16 +93,25 @@ StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockMode
     return StockModel::StockNode(item, parent);
 }
 
+void StockModel::buildRoot()
+{
+    qDebug() << "stock: building root";
+    ClassItem::ClassList list = m_dbman->getClassList();
+    beginInsertRows(QModelIndex(), 0, list.size()-1);
+    for (const ClassItem &it : list) {
+        m_nodes.append(std::move(makeClassNode(it)));
+    }
+    endInsertRows();
+}
+
 void StockModel::buildCategoryLevel()
 {
+    // REFACTOR
     qDebug() << "stock: building category level";
-    CategoryItem::CategoryList list = m_dbman->getCategoryList();
+    CategoryItem::CategoryList list = m_dbman->getCategoryList(1);
     beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
-//        if (it.itemId == 1) {
-//            continue;
-//        }
-        m_nodes.append(std::move(makeCategoryNode(it)));
+//        m_nodes.append(std::move(makeCategoryNode(it)));
     }
     endInsertRows();
 }
@@ -125,9 +145,10 @@ void StockModel::buildStockLevel()
 void StockModel::initModel()
 {
     // TODO: формировать уровни одновременно - надо ли?
-    buildCategoryLevel();
-    buildGroupLevel();
-    buildStockLevel();
+    buildRoot();
+//    buildCategoryLevel();
+//    buildGroupLevel();
+//    buildStockLevel();
 }
 
 void StockModel::clearNodeList(StockModel::StockNodeList &list)
@@ -333,20 +354,19 @@ int StockModel::findRow(const StockNode *stockNode) const
 
 QModelIndex StockModel::addStock(const StockItem &item)
 {
-    QPair<qint32, qint32> grpcat = m_dbman->getProductParents(item.itemProduct);
+    // REFACTOR
+    DataBaseManager::ProductParents p = m_dbman->getProductParents(item.itemProduct);
 
     auto catIter = std::find_if(m_nodes.begin(), m_nodes.end(),
-                                [&grpcat](const StockNode &it) -> bool {
-        return (it.stockItem.itemId == grpcat.second);
+                                [&p](const StockNode &it) -> bool {
+        return (it.stockItem.itemId == p.parentCategory);
     });
-//    qDebug() << "cat:" << catIter->stockItem.itemId << catIter->stockItem.itemName;
 
     auto grpIter = std::find_if(catIter->children.begin(), catIter->children.end(),
-                                [&grpcat](const StockNode &it) -> bool {
-        return (it.stockItem.itemId == grpcat.first);
+                                [&p](const StockNode &it) -> bool {
+        return (it.stockItem.itemId == p.parentGroup);
     });
     qint32 grprow = std::distance(catIter->children.begin(), grpIter);
-//    qDebug() << "grp:" << grpIter->stockItem.itemId << grpIter->stockItem.itemName;
 
     auto targetIter = std::find_if(grpIter->children.begin(), grpIter->children.end(),
                                    [&grpIter](const StockNode &it) -> bool {

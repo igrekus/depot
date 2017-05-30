@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     decoderproxymodel.cpp \
     delegatehighligtabletabletext.cpp \
     delegatehighligtabltreetext.cpp \
-    dicteditordialog.cpp
+    dicteditordialog.cpp \
+    classitem.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -75,7 +76,8 @@ HEADERS  += mainwindow.h \
     decoderproxymodel.h \
     delegatehighligtabletabletext.h \
     delegatehighligtabltreetext.h \
-    dicteditordialog.h
+    dicteditordialog.h \
+    classitem.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

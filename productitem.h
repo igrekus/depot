@@ -14,17 +14,13 @@ public:
     QString itemSerialn;
     QString itemUnit;
     QString itemMiscTag;
-    qint32  itemGroupRef;
-    qint32  itemCategoryRef;
 
     explicit ProductItem():
         AbstractItem(),
         itemFullname(),
         itemSerialn(),
         itemUnit(),
-        itemMiscTag(),
-        itemGroupRef(),
-        itemCategoryRef()
+        itemMiscTag()
     {}
 
     explicit ProductItem(qint32         id,
@@ -32,16 +28,12 @@ public:
                          const QString &fullname,
                          const QString &serialn,
                          const QString &unit,
-                         const QString &miscTag,
-                         qint32         group,
-                         qint32         category):
+                         const QString &miscTag):
         AbstractItem   (id, name),
         itemFullname   (fullname),
         itemSerialn    (serialn),
         itemUnit       (unit),
-        itemMiscTag    (miscTag),
-        itemGroupRef   (group),
-        itemCategoryRef(category)
+        itemMiscTag    (miscTag)
     {}
 
      ProductItem(const ProductItem &copy):
@@ -49,9 +41,7 @@ public:
         itemFullname   (copy.itemFullname),
         itemSerialn    (copy.itemSerialn),
         itemUnit       (copy.itemUnit),
-        itemMiscTag    (copy.itemMiscTag),
-        itemGroupRef   (copy.itemGroupRef),
-        itemCategoryRef(copy.itemCategoryRef)
+        itemMiscTag    (copy.itemMiscTag)
     {}
 
 
@@ -63,8 +53,6 @@ public:
             itemSerialn     = right.itemSerialn;
             itemUnit        = right.itemUnit;
             itemMiscTag     = right.itemMiscTag;
-            itemGroupRef    = right.itemGroupRef;
-            itemCategoryRef = right.itemCategoryRef;
         }
         return *this;
     }
@@ -75,9 +63,7 @@ public:
                 itemFullname    == right.itemFullname  &&
                 itemSerialn     == right.itemSerialn   &&
                 itemUnit        == right.itemUnit      &&
-                itemMiscTag     == right.itemMiscTag   &&
-                itemGroupRef    == right.itemGroupRef  &&
-                itemCategoryRef == right.itemCategoryRef);
+                itemMiscTag     == right.itemMiscTag);
     }
 
     friend QDebug operator<<(QDebug dbg, const ProductItem &right) {
@@ -88,8 +74,6 @@ public:
                       << " serial:" << right.itemSerialn
                       << " unit:"   << right.itemUnit
                       << " tag:"    << right.itemMiscTag
-                      << " grp:"    << right.itemGroupRef
-                      << " cat:"    << right.itemCategoryRef
                       << ")";
         return dbg.maybeSpace();
     }
@@ -104,8 +88,6 @@ public:
         QString prodSerialn   = QString();
         QString prodUnit      = QString("шт");
         QString prodMiscTag   = QString();
-        qint32  prodGroupRef  = 0;
-        qint32  prodCatRef    = 0;
 
         ProductItemBuilder(){}
 
@@ -115,9 +97,7 @@ public:
             prodFullname(item.itemFullname),
             prodSerialn (item.itemSerialn),
             prodUnit    (item.itemUnit),
-            prodMiscTag (item.itemMiscTag),
-            prodGroupRef(item.itemGroupRef),
-            prodCatRef  (item.itemCategoryRef)
+            prodMiscTag (item.itemMiscTag)
         {}
 
         ProductItemBuilder& setId       (const qint32   id)      { this->prodId       = id;       return *this; }
@@ -126,13 +106,10 @@ public:
         ProductItemBuilder& setSerialn  (const QString &serialn) { this->prodSerialn  = serialn;  return *this; }
         ProductItemBuilder& setUnit     (const QString &unit)    { this->prodUnit     = unit;     return *this; }
         ProductItemBuilder& setMiscTag  (const QString &miscTag) { this->prodMiscTag  = miscTag;  return *this; }
-        ProductItemBuilder& setGroup    (const qint32   group)   { this->prodGroupRef = group;    return *this; }
-        ProductItemBuilder& setCategory (const qint32   cat)     { this->prodCatRef   = cat;      return *this; }
         ProductItem build() {
             return ProductItem(this->prodId,       this->prodName,
                                this->prodFullname, this->prodSerialn,
-                               this->prodUnit,     this->prodMiscTag,
-                               this->prodGroupRef, this->prodCatRef);
+                               this->prodUnit,     this->prodMiscTag);
         }
     };
 };

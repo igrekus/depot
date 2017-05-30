@@ -96,13 +96,11 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
 
 void InventoryModel::buildCategoryLevel()
 {
+    // REFACTOR
     qDebug() << "inventory: building category level";
-    CategoryItem::CategoryList list = m_dbman->getCategoryList();
+    CategoryItem::CategoryList list = m_dbman->getCategoryList(1);
 //    beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const CategoryItem &it : list) {
-//        if (it.itemId == 1) {
-//            continue;
-//        }
         m_nodes.append(std::move(makeCategoryNode(it)));
     }
 //    endInsertRows();
@@ -122,16 +120,17 @@ void InventoryModel::buildGroupLevel()
 
 void InventoryModel::buildProductLevel()
 {
+    // REFACTOR
     qDebug() << "inventory: building product level";
-// TODO: endinsertrows
-    for (InventoryNode &it : m_nodes) {
-        for (InventoryNode &jt : it.children) {
-            ProductItem::ProductList list = m_dbman->getProductListByGroup(it.inventoryItem.itemId, jt.inventoryItem.itemId);
-            for (const ProductItem &kt : list) {
-                jt.children.append(std::move(makeProductNode(kt, &jt)));
-            }
-        }
-    }
+//// TODO: endinsertrows
+//    for (InventoryNode &it : m_nodes) {
+//        for (InventoryNode &jt : it.children) {
+//            ProductItem::ProductList list = m_dbman->getProductListByGroup(it.inventoryItem.itemId, jt.inventoryItem.itemId);
+//            for (const ProductItem &kt : list) {
+//                jt.children.append(std::move(makeProductNode(kt, &jt)));
+//            }
+//        }
+//    }
 }
 
 void InventoryModel::initModel()
@@ -417,6 +416,7 @@ void InventoryModel::deleteCategory(const QModelIndex &index)
 
 QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &grpName)
 {
+    // REFACTOR
     // TODO: соединить метод с методом добавки категории?
     InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
 
@@ -427,7 +427,7 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
 
     GroupItem::GroupItemBuilder b;
     b.setName(grpName);
-    b.setCategory(pnode->inventoryItem.itemId);
+//    b.setCategory(pnode->inventoryItem.itemId);
 
     qint32 newId = m_dbman->insertGroup(b.build());
 
@@ -520,6 +520,7 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
 
 ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
 {
+    // REFACTOR
     InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
     return (ProductItem::ProductItemBuilder()
             .setId      (tmpnode->inventoryItem.itemId)
@@ -528,8 +529,8 @@ ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
             .setSerialn (tmpnode->inventoryItem.itemSerialn)
             .setUnit    (tmpnode->inventoryItem.itemUnit)
             .setMiscTag (tmpnode->inventoryItem.itemMiscTag)
-            .setGroup   (tmpnode->parent->inventoryItem.itemId)          // TODO: FIX this shit
-            .setCategory(tmpnode->parent->parent->inventoryItem.itemId)
+//            .setGroup   (tmpnode->parent->inventoryItem.itemId)          // TODO: FIX this shit
+//            .setCategory(tmpnode->parent->parent->inventoryItem.itemId)
             .build());
 }
 

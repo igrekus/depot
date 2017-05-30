@@ -6,13 +6,6 @@
 #include <databasemanager.h>
 #include <dictmodel.h>
 
-#define DATA_INVALID -1
-
-#define ROLE_LEVEL_ID  (Qt::UserRole+1)
-#define ROLE_NODE_TYPE (Qt::UserRole+2)
-#define ROLE_NODE_ID   (Qt::UserRole+3)
-#define ROLE_NODE_HAS_CHILDREN (Qt::UserRole+4)
-
 class StockItem;
 
 class StockModel : public QAbstractItemModel
@@ -49,11 +42,13 @@ public:
     ~StockModel();
 
     // фабрики узлов дерева
-    StockNode makeCategoryNode(const CategoryItem &item);
+    StockNode makeClassNode(const ClassItem &item);
+    StockNode makeCategoryNode(const CategoryItem &item, StockNode *parent);
     StockNode makeGroupNode(const GroupItem &item, StockNode *parent);
     StockNode makeStockNode(const StockItem &item, StockNode *parent);
 
     // инициализация модели
+    void buildRoot();
     void buildCategoryLevel();
     void buildGroupLevel();
     void buildStockLevel();
