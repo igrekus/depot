@@ -149,5 +149,6 @@ void DictEditorDialog::on_btnDelete_clicked()
 
 void DictEditorDialog::on_listDict_doubleClicked(const QModelIndex &index)
 {
+    Q_UNUSED(index)
     ui->btnEdit->click();
 }

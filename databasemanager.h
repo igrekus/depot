@@ -26,18 +26,6 @@ class DataBaseManager : public QObject
     Q_OBJECT
 public:
 
-    struct ProductParents {
-        qint32 parentClass    = 0;
-        qint32 parentCategory = 0;
-        qint32 parentGroup    = 0;
-
-        ProductParents():
-            parentClass(),
-            parentCategory(),
-            parentGroup()
-        {}
-    };
-
     explicit DataBaseManager(QObject *parent = 0);
 
     void connectToDatabase();
@@ -49,14 +37,14 @@ public:
     ClassItem::ClassList getClassList();
     CategoryItem::CategoryList getCategoryList(const qint32 classId);
     GroupItem::GroupList getGroupList(const qint32 catId);
-    StockItem::StockList getStockList(const qint32 catId, const qint32 groupId);
+    StockItem::StockList getStockList(const qint32 groupId);
     ProductItem::ProductList getProductListByGroup(const qint32 groupId);
     TransactItem::TransactList getTransactList();
 
     IdStringList getIdProductList();
 
     StockItem getStockByProductId(const qint32 prodId);
-    ProductParents getProductParents(const qint32 prodId);
+    ProductParentData getProductParents(const qint32 prodId);
 
     // словари
     HashDict fillHashDict(QSqlQuery &&q);
@@ -75,11 +63,11 @@ public:
     QSqlQuery getTransactStats(const ReportRequest &req);
 
     // запись данных в БД
-    qint32 insertCategory(const QString &name);
+    qint32 insertCategory(const qint32 classId, const QString &name);
     void updateCategory(const CategoryItem &item);
     void deleteCategory(const CategoryItem &item);
 
-    qint32 insertGroup(const GroupItem &item);
+    qint32 insertGroup(const qint32 catId, const QString &grpName);
     void updateGroup(const GroupItem &item);
     void deleteGroup(const GroupItem &item);
 

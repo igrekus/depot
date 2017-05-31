@@ -265,7 +265,7 @@
         <item>
          <widget class="QPushButton" name="btnInventoryEditor">
           <property name="text">
-           <string>Номенклатура</string>
+           <string>Номенклатура &amp;a</string>
           </property>
          </widget>
         </item>

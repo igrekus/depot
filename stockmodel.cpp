@@ -61,7 +61,7 @@ StockModel::StockNode StockModel:: makeClassNode(const ClassItem &item)
     return StockModel::StockNode(StockItem::StockItemBuilder()
                                  .setId   (item.itemId)
                                  .setName (item.itemName)
-                                 .setType (Constants::ItemCategory)
+                                 .setType (Constants::ItemClass)
                                  .setLevel(Constants::LevelRoot)
                                  .build());
 }
@@ -93,9 +93,40 @@ StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockMode
     return StockModel::StockNode(item, parent);
 }
 
-void StockModel::buildRoot()
+void StockModel::fillClassNode(const QModelIndex &index, StockNode &node)
 {
-    qDebug() << "stock: building root";
+    CategoryItem::CategoryList list = m_dbman->getCategoryList(node.stockItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const CategoryItem &it : list) {
+        node.children.append(std::move(makeCategoryNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void StockModel::fillCategoryNode(const QModelIndex &index, StockNode &node)
+{
+    GroupItem::GroupList list = m_dbman->getGroupList(node.stockItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const GroupItem &it : list) {
+        node.children.append(std::move(makeGroupNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void StockModel::fillGroupNode(const QModelIndex &index, StockNode &node)
+{
+    // TODO: finish
+    StockItem::StockList list = m_dbman->getStockList(node.stockItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const StockItem &it : list) {
+        node.children.append(std::move(makeStockNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void StockModel::buildClassLevel()
+{
+    qDebug() << "stock: building class level (0)";
     ClassItem::ClassList list = m_dbman->getClassList();
     beginInsertRows(QModelIndex(), 0, list.size()-1);
     for (const ClassItem &it : list) {
@@ -106,37 +137,35 @@ void StockModel::buildRoot()
 
 void StockModel::buildCategoryLevel()
 {
-    // REFACTOR
-    qDebug() << "stock: building category level";
-    CategoryItem::CategoryList list = m_dbman->getCategoryList(1);
-    beginInsertRows(QModelIndex(), 0, list.size()-1);
-    for (const CategoryItem &it : list) {
-//        m_nodes.append(std::move(makeCategoryNode(it)));
+    qDebug() << "stock: building category level (1)";
+    qint32 i=0;
+    for (StockNode &classNode : m_nodes) {
+        fillClassNode(createIndex(i, 0, &classNode), classNode);
+        ++i;
     }
-    endInsertRows();
 }
 
 void StockModel::buildGroupLevel()
 {
-    qDebug() << "stock: building group level";
-// TODO: begininsertorws;
-    for (StockNode &it : m_nodes) {
-        GroupItem::GroupList list = m_dbman->getGroupList(it.stockItem.itemId);
-        for (const GroupItem &jt : list) {
-            it.children.append(std::move(makeGroupNode(jt, &it)));
+    qDebug() << "stock: building group level (2)";
+    for (StockNode &classNode : m_nodes) {
+        qint32 i=0;
+        for (StockNode &categoryNode : classNode.children) {
+            fillCategoryNode(createIndex(i, 0, &categoryNode), categoryNode);
+            ++i;
         }
     }
 }
 
 void StockModel::buildStockLevel()
 {
-    qDebug() << "stock: building product level";
-// TODO: endinsertrows
-    for (StockNode &it : m_nodes) {
-        for (StockNode &jt : it.children) {
-            StockItem::StockList list = m_dbman->getStockList(it.stockItem.itemId, jt.stockItem.itemId);
-            for (const StockItem &kt : list) {
-                jt.children.append(std::move(makeStockNode(kt, &jt)));
+    qDebug() << "stock: building product level (2)";
+    for (StockNode &classNode : m_nodes) {
+        for (StockNode &categoryNode : classNode.children) {
+            qint32 i=0;
+            for (StockNode &groupNode : categoryNode.children) {
+                fillGroupNode(createIndex(i, 0, &groupNode), groupNode);
+                ++i;
             }
         }
     }
@@ -144,11 +173,11 @@ void StockModel::buildStockLevel()
 
 void StockModel::initModel()
 {
-    // TODO: формировать уровни одновременно - надо ли?
-    buildRoot();
-//    buildCategoryLevel();
-//    buildGroupLevel();
-//    buildStockLevel();
+    // TODO: формировать уровни одновременно - как?
+    buildClassLevel();
+    buildCategoryLevel();
+    buildGroupLevel();
+    buildStockLevel();
 }
 
 void StockModel::clearNodeList(StockModel::StockNodeList &list)
@@ -355,7 +384,7 @@ int StockModel::findRow(const StockNode *stockNode) const
 QModelIndex StockModel::addStock(const StockItem &item)
 {
     // REFACTOR
-    DataBaseManager::ProductParents p = m_dbman->getProductParents(item.itemProduct);
+    ProductParentData p = m_dbman->getProductParents(item.itemProduct);
 
     auto catIter = std::find_if(m_nodes.begin(), m_nodes.end(),
                                 [&p](const StockNode &it) -> bool {

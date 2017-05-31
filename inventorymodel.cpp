@@ -57,15 +57,26 @@ InventoryModel::~InventoryModel()
 
 }
 
-InventoryModel::InventoryNode InventoryModel::makeCategoryNode(const CategoryItem &item)
+InventoryModel::InventoryNode InventoryModel::makeClassNode(const ClassItem &item)
+{
+    return InventoryModel::InventoryNode(InventoryItem::InventoryItemBuilder()
+                                         .setId   (item.itemId)
+                                         .setName (item.itemName)
+                                         .setType (Constants::ItemClass)
+                                         .setLevel(Constants::LevelRoot)
+                                         .build(),
+                                         nullptr);
+}
+
+InventoryModel::InventoryNode InventoryModel::makeCategoryNode(const CategoryItem &item, InventoryNode *parent)
 {
     return InventoryModel::InventoryNode(InventoryItem::InventoryItemBuilder()
                                          .setId   (item.itemId)
                                          .setName (item.itemName)
                                          .setType (Constants::ItemCategory)
-                                         .setLevel(Constants::LevelRoot)
+                                         .setLevel(Constants::Level_1)
                                          .build(),
-                                         nullptr);
+                                         parent);
 }
 
 InventoryModel::InventoryNode InventoryModel::makeGroupNode(const GroupItem &item, InventoryNode *parent)
@@ -74,7 +85,7 @@ InventoryModel::InventoryNode InventoryModel::makeGroupNode(const GroupItem &ite
                                          .setId   (item.itemId)
                                          .setName (item.itemName)
                                          .setType (Constants::ItemGroup)
-                                         .setLevel(Constants::Level_1)
+                                         .setLevel(Constants::Level_2)
                                          .build(),
                                          parent);
 }
@@ -85,7 +96,7 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
                                          .setId(item.itemId)
                                          .setName(item.itemName)
                                          .setType (Constants::ItemItem)
-                                         .setLevel(Constants::Level_2)
+                                         .setLevel(Constants::Level_3)
                                          .setFullname(item.itemFullname)
                                          .setSerialn(item.itemSerialn)
                                          .setUnit(item.itemUnit)
@@ -94,47 +105,86 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
                                          parent);
 }
 
+void InventoryModel::fillClassNode(const QModelIndex &index, InventoryNode &node)
+{
+    CategoryItem::CategoryList list = m_dbman->getCategoryList(node.inventoryItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const CategoryItem &it : list) {
+        node.children.append(std::move(makeCategoryNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void InventoryModel::fillCategoryNode(const QModelIndex &index, InventoryNode &node)
+{
+    GroupItem::GroupList list = m_dbman->getGroupList(node.inventoryItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const GroupItem &it : list) {
+        node.children.append(std::move(makeGroupNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void InventoryModel::fillGroupNode(const QModelIndex &index, InventoryNode &node)
+{
+    ProductItem::ProductList list = m_dbman->getProductListByGroup(node.inventoryItem.itemId);
+    beginInsertRows(index, 0, list.size()-1);
+    for (const ProductItem &it : list) {
+        node.children.append(std::move(makeProductNode(it, &node)));
+    }
+    endInsertRows();
+}
+
+void InventoryModel::buildClassLevel()
+{
+    qDebug() << "inventory: building class level (0)";
+    ClassItem::ClassList list = m_dbman->getClassList();
+    beginInsertRows(QModelIndex(), 0, list.size()-1);
+    for (const ClassItem &it : list) {
+        m_nodes.append(std::move(makeClassNode(it)));
+    }
+    endInsertRows();
+}
+
 void InventoryModel::buildCategoryLevel()
 {
-    // REFACTOR
-    qDebug() << "inventory: building category level";
-    CategoryItem::CategoryList list = m_dbman->getCategoryList(1);
-//    beginInsertRows(QModelIndex(), 0, list.size()-1);
-    for (const CategoryItem &it : list) {
-        m_nodes.append(std::move(makeCategoryNode(it)));
+    qDebug() << "inventory: building category level (1)";
+    qint32 i=0;
+    for (InventoryNode &classNode : m_nodes) {
+        fillClassNode(createIndex(i, 0, &classNode), classNode);
+        ++i;
     }
-//    endInsertRows();
 }
 
 void InventoryModel::buildGroupLevel()
 {
-    qDebug() << "inventory: building group level";
-// TODO: begininsertorws;
-    for (InventoryNode &it : m_nodes) {
-        GroupItem::GroupList list = m_dbman->getGroupList(it.inventoryItem.itemId);
-        for (const GroupItem &jt : list) {
-            it.children.append(std::move(makeGroupNode(jt, &it)));
+    qDebug() << "inventory: building group level (2)";
+    for (InventoryNode &classNode : m_nodes) {
+        qint32 i=0;
+        for (InventoryNode &categoryNode : classNode.children) {
+            fillCategoryNode(createIndex(i, 0, &categoryNode), categoryNode);
+            ++i;
         }
     }
 }
 
 void InventoryModel::buildProductLevel()
 {
-    // REFACTOR
-    qDebug() << "inventory: building product level";
-//// TODO: endinsertrows
-//    for (InventoryNode &it : m_nodes) {
-//        for (InventoryNode &jt : it.children) {
-//            ProductItem::ProductList list = m_dbman->getProductListByGroup(it.inventoryItem.itemId, jt.inventoryItem.itemId);
-//            for (const ProductItem &kt : list) {
-//                jt.children.append(std::move(makeProductNode(kt, &jt)));
-//            }
-//        }
-//    }
+    qDebug() << "inventory: building product level (3)";
+    for (InventoryNode &classNode : m_nodes) {
+        for (InventoryNode &categoryNode : classNode.children) {
+            qint32 i=0;
+            for (InventoryNode &groupNode : categoryNode.children) {
+                fillGroupNode(createIndex(i, 0, &groupNode), groupNode);
+                ++i;
+            }
+        }
+    }
 }
 
 void InventoryModel::initModel()
 {
+    buildClassLevel();
     buildCategoryLevel();
     buildGroupLevel();
     buildProductLevel();
@@ -142,9 +192,8 @@ void InventoryModel::initModel()
 
 QVariant InventoryModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Категория/Код изделия ", "Код", "Наименование", "Единица", "№ партии", "Полное наименование"};
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
-        return headers[section];
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < m_headers.size()) {
+        return m_headers[section];
     }
     return QVariant();
 }
@@ -209,9 +258,9 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
     }
 
     const InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
-    const InventoryItem tmpitem = tmpnode->inventoryItem;
-
     Q_ASSERT(tmpnode != nullptr);
+
+    const InventoryItem tmpitem = tmpnode->inventoryItem;
 
     switch (role) {
     case Qt::DisplayRole: {
@@ -219,39 +268,38 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         case CategoryColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemId;
-//                return QVariant();
-            } else {
-                return tmpitem.itemName;
             }
+            return tmpitem.itemName;
             break;
         }
         case CodeColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemId;
-//                return m_dictModel->m_productListModel->getName(tmpitem.itemId);
-            } else {
-                return QVariant();
             }
             break;
         }
         case NameColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
                 return tmpitem.itemName;
-            } else {
-                return QVariant();
             }
             break;
         }
         case UnitColumn: {
-            return tmpitem.itemUnit;
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemUnit;
+            }
             break;
         }
         case SerialnColumn: {
-            return tmpitem.itemSerialn;
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemSerialn;
+            }
             break;
         }
         case FullnameColumn: {
-            return tmpitem.itemFullname;
+            if (tmpitem.itemType == Constants::ItemItem) {
+                return tmpitem.itemFullname;
+            }
             break;
         }
         case ColumnCount:
@@ -261,79 +309,27 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         break;
     }
     case Constants::RoleLevelId: {
-        switch (index.column()) {
-        case CategoryColumn:
-        case CodeColumn:
-        case NameColumn:
-        case UnitColumn:
-        case SerialnColumn:
-        case FullnameColumn: {
-            return tmpitem.itemLevel;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return tmpitem.itemLevel;
         break;
     }
     case Constants::RoleNodeType: {
-        switch (index.column()) {
-        case CategoryColumn:
-        case CodeColumn:
-        case NameColumn:
-        case UnitColumn:
-        case SerialnColumn:
-        case FullnameColumn: {
-            return tmpitem.itemType;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return tmpitem.itemType;
         break;
     }
     case Constants::RoleNodeId: {
-        switch (index.column()) {
-        case CategoryColumn:
-        case CodeColumn:
-        case NameColumn:
-        case UnitColumn:
-        case SerialnColumn:
-        case FullnameColumn: {
-            return tmpitem.itemId;
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return tmpitem.itemId;
         break;
     }
     case Constants::RoleNodeHasChildren: {
-        switch (index.column()) {
-        case CategoryColumn:
-        case CodeColumn:
-        case NameColumn:
-        case UnitColumn:
-        case SerialnColumn:
-        case FullnameColumn: {
-            return !tmpnode->children.isEmpty();
-            break;
-        }
-        case ColumnCount:
-        default:
-            break;
-        }
+        return !tmpnode->children.isEmpty();
         break;
     }
     case Constants::RoleSearchString: {
-        return QVariant(QString(tmpnode->inventoryItem.itemId+";"+
-                                tmpnode->inventoryItem.itemName+";"+
-                                tmpnode->inventoryItem.itemUnit+";"+
-                                tmpnode->inventoryItem.itemSerialn+";"+
-                                tmpnode->inventoryItem.itemFullname+";"));
+//        return QVariant(QString(tmpnode->inventoryItem.itemId+";"+
+//                                tmpnode->inventoryItem.itemName+";"+
+//                                tmpnode->inventoryItem.itemUnit+";"+
+//                                tmpnode->inventoryItem.itemSerialn+";"+
+//                                tmpnode->inventoryItem.itemFullname+";"));
     break;
     }
     default:
@@ -352,53 +348,45 @@ int InventoryModel::findRow(const InventoryNode *invNode) const
     return std::distance(searchList.begin(), position);
 }
 
-QModelIndex InventoryModel::addCategory(const QString &catName)
+QModelIndex InventoryModel::addCategory(const QModelIndex &pindex, const QString &catName)
 {
-    qint32 newId = m_dbman->insertCategory(catName);
-    m_dictModel->m_categoryListModel->addItem(newId, catName);
+    // TODO: obey custom sort order
+    InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
 
-    auto row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&catName](const InventoryNode &it){
-        return it.inventoryItem.itemName > catName;
-    });
-    qint32 row = std::distance(m_nodes.begin(), row_iterator);
-    beginInsertRows(QModelIndex(), row, row);
-    InventoryNode tmpnode = makeCategoryNode(CategoryItem::CategoryItemBuilder()
-                                             .setId(newId)
-                                             .setName(catName)
-                                             .build());
-    m_nodes.insert(row, tmpnode);
+    qint32 classId = pnode->inventoryItem.itemId;
+
+    qint32 newId = m_dbman->insertCategory(classId, catName);
+
+    auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
+                                     [&catName](const InventoryNode &it){
+                                        return it.inventoryItem.itemName > catName;
+                                     });
+
+    qint32 row = std::distance(pnode->children.begin(), row_iterator);
+    beginInsertRows(pindex, row, row);
+    pnode->children.insert(row, makeCategoryNode(CategoryItem::CategoryItemBuilder()
+                                                 .setId(newId)
+                                                 .setName(catName)
+                                                 .build(),
+                                                 pnode));
     endInsertRows();
-
-    return index(row, 0, QModelIndex());
+    return index(row, 0, pindex);
 }
 
-QModelIndex InventoryModel::editCategory(const QModelIndex &index, const QString &newName)
+void InventoryModel::editCategory(const QModelIndex &index, const QString &newName)
 {
-    // TODO: !!!rewrite to be like editInventory!!!
     InventoryNode *editNode = static_cast<InventoryNode *>(index.internalPointer());
     InventoryItem &editItem = editNode->inventoryItem;
+
     editItem.itemName = newName;
 
+    // TODO: conver InventoryItem to CategoryItem via a method
     m_dbman->updateCategory(CategoryItem::CategoryItemBuilder()
                             .setId  (editItem.itemId)
                             .setName(editItem.itemName)
                             .build());
 
     emit dataChanged(index, index);
-
-    //TODO: сортировка при переименовании
-//    auto dest_row_iterator = std::find_if(m_nodes.begin(), m_nodes.end(), [&newName](const InventoryNode &it){
-//        return it.inventoryItem.itemName > newName;
-//    });
-//    qint32 dest_row = std::distance(m_nodes.begin(), dest_row_iterator);
-//    qint32 row = index.row();
-
-//    beginMoveRows(index.parent(), row, row, index.parent(), dest_row);
-//    m_nodes.move(row, dest_row);
-//    endMoveRows();
-
-//    return this->index(dest_row, 0, index.parent());
-    return this->index(index.row(), 0, index.parent());
 }
 
 void InventoryModel::deleteCategory(const QModelIndex &index)
@@ -406,7 +394,7 @@ void InventoryModel::deleteCategory(const QModelIndex &index)
     InventoryNode *delNode = static_cast<InventoryNode *>(index.internalPointer());
 
     m_dbman->deleteCategory(CategoryItem::CategoryItemBuilder()
-                            .setId  (delNode->inventoryItem.itemId)
+                            .setId(delNode->inventoryItem.itemId)
                             .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
@@ -416,22 +404,23 @@ void InventoryModel::deleteCategory(const QModelIndex &index)
 
 QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &grpName)
 {
-    // REFACTOR
-    // TODO: соединить метод с методом добавки категории?
     InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
 
-    auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
-                                     [&grpName](const InventoryNode &it){return it.inventoryItem.itemName > grpName;});
+    qint32 categoryId = pnode->inventoryItem.itemId;
+
+    qint32 newId = m_dbman->insertGroup(categoryId, grpName);
+
+    auto row_iterator = std::find_if(pnode->children.begin(),
+                                     pnode->children.end(),
+                                     [&grpName](const InventoryNode &it) {
+                                         return it.inventoryItem.itemName > grpName;
+                                     });
 
     qint32 row = std::distance(pnode->children.begin(), row_iterator);
 
     GroupItem::GroupItemBuilder b;
-    b.setName(grpName);
-//    b.setCategory(pnode->inventoryItem.itemId);
-
-    qint32 newId = m_dbman->insertGroup(b.build());
-
     b.setId(newId);
+    b.setName(grpName);
 
     beginInsertRows(pindex, row, row);
     pnode->children.insert(row, std::move(makeGroupNode(b.build(), pnode)));
@@ -513,7 +502,6 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
                            .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-//    delNode->siblings().removeAt(index.row());
     parentNode->children.removeAt(index.row());
     endRemoveRows();
 }

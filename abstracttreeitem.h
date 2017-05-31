@@ -10,17 +10,6 @@
 class AbstractTreeItem : public AbstractItem
 {
 public:
-//    enum TreeItemType {
-//        ItemCategory = 0,
-//        ItemGroup,
-//        ItemItem
-//    };
-
-//    enum TreeItemLevel {
-//        LevelRoot = 0,
-//        Level_1,
-//        Level_2
-//    };
 
     Constants::TreeItemType  itemType  = Constants::ItemCategory;
     Constants::TreeItemLevel itemLevel = Constants::LevelRoot;

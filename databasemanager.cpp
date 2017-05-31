@@ -107,9 +107,8 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
     return tmplist;
 }
 
-StockItem::StockList DataBaseManager::getStockList(const qint32 catId, const qint32 groupId)
+StockItem::StockList DataBaseManager::getStockList(const qint32 groupId)
 {
-    Q_UNUSED(catId)
     StockItem::StockList tmplist;
     QSqlQuery q = execSimpleQuery("CALL getStockByGroup("+QString::number(groupId)+")");
     while (q.next()) {
@@ -202,11 +201,11 @@ StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
            .build();
 }
 
-DataBaseManager::ProductParents DataBaseManager::getProductParents(const qint32 prodId)
+ProductParentData DataBaseManager::getProductParents(const qint32 prodId)
 {
     QSqlQuery q = execSimpleQuery("CALL getProductParents("+QString::number(prodId)+")");
 
-    ProductParents p;
+    ProductParentData p;
     if (!q.next()) {
         return p;
     }
@@ -290,14 +289,16 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                            req.searchString+"')");
 }
 
-qint32 DataBaseManager::insertCategory(const QString &name)
+qint32 DataBaseManager::insertCategory(const qint32 classId, const QString &name)
 {
-    QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(name.toUtf8());
-    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedName+"')");
-    q.next();
-//    qDebug() << q.value(0).toInt();
-    return q.value(0).toInt();
+    // REFACTOR
+//    QTextCodec *encode = QTextCodec::codecForLocale();
+//    QString encodedName = encode->toUnicode(name.toUtf8());
+//    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedName+"')");
+//    q.next();
+////    qDebug() << q.value(0).toInt();
+//    return q.value(0).toInt();
+    return 100;
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)
@@ -313,7 +314,7 @@ void DataBaseManager::deleteCategory(const CategoryItem &item)
     QSqlQuery q = execSimpleQuery("CALL deleteCategory("+QString::number(item.itemId)+")");
 }
 
-qint32 DataBaseManager::insertGroup(const GroupItem &item)
+qint32 DataBaseManager::insertGroup(const qint32 catId, const QString &grpName)
 {
     // REFACTOR
     return 100;

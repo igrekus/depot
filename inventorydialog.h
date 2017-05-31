@@ -32,14 +32,6 @@ class InventoryDialog : public QDialog
 
 public:
 
-    class TextDelegate : public QStyledItemDelegate
-    {
-    public:
-        explicit TextDelegate(QObject * parent = 0) : QStyledItemDelegate(parent) {Q_UNUSED(parent)}
-        ~TextDelegate() {}
-        void paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const;
-    };
-
     InventoryModel *m_inventoryModel;
 
     RecursiveFilterProxyModel *m_searchProxyModel;
@@ -118,6 +110,9 @@ private slots:
     void on_treeInventory_doubleClicked(const QModelIndex &index);
     void on_btnRegisterStock_clicked();
     void on_editSearch_textChanged(const QString &arg1);
+
+    // utility
+    void getPathToRoot(const QModelIndex &node, QModelIndexList &path);
 
 private:
     Ui::InventoryDialog *ui;

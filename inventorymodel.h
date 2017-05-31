@@ -29,6 +29,14 @@ public:
     };
     Q_ENUM(Columns)
 
+    // заголовки таблицы
+    const QStringList m_headers = {"Категория/Код изделия ",
+                                   "Код",
+                                   "Наименование",
+                                   "Единица",
+                                   "№ партии",
+                                   "Полное наименование"};
+
     // данные
     struct InventoryNode;
     typedef QList<InventoryNode> InventoryNodeList;
@@ -45,11 +53,19 @@ public:
     InventoryModel &setDictModel      (DictModel       *dict) {m_dictModel = dict;  return *this;}
 
     // фабрики узлов дерева
-    InventoryNode makeCategoryNode(const CategoryItem &item);
+    InventoryNode makeClassNode(const ClassItem &item);
+    InventoryNode makeCategoryNode(const CategoryItem &item, InventoryNode *parent);
     InventoryNode makeGroupNode(const GroupItem &item, InventoryNode *parent);
     InventoryNode makeProductNode(const ProductItem &item, InventoryNode *parent);
 
+    // заполнение узла дерева
+    // TODO: refactor with functors/templates?
+    void fillClassNode(const QModelIndex &index, InventoryNode &node);
+    void fillCategoryNode(const QModelIndex &index, InventoryNode &node);
+    void fillGroupNode(const QModelIndex &index, InventoryNode &node);
+
     // инициализация модели
+    void buildClassLevel();
     void buildCategoryLevel();
     void buildGroupLevel();
     void buildProductLevel();
@@ -69,8 +85,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     int findRow(const InventoryNode *invNode) const;
 
-    QModelIndex addCategory(const QString &catName);
-    QModelIndex editCategory(const QModelIndex &index, const QString &newName);
+    QModelIndex addCategory(const QModelIndex &pindex, const QString &catName);
+    void editCategory(const QModelIndex &index, const QString &newName);
     void deleteCategory(const QModelIndex &index);
 
     QModelIndex addGroup(const QModelIndex &pindex, const QString &grpName);

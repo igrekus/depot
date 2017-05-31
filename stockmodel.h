@@ -47,8 +47,14 @@ public:
     StockNode makeGroupNode(const GroupItem &item, StockNode *parent);
     StockNode makeStockNode(const StockItem &item, StockNode *parent);
 
+    // заполнение отдельных узлов
+    // TODO: refactor these into one function (with functors)
+    void fillClassNode(const QModelIndex &index, StockNode &node);
+    void fillCategoryNode(const QModelIndex &index, StockNode &node);
+    void fillGroupNode(const QModelIndex &index, StockNode &node);
+
     // инициализация модели
-    void buildRoot();
+    void buildClassLevel();
     void buildCategoryLevel();
     void buildGroupLevel();
     void buildStockLevel();

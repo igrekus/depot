@@ -52,6 +52,7 @@ void InventoryDialog::createActions()
     actRegisterStock = new QAction("Удалить номенклатуру", this);
     connect(actRegisterStock, &QAction::triggered, this, &InventoryDialog::procActRegisterStock);
 }
+
 void InventoryDialog::initDialog()
 {
     m_inventoryModel = new InventoryModel(this);
@@ -64,9 +65,7 @@ void InventoryDialog::initDialog()
     m_searchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
     m_searchProxyModel->setFilterWildcard("");
     m_searchProxyModel->setFilterRole(Constants::RoleSearchString);
-//    m_searchProxyModel->setDynamicSortFilter(false);
 
-//    ui->treeInventory->setModel(m_inventoryModel);
     ui->treeInventory->setModel(m_searchProxyModel);
     ui->treeInventory->setSelectionMode(QAbstractItemView::SingleSelection);
     ui->treeInventory->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -74,10 +73,6 @@ void InventoryDialog::initDialog()
 //    ui->treeInventory->setAlternatingRowColors(true);
     ui->treeInventory->setItemDelegate(new DelegateHighligtableTreeText(ui->treeInventory));
     ui->treeInventory->header()->setStretchLastSection(true);
-//    ui->treeInventory->setItemDelegateForColumn(2, new TextDelegate(ui->treeInventory));
-//    ui->treeInventory->setItemDelegateForColumn(3, new TextDelegate(ui->treeInventory));
-//    ui->treeInventory->setItemDelegateForColumn(4, new TextDelegate(ui->treeInventory));
-//    ui->treeInventory->setItemDelegateForColumn(5, new TextDelegate(ui->treeInventory));
     ui->treeInventory->hideColumn(1); // hide "code" column
 
     actRefreshView->trigger();
@@ -112,6 +107,7 @@ void InventoryDialog::procActEdit()
     case Constants::ItemItem:
         actInventoryEdit->trigger();
         break;
+    case Constants::ItemClass:
     default:
         break;
     }
@@ -130,6 +126,7 @@ void InventoryDialog::procActDelete()
     case Constants::ItemItem:
         actInventoryDelete->trigger();
         break;
+    case Constants::ItemClass:
     default:
         break;
     }
@@ -137,26 +134,33 @@ void InventoryDialog::procActDelete()
 
 void InventoryDialog::procActCategoryAdd()
 {
+    QModelIndexList path;
+    getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
+
+    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.last());
+
     bool ok;
     QString newName = QInputDialog::getText(this, "Добавить категорию",
-                                         "Введите название:", QLineEdit::Normal,
-                                         QString(), &ok);
+                                            "Введите название:", QLineEdit::Normal,
+                                            QString(), &ok);
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        QModelIndex ind = m_inventoryModel->addCategory(newName);
+
+        QModelIndex index = m_inventoryModel->addCategory(parentIndex, newName);
 
         m_dictModel->updateCategoryList();
 
         ui->treeInventory->selectionModel()->clear();
-        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index),
+                                                             QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
     }
 }
 
 void InventoryDialog::procActCategoryEdit()
 {
-    // TODO: вынести одинаковые с editgroup участки в отдельный метод
-    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex index = m_searchProxyModel->mapToSource(ui->treeInventory->selectionModel()->selectedIndexes().
+                                                        first());
     bool ok;
     QString oldName = index.data(Qt::DisplayRole).toString();
     QString newName = QInputDialog::getText(this,
@@ -167,7 +171,8 @@ void InventoryDialog::procActCategoryEdit()
                                             &ok);
     if (ok && !oldName.isEmpty() && oldName != newName) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        m_inventoryModel->editCategory(m_searchProxyModel->mapToSource(index), newName);
+
+        m_inventoryModel->editCategory(index, newName);
 
         m_dictModel->updateCategoryList();
 
@@ -201,18 +206,11 @@ void InventoryDialog::procActCategoryDelete()
 
 void InventoryDialog::procActGroupAdd()
 {
-    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(Constants::RoleNodeType).toInt()) {
-        case Constants::ItemCategory:
-            return cur;
-        case Constants::ItemGroup:
-            return cur.parent();
-        case Constants::ItemItem:
-            return cur.parent().parent();   // TODO: FIX parent search model->getparentroot
-        }
-            return QModelIndex();
-    }();
+    QModelIndexList path;
+    getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
+
+    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.at(path.size()-1-1));
+
     bool ok;
     QString newName = QInputDialog::getText(this, "Добавить группу",
                                          "Введите название:", QLineEdit::Normal,
@@ -220,13 +218,13 @@ void InventoryDialog::procActGroupAdd()
 
     if (ok & !newName.isEmpty()) {
         newName.replace(0, 1, newName.at(0).toUpper());
-        QModelIndex ind = m_inventoryModel->addGroup(m_searchProxyModel->mapToSource(pindex), newName);
+        QModelIndex index = m_inventoryModel->addGroup(parentIndex, newName);
 
         m_dictModel->updateGroupList();
         m_dictModel->updateMapGroupToCategory();
 
         ui->treeInventory->selectionModel()->clear();
-        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+        ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
         treeUpdated = true;
     }
 }
@@ -464,6 +462,12 @@ void InventoryDialog::changeEvent(QEvent *e)
 
 void InventoryDialog::on_btnAddCategory_clicked()
 {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите раздел для добавления категории.");
+        return;
+    }
     actCategoryAdd->trigger();
 }
 
@@ -475,13 +479,28 @@ void InventoryDialog::on_btnAddGroup_clicked()
                              "Выберите категорию для добавления группы.");
         return;
     }
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите категорию для добавления группы.");
+        return;
+    }
     actGroupAdd->trigger();
 }
 
 void InventoryDialog::on_btnAddInventory_clicked()
 {
-    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
-         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) == Constants::ItemCategory)) {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите группу для добавления номенклатуры.");
+        return;
+    }
+
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if ((index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) ||
+        (index.data(Constants::RoleNodeType).toInt() == Constants::ItemCategory)) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите группу для добавления номенклатуры.");
@@ -492,8 +511,8 @@ void InventoryDialog::on_btnAddInventory_clicked()
 
 void InventoryDialog::on_btnCopy_clicked()
 {
-    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
-         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) != Constants::ItemItem)) {
+    if (!ui->treeInventory->selectionModel()->hasSelection() ||
+        (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem)) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите номенклатуру для создания копии.");
@@ -510,6 +529,13 @@ void InventoryDialog::on_btnEdit_clicked()
                              "Выберите запись для редактирования.");
         return;
     }
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя редактировать раздел.");
+        return;
+    }
     actEdit->trigger();
 }
 
@@ -521,13 +547,26 @@ void InventoryDialog::on_btnDelete_clicked()
                              "Выберите запись для удаления.");
         return;
     }
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Нельзя удалить раздел.");
+        return;
+    }
     actDelete->trigger();
 }
 
 void InventoryDialog::on_btnRegisterStock_clicked()
 {
-    if ((!ui->treeInventory->selectionModel()->hasSelection()) ||
-         (ui->treeInventory->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType) != Constants::ItemItem)) {
+    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите номенклатуру для регистрации на складе.");
+        return;
+    }
+    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    if (index.data(Constants::RoleNodeType) != Constants::ItemItem) {
         QMessageBox::warning(this,
                              "Ошибка!",
                              "Выберите номенклатуру для регистрации на складе.");
@@ -552,77 +591,27 @@ void InventoryDialog::on_editSearch_textChanged(const QString &arg1)
     if (arg1.size() > 2)
         ui->treeInventory->expandAll();
 }
-// ---------------------- column delegate ----------------------------
-void InventoryDialog::TextDelegate::paint(QPainter *painter, const QStyleOptionViewItem &option, const QModelIndex &index) const
-{
-//    QStyleOptionViewItem opt = option;
-    painter->save();
-    painter->setPen(QColor(Qt::lightGray));
-
-    if (index.column() != 0 ) {
-        painter->drawLine(QLine(option.rect.x()-1, option.rect.y(),
-                                option.rect.x()-1, option.rect.y()+option.rect.height()));
-    }
-    QStyledItemDelegate::paint(painter, option, index);
-//    option.widget->style()->drawPrimitive(QStyle::PE_PanelItemViewItem, &opt, painter);
-
-//    bool mouseOver = (option.state & QStyle::State_MouseOver);
-//    bool cellSelected = (option.state & QStyle::State_Selected);
-
-//    if (mouseOver) {
-//        QBrush br(QColor(208, 224, 240, 150));
-//        painter->fillRect(option.rect, br);
-//    }
-
-//    QPalette pal = option.palette;
-//    if (cellSelected) {
-//        pal.setColor(QPalette::ButtonText, Qt::black);
-//    }
-//    else {
-//        pal.setColor(QPalette::ButtonText, Qt::black);
-//    }
-
-//    // TODO: immediately invoked lambda
-//    QString text;
-//    if (index.column() != 3) {
-//        text = index.data(Qt::DisplayRole).toString();
-//    } else {
-//        text = index.data(Qt::DisplayRole).toDateTime().toString(Qt::LocalDate);
-//    }
-
-//    QString search = index.data(ROLE_SEARCHSTR).toString();
-//    if (text.contains(search, Qt::CaseInsensitive)) {
-//        qint32 pos = text.indexOf(search, 0, Qt::CaseInsensitive);
-//        qint32 len = search.size();
-//        QString hlstr = text.mid(pos, len);
-
-//        QFontMetrics fm = painter->fontMetrics();
-
-//        QRect trect = fm.boundingRect(hlstr);
-//        QRect shiftrect = fm.boundingRect(text.left(pos));
-
-//        shiftrect.moveTo(option.rect.topLeft());
-//        trect.moveTo(shiftrect.topRight());
-//        painter->fillRect(trect.adjusted(+4, 0, +6, 0), QColor(Qt::yellow));
-//    }
-
-//    option.widget->style()->drawItemText(painter, option.rect.adjusted(+4, 0, 0, 0),
-//                                         1, pal, true, text, QPalette::ButtonText);
-    painter->restore();
-}
 
 // ------------------------- utility routines -----------------
+void InventoryDialog::getPathToRoot(const QModelIndex &node, QModelIndexList &path)
+{
+    // TODO: exstract to separate TreeHelper class
+    if (!node.isValid())
+        return;
+    path.append(node);
+    getPathToRoot(node.parent(), path);
+}
 
 // ------------------------- Testing routines ----------------
 void InventoryDialog::testAddCat()
 {
-    for (int i=0; i<10; ++i) {
-        QString id = Utility::rndString(12);
-        id.replace(0, 1, id.at(0).toUpper());
-        QModelIndex ind = m_inventoryModel->addCategory(id);
-        ui->treeInventory->selectionModel()->clear();
-        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    }
+//    for (int i=0; i<10; ++i) {
+//        QString id = Utility::rndString(12);
+//        id.replace(0, 1, id.at(0).toUpper());
+//        QModelIndex ind = m_inventoryModel->addCategory(id);
+//        ui->treeInventory->selectionModel()->clear();
+//        ui->treeInventory->selectionModel()->setCurrentIndex(ind, QItemSelectionModel::Select | QItemSelectionModel::Rows);
+//    }
 }
 
 void InventoryDialog::testRemCat()
