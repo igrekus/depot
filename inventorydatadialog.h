@@ -23,9 +23,42 @@ class InventoryDataDialog : public QDialog
     Q_OBJECT
 
 public:
+    struct DialogData {
+        ProductItem item;
+        ProductRelation relation;
 
-    ProductItem m_data;
-    ProductItem m_oldData;
+        DialogData() = default;
+        DialogData(const DialogData &copy) = default;
+
+        DialogData(const ProductItem &item, const ProductRelation &rel):
+            item(item),
+            relation(rel)
+        {}
+
+        DialogData &operator=(const DialogData &right) {
+            if (this != &right) {
+                item     = right.item;
+                relation = right.relation;
+            }
+            return *this;
+        }
+
+        bool operator==(const DialogData &right) const {
+            return (item     == right.item &&
+                    relation == right.relation);
+        }
+
+        friend QDebug operator<<(QDebug dbg, const DialogData &right) {
+            dbg.nospace() << "InvDialogData("
+                          << "product item:" << right.item
+                          << " relation :"   << right.relation
+                          << ")" ;
+            return dbg.maybeSpace();
+        }
+    };
+
+    DialogData m_data;
+    DialogData m_oldData;
 
     DictModel *m_dictModel;
 
@@ -36,8 +69,8 @@ public:
     explicit InventoryDataDialog(QWidget *parent = nullptr);
     ~InventoryDataDialog();
 
-    InventoryDataDialog &setData         (const ProductItem &data){m_data      = data; return *this;}
-    InventoryDataDialog &setDictModel    (      DictModel   *dict){m_dictModel = dict; return *this;}
+    InventoryDataDialog &setDictModel(      DictModel  *dict) {m_dictModel = dict;  return *this;}
+    InventoryDataDialog &setData     (const DialogData &data) {m_data      = data;  return *this;}
 
     void filterGroupCombo(const qint32 catId);
 
@@ -45,14 +78,14 @@ public:
     void updateWidgets();
     void initDialog();
 
-    ProductItem getData();
+    DialogData getData();
 
 protected:
     void changeEvent(QEvent *e);
 
 private slots:
 
-    ProductItem collectData();
+    DialogData collectData();
 
     void on_comboCategory_currentIndexChanged(int index);
     void on_comboGroup_currentTextChanged(const QString &arg1);

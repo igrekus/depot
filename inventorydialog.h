@@ -113,6 +113,7 @@ private slots:
 
     // utility
     void getPathToRoot(const QModelIndex &node, QModelIndexList &path);
+    void expandTreePath(const QModelIndexList &path);
 
 private:
     Ui::InventoryDialog *ui;

@@ -209,7 +209,7 @@ void InventoryDialog::procActGroupAdd()
     QModelIndexList path;
     getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
 
-    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.at(path.size()-1-1));
+    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.end()[-1-1]);
 
     bool ok;
     QString newName = QInputDialog::getText(this, "Добавить группу",
@@ -278,92 +278,135 @@ void InventoryDialog::procActGroupDelete()
 
 void InventoryDialog::procActInventoryAdd()
 {
-    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(Constants::RoleNodeType).toInt()) {
-        case Constants::ItemGroup:
-            return cur;
-        case Constants::ItemItem:
-            return cur.parent();
-        }
-        return QModelIndex();
-    }();
-// TODO: fix ind.parent chain;
-    // REFACTOR: new dialog data struct
-    ProductItem dummyProduct = ProductItem::ProductItemBuilder()
-//                               .setGroup(pindex.data(Constants::RoleNodeId).toInt())
-//                               .setCategory(pindex.parent().data(Constants::RoleNodeId).toInt())
-                               .setUnit("шт")
-                               .build();
+    // TODO: merge with copy method
+    QModelIndexList path;
+    getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
+
+    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.end()[-1-2]);
+
+    InventoryDataDialog::DialogData dummyData(ProductItem::ProductItemBuilder().build(),
+                                              ProductRelation::ProductRelationBuilder()
+                                              .setClass   (path.end()[-1-0].data(Constants::RoleNodeId).toInt())
+                                              .setCategory(path.end()[-1-1].data(Constants::RoleNodeId).toInt())
+                                              .setGroup   (path.end()[-1-2].data(Constants::RoleNodeId).toInt())
+                                              .build()); // TODO: extract to a method
 
     InventoryDataDialog dialog(this);
 
-    dialog.setData(dummyProduct)
-          .setDictModel(m_dictModel)
+    dialog.setDictModel(m_dictModel)
+          .setData(dummyData)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
-    QModelIndex ind = m_inventoryModel->addInventory(m_searchProxyModel->mapToSource(pindex), dialog.getData());
+    InventoryDataDialog::DialogData recievedData(dialog.getData());
+
+    QModelIndex index = m_inventoryModel->addInventory(parentIndex, recievedData.relation, recievedData.item);
 
     m_dictModel->updateProductList();
 
+    QModelIndex indexToSelect = m_searchProxyModel->mapFromSource(index);
+    QModelIndexList ePath;
+    getPathToRoot(indexToSelect, ePath);
+    expandTreePath(ePath);
     ui->treeInventory->selectionModel()->clear();
-    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
     treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryCopy()
 {
-    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex proxyIndex = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
-    ProductItem CopyProduct = m_inventoryModel->getProductItemByIndex(m_searchProxyModel->mapToSource(index));
-    CopyProduct.itemId = 0;
+    QModelIndex sourceIndex = m_searchProxyModel->mapToSource(proxyIndex);
+    QModelIndex parentIndex = sourceIndex.parent();
+
+    QModelIndexList path;
+    getPathToRoot(sourceIndex, path);
+
+    ProductItem copyProduct = m_inventoryModel->getProductItemByIndex(sourceIndex);
+    copyProduct.itemId = 0;
+
+    InventoryDataDialog::DialogData dummyData(copyProduct,
+                                              ProductRelation::ProductRelationBuilder()
+                                              .setClass   (path.end()[-1-0].data(Constants::RoleNodeId).toInt())
+                                              .setCategory(path.end()[-1-1].data(Constants::RoleNodeId).toInt())
+                                              .setGroup   (path.end()[-1-2].data(Constants::RoleNodeId).toInt())
+                                              .build());
 
     InventoryDataDialog dialog(this);
 
-    dialog.setData(CopyProduct)
-          .setDictModel(m_dictModel)
+    dialog.setDictModel(m_dictModel)
+          .setData(dummyData)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
-    QModelIndex ind = m_inventoryModel->addInventory(m_searchProxyModel->mapToSource(index.parent()), dialog.getData());
+    InventoryDataDialog::DialogData recievedData(dialog.getData());
+
+    QModelIndex index = m_inventoryModel->addInventory(parentIndex, recievedData.relation, recievedData.item);
 
     m_dictModel->updateProductList();
 
+    QModelIndex indexToSelect = m_searchProxyModel->mapFromSource(index);
+    QModelIndexList ePath;
+    getPathToRoot(indexToSelect, ePath);
+    expandTreePath(ePath);
     ui->treeInventory->selectionModel()->clear();
-    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(ind), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
     treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryEdit()
 {
-    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex proxyIndex = ui->treeInventory->selectionModel()->selectedIndexes().first();
 
-    ProductItem oldProduct = m_inventoryModel->getProductItemByIndex(m_searchProxyModel->mapToSource(index));
+    QModelIndex sourceIndex = m_searchProxyModel->mapToSource(proxyIndex);
+//    QModelIndex parentIndex = sourceIndex.parent();
+
+    QModelIndexList path;
+    getPathToRoot(sourceIndex, path);
+
+    ProductItem editProduct = m_inventoryModel->getProductItemByIndex(sourceIndex);
+
+    InventoryDataDialog::DialogData editData(editProduct,
+                                             ProductRelation::ProductRelationBuilder()
+                                             .setClass   (path.end()[-1-0].data(Constants::RoleNodeId).toInt())
+                                             .setCategory(path.end()[-1-1].data(Constants::RoleNodeId).toInt())
+                                             .setGroup   (path.end()[-1-2].data(Constants::RoleNodeId).toInt())
+                                             .build());
 
     InventoryDataDialog dialog(this);
 
-    dialog.setData(oldProduct)
-          .setDictModel(m_dictModel)
+    dialog.setDictModel(m_dictModel)
+          .setData(editData)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
         return;
     }
 
-    m_inventoryModel->editInventory(m_searchProxyModel->mapToSource(index), dialog.getData());
+    InventoryDataDialog::DialogData recievedData(dialog.getData());
 
-    m_dictModel->updateProductList();
+    QModelIndex index = m_inventoryModel->editInventory(sourceIndex, recievedData.relation, recievedData.item);
 
-    treeUpdated = true;
+//    m_dictModel->updateProductList();
+
+//    // TODO: extract to selectNode method
+//    QModelIndex indexToSelect = m_searchProxyModel->mapFromSource(index);
+//    QModelIndexList ePath;
+//    getPathToRoot(indexToSelect, ePath);
+//    expandTreePath(ePath);
+//    ui->treeInventory->selectionModel()->clear();
+//    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+
+//    treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryDelete()
@@ -600,6 +643,13 @@ void InventoryDialog::getPathToRoot(const QModelIndex &node, QModelIndexList &pa
         return;
     path.append(node);
     getPathToRoot(node.parent(), path);
+}
+
+void InventoryDialog::expandTreePath(const QModelIndexList &path)
+{
+    for (auto it = path.rbegin(); it != path.rend(); ++it) {
+        ui->treeInventory->expand(*it);
+    }
 }
 
 // ------------------------- Testing routines ----------------

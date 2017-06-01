@@ -359,7 +359,7 @@ QModelIndex InventoryModel::addCategory(const QModelIndex &pindex, const QString
 
     auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
                                      [&catName](const InventoryNode &it){
-                                        return it.inventoryItem.itemName > catName;
+                                        return QString::localeAwareCompare(it.inventoryItem.itemName, catName) > 0;
                                      });
 
     qint32 row = std::distance(pnode->children.begin(), row_iterator);
@@ -413,7 +413,7 @@ QModelIndex InventoryModel::addGroup(const QModelIndex &pindex, const QString &g
     auto row_iterator = std::find_if(pnode->children.begin(),
                                      pnode->children.end(),
                                      [&grpName](const InventoryNode &it) {
-                                         return it.inventoryItem.itemName > grpName;
+                                         return QString::localeAwareCompare(it.inventoryItem.itemName, grpName) > 0;
                                      });
 
     qint32 row = std::distance(pnode->children.begin(), row_iterator);
@@ -457,39 +457,69 @@ void InventoryModel::deleteGroup(const QModelIndex &index)
     endRemoveRows();
 }
 
-QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const ProductItem &item)
+QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const ProductRelation &relation, const ProductItem &item)
 {
-    // TODO: соединить метод с методом добавки категории?
-    InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
+    Q_UNUSED(pindex)
+    InventoryNode *destNode = findDestinationNode(relation);
+//    InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
 
     QString tmpstr = item.itemName;
 
-    auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
-                                     [&tmpstr](const InventoryNode &it){return it.inventoryItem.itemName > tmpstr;});
+    auto row_iterator = std::find_if(destNode->children.begin(),
+                                     destNode->children.end(),
+                                     [&tmpstr](const InventoryNode &it) {
+                                         return QString::localeAwareCompare(it.inventoryItem.itemName, tmpstr) > 0;
+                                     });
 
-    qint32 row = std::distance(pnode->children.begin(), row_iterator);
+    qint32 row = std::distance(destNode->children.begin(), row_iterator);
 
-    qint32 newId = m_dbman->insertProduct(item);
+    qint32 newId = m_dbman->insertProduct(relation, item);
 
-//    beginInsertRows(pindex, row, row + 1);
-    beginInsertRows(pindex, row, row);
-    pnode->children.insert(row, std::move(makeProductNode(ProductItem::ProductItemBuilder(item)
-                                                          .setId(newId)
-                                                          .build(), pnode)));
+    QModelIndex destIndex = createIndex(findRow(destNode), 0, destNode);
+    beginInsertRows(destIndex, row, row);
+    destNode->children.insert(row, makeProductNode(ProductItem::ProductItemBuilder(item)
+                                                   .setId(newId)
+                                                   .build(),
+                                                   destNode));
     endInsertRows();
 
-    return index(row, 0, pindex);
+    return index(row, 0, destIndex);
 }
 
-void InventoryModel::editInventory(const QModelIndex &index, const ProductItem &item)
+QModelIndex InventoryModel::editInventory(const QModelIndex &index, const ProductRelation &relation, const ProductItem &item)
 {
-    // TODO: сортировака при добавлении продукта
-    InventoryNode *editNode = static_cast<InventoryNode *>(index.internalPointer());
-    *editNode = std::move(makeProductNode(item, editNode->parent));
+    m_dbman->updateProduct(relation, item);
 
-    m_dbman->updateProduct(item);
+    InventoryNode *sourceNode = static_cast<InventoryNode *>(index.parent().internalPointer());
+    InventoryNode *destNode = findDestinationNode(relation);
 
-    emit dataChanged(index, index);
+//    qDebug() << "edit:" << editNode->inventoryItem;
+//    qDebug() << "source:" << sourceNode->inventoryItem << sourceNode->children.size();
+//    qDebug() << sourceNode->children.at(index.row()).inventoryItem;
+//    qDebug() << "dest:" << destNode->inventoryItem;
+//    qDebug() << "dest index" << destIndex << destIndex.data(Qt::DisplayRole);
+
+    beginRemoveRows(index.parent(), index.row(), index.row());
+    sourceNode->children.removeAt(index.row());
+    endRemoveRows();
+
+    QString tmpstr = item.itemName;
+    auto row_iterator = std::find_if(destNode->children.begin(),
+                                     destNode->children.end(),
+                                     [&tmpstr](const InventoryNode &it) {
+                                         return QString::localeAwareCompare(it.inventoryItem.itemName, tmpstr) > 0;
+                                     });
+    qint32 row = std::distance(destNode->children.begin(), row_iterator);
+
+    QModelIndex destIndex = createIndex(findRow(destNode), 0, destNode);
+    beginInsertRows(destIndex, row, row);
+    destNode->children.insert(row, makeProductNode(item, destNode));
+//    destNode->children.append(makeProductNode(item, destNode));
+    endInsertRows();
+
+//    *editNode = std::move(makeProductNode(item, destNode));
+//    emit dataChanged(index, index);
+    return this->index(row, 0, destIndex);
 }
 
 void InventoryModel::deleteInventory(const QModelIndex &index)
@@ -526,4 +556,30 @@ InventoryItem InventoryModel::getInventoryItemByIndex(const QModelIndex &index)
 {
     InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
     return (tmpnode->inventoryItem);
+}
+
+InventoryModel::InventoryNode *InventoryModel::findDestinationNode(const ProductRelation &relation)
+{
+//    qDebug() << relation;
+    decltype(m_nodes.begin()) categoryIter;
+    for (auto &it : m_nodes) {
+        categoryIter = std::find_if(it.children.begin(),
+                                    it.children.end(),
+                                    [&relation](const InventoryNode &node) -> bool {
+                                        return node.inventoryItem.itemId == relation.parentCategory;
+                                    });
+        if (categoryIter != it.children.end()) {
+//            qDebug() << "class:" << it.inventoryItem;
+            break;
+        }
+    }
+//    qDebug() << "cat:" << categoryIter->inventoryItem;
+
+    auto groupIter = std::find_if(categoryIter->children.begin(),
+                                  categoryIter->children.end(),
+                                  [&relation](const InventoryNode &node) -> bool {
+                                      return node.inventoryItem.itemId == relation.parentGroup;
+                                  });
+//    qDebug() << "grp:" << groupIter->inventoryItem;
+    return &(*groupIter);
 }

@@ -33,20 +33,19 @@ void InventoryDataDialog::filterGroupCombo(const qint32 catId)
 
 void InventoryDataDialog::updateWidgets()
 {
-    ui->editFullname->setText(m_data.itemFullname);
+    ui->editFullname->setText(m_data.item.itemFullname);
     ui->editMiscTag->setText("");
-    ui->editName->setText(m_data.itemName);
-    ui->editSerialn->setText(m_data.itemSerialn);
-    ui->editUnit->setText(m_data.itemUnit);
+    ui->editName->setText(m_data.item.itemName);
+    ui->editSerialn->setText(m_data.item.itemSerialn);
+    ui->editUnit->setText(m_data.item.itemUnit);
 
-    // REFACTOR
-//    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.itemCategoryRef));
-//    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.itemGroupRef));
+    ui->comboCategory->setCurrentText(m_dictModel->m_categoryListModel->getData(m_data.relation.parentCategory));
+    ui->comboGroup->setCurrentText(m_dictModel->m_groupListModel->getData(m_data.relation.parentGroup));
 }
 
 void InventoryDataDialog::initDialog()
 {
-    if (m_data.itemId == 0) {
+    if (m_data.item.itemId == 0) {
         setWindowTitle("Добавить номенклатуру:");
     } else {
         setWindowTitle("Изменить номенклатуру:");
@@ -57,10 +56,12 @@ void InventoryDataDialog::initDialog()
 
     updateWidgets();
 
+    ui->editName->setFocus();
+
     m_oldData = m_data;
 }
 
-ProductItem InventoryDataDialog::getData()
+InventoryDataDialog::DialogData InventoryDataDialog::getData()
 {
     return m_data;
 }
@@ -78,19 +79,22 @@ void InventoryDataDialog::changeEvent(QEvent *e)
     }
 }
 
-ProductItem InventoryDataDialog::collectData()
+InventoryDataDialog::DialogData InventoryDataDialog::collectData()
 {
-    // REFACTOR
-    return (ProductItem::ProductItemBuilder()
-            .setId(m_data.itemId)
-            .setName(ui->editName->text())
-            .setFullname(ui->editFullname->text())
-            .setSerialn(ui->editSerialn->text())
-            .setUnit(ui->editUnit->text())
-            .setMiscTag(ui->editMiscTag->text())
-//            .setGroup(ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
-//            .setCategory(ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
-            .build());
+    DialogData tmpdata(ProductItem::ProductItemBuilder()
+                       .setId(m_oldData.item.itemId)
+                       .setName(ui->editName->text())
+                       .setFullname(ui->editFullname->text())
+                       .setSerialn(ui->editSerialn->text())
+                       .setUnit(ui->editUnit->text())
+                       .setMiscTag(ui->editMiscTag->text())
+                       .build(),
+                       ProductRelation::ProductRelationBuilder()
+                       .setClass(m_oldData.relation.parentClass)
+                       .setCategory(ui->comboCategory->currentData(Constants::RoleNodeId).toInt())
+                       .setGroup(ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
+                       .build());
+    return tmpdata;
 }
 
 void InventoryDataDialog::on_comboCategory_currentIndexChanged(int index)

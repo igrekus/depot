@@ -201,11 +201,11 @@ StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
            .build();
 }
 
-ProductParentData DataBaseManager::getProductParents(const qint32 prodId)
+ProductRelation DataBaseManager::getProductParents(const qint32 prodId)
 {
     QSqlQuery q = execSimpleQuery("CALL getProductParents("+QString::number(prodId)+")");
 
-    ProductParentData p;
+    ProductRelation p;
     if (!q.next()) {
         return p;
     }
@@ -338,7 +338,7 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
     QSqlQuery q = execSimpleQuery("CALL deleteGroup("+QString::number(item.itemId)+")");
 }
 
-qint32 DataBaseManager::insertProduct(const ProductItem &item)
+qint32 DataBaseManager::insertProduct(const ProductRelation &relation, const ProductItem &item)
 {
     // REFACTOR
     return 100;
@@ -362,7 +362,7 @@ qint32 DataBaseManager::insertProduct(const ProductItem &item)
 //    return q.value(0).toInt();
 }
 
-void DataBaseManager::updateProduct(const ProductItem &item)
+void DataBaseManager::updateProduct(const ProductRelation &relation, const ProductItem &item)
 {
     // REFACTOR
 //    QTextCodec *encode = QTextCodec::codecForLocale();

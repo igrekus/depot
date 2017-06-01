@@ -44,7 +44,7 @@ public:
     IdStringList getIdProductList();
 
     StockItem getStockByProductId(const qint32 prodId);
-    ProductParentData getProductParents(const qint32 prodId);
+    ProductRelation getProductParents(const qint32 prodId);
 
     // словари
     HashDict fillHashDict(QSqlQuery &&q);
@@ -71,8 +71,8 @@ public:
     void updateGroup(const GroupItem &item);
     void deleteGroup(const GroupItem &item);
 
-    qint32 insertProduct(const ProductItem &item);
-    void updateProduct(const ProductItem &item);
+    qint32 insertProduct(const ProductRelation &relation, const ProductItem &item);
+    void updateProduct(const ProductRelation &relation, const ProductItem &item);
     void deleteProduct(const ProductItem &item);
 
     qint32 insertStock(const StockItem &item);

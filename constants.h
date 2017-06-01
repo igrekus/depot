@@ -8,18 +8,18 @@ using IdMap  = QMultiHash<qint32, qint32>;
 using IdPair = QPair<qint32, QString>;
 using IdStringList = QVector<IdPair>;
 
-struct ProductParentData {
+struct ProductRelation {
     qint32 parentClass    = 0;
     qint32 parentCategory = 0;
     qint32 parentGroup    = 0;
 
-    ProductParentData():
+    ProductRelation():
         parentClass(),
         parentCategory(),
         parentGroup()
     {}
 
-    ProductParentData(const qint32 cls,
+    ProductRelation(const qint32 cls,
                       const qint32 cat,
                       const qint32 grp):
         parentClass(cls),
@@ -27,29 +27,34 @@ struct ProductParentData {
         parentGroup(grp)
     {}
 
-    ProductParentData(const ProductParentData &copy) = default;
-    ProductParentData &operator=(const ProductParentData &right) = default;
+    ProductRelation(const ProductRelation &copy) = default;
+    ProductRelation &operator=(const ProductRelation &right) = default;
+    bool operator==(const ProductRelation &right) const {
+        return (parentClass    == right.parentClass &&
+                parentCategory == right.parentCategory &&
+                parentGroup    == right.parentGroup);
+    }
 
-    friend QDebug operator<<(QDebug dbg, const ProductParentData &right) {
-        dbg.nospace() << "ProductParentIds("
+    friend QDebug operator<<(QDebug dbg, const ProductRelation &right) {
+        dbg.nospace() << "ProductRelation("
                       << "class:"  << right.parentClass
-                      << "  cat:"  << right.parentCategory
+                      << " cat:"   << right.parentCategory
                       << " group:" << right.parentGroup
                       << ")" ;
         return dbg.maybeSpace();
     }
 
-    class ProductParentDataBuilder {
+    class ProductRelationBuilder {
     public:
         qint32 cls = 0;
         qint32 cat = 0;
         qint32 grp = 0;
 
-        ProductParentDataBuilder& setClass   (const qint32 cls) { this->cls = cls; return *this; }
-        ProductParentDataBuilder& setCategory(const qint32 cat) { this->cat = cat; return *this; }
-        ProductParentDataBuilder& setGroup   (const qint32 grp) { this->grp = grp; return *this; }
-        ProductParentData build() {
-            return ProductParentData(this->cls,
+        ProductRelationBuilder& setClass   (const qint32 cls) { this->cls = cls; return *this; }
+        ProductRelationBuilder& setCategory(const qint32 cat) { this->cat = cat; return *this; }
+        ProductRelationBuilder& setGroup   (const qint32 grp) { this->grp = grp; return *this; }
+        ProductRelation build() {
+            return ProductRelation(this->cls,
                                      this->cat,
                                      this->grp);
         }

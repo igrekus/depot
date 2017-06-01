@@ -71,10 +71,10 @@ public:
     void buildProductLevel();
     void initModel();
 
-    // Header:
+    // header:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override;
 
-    // Basic functionality:
+    // basic functionality:
     QModelIndex index(int row, int column,
                       const QModelIndex &parent = QModelIndex()) const override;
     QModelIndex parent(const QModelIndex &index) const override;
@@ -93,12 +93,15 @@ public:
     void editGroup(const QModelIndex &index, const QString &newName);
     void deleteGroup(const QModelIndex &index);
 
-    QModelIndex addInventory(const QModelIndex &pindex, const ProductItem &item);
-    void editInventory(const QModelIndex &index, const ProductItem &item);
+    QModelIndex addInventory(const QModelIndex &pindex, const ProductRelation &relation, const ProductItem &item);
+    QModelIndex editInventory(const QModelIndex &index, const ProductRelation &relation, const ProductItem &item);
     void deleteInventory(const QModelIndex &index);
 
     ProductItem getProductItemByIndex(const QModelIndex &index);
     InventoryItem getInventoryItemByIndex(const QModelIndex &index);
+
+    // helpers
+    InventoryNode *findDestinationNode(const ProductRelation &relation);
 
 private:
 };

@@ -384,7 +384,7 @@ int StockModel::findRow(const StockNode *stockNode) const
 QModelIndex StockModel::addStock(const StockItem &item)
 {
     // REFACTOR
-    ProductParentData p = m_dbman->getProductParents(item.itemProduct);
+    ProductRelation p = m_dbman->getProductParents(item.itemProduct);
 
     auto catIter = std::find_if(m_nodes.begin(), m_nodes.end(),
                                 [&p](const StockNode &it) -> bool {
