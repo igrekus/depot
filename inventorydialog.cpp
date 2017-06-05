@@ -183,6 +183,8 @@ void InventoryDialog::procActCategoryEdit()
 void InventoryDialog::procActCategoryDelete()
 {
     QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex sourceIndex = m_searchProxyModel->mapToSource(index);
+
     if (index.data(Constants::RoleNodeHasChildren).toBool()) {
         QMessageBox::warning(this,
                              "Ошибка!",
@@ -196,7 +198,7 @@ void InventoryDialog::procActCategoryDelete()
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
     if (res == QMessageBox::Yes) {
-        m_inventoryModel->deleteCategory(m_searchProxyModel->mapToSource(index));
+        m_inventoryModel->deleteCategory(sourceIndex);
 
         m_dictModel->updateCategoryList();
 
@@ -396,17 +398,17 @@ void InventoryDialog::procActInventoryEdit()
 
     QModelIndex index = m_inventoryModel->editInventory(sourceIndex, recievedData.relation, recievedData.item);
 
-//    m_dictModel->updateProductList();
+    m_dictModel->updateProductList();
 
-//    // TODO: extract to selectNode method
-//    QModelIndex indexToSelect = m_searchProxyModel->mapFromSource(index);
-//    QModelIndexList ePath;
-//    getPathToRoot(indexToSelect, ePath);
-//    expandTreePath(ePath);
-//    ui->treeInventory->selectionModel()->clear();
-//    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    // TODO: extract to selectNode method
+    QModelIndex indexToSelect = m_searchProxyModel->mapFromSource(index);
+    QModelIndexList ePath;
+    getPathToRoot(indexToSelect, ePath);
+    expandTreePath(ePath);
+    ui->treeInventory->selectionModel()->clear();
+    ui->treeInventory->selectionModel()->setCurrentIndex(m_searchProxyModel->mapFromSource(index), QItemSelectionModel::Select | QItemSelectionModel::Rows);
 
-//    treeUpdated = true;
+    treeUpdated = true;
 }
 
 void InventoryDialog::procActInventoryDelete()
@@ -428,22 +430,12 @@ void InventoryDialog::procActInventoryDelete()
 
 void InventoryDialog::procActRegisterStock()
 {
-    QModelIndex cur = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    QModelIndex pindex = [cur]() -> QModelIndex {
-        switch (cur.data(Constants::RoleNodeType).toInt()) {
-        case Constants::ItemGroup:
-            return cur;
-            break;
-        case Constants::ItemItem:
-            return cur.parent();     // TODO: fix cur.parent chain
-            break;
-        }
-        return QModelIndex();
-    }();
+    QModelIndex proxyIndex = ui->treeInventory->selectionModel()->selectedIndexes().first();
+    QModelIndex sourceIndex = m_searchProxyModel->mapToSource(proxyIndex);
 
     StockItem newStockItem = StockItem::StockItemBuilder()
-                             .setName(cur.sibling(cur.row(), 2).data(Qt::DisplayRole).toString())
-                             .setProduct(cur.data(Constants::RoleNodeId).toInt())
+                             .setName(sourceIndex.sibling(sourceIndex.row(), 2).data(Qt::DisplayRole).toString())
+                             .setProduct(sourceIndex.data(Constants::RoleNodeId).toInt())
                              .build();
 
     StockDataDialog dialog(this);
@@ -457,13 +449,13 @@ void InventoryDialog::procActRegisterStock()
     }
 
     newStockItem = dialog.getData();
-    if (newStockItem.itemAmount<0)
-        newStockItem.itemAmount=0;
+    if (newStockItem.itemAmount < 0)
+        newStockItem.itemAmount = 0;
 
     // TODO: check stock for dupes
     qint32 newStockId = m_dbman->insertStock(newStockItem);
 
-    if (newStockItem.itemAmount>0) {
+    if (newStockItem.itemAmount > 0) {
         TransactItem newTransact(TransactItem::TransactItemBuilder()
                                  .setDate(QDate::currentDate())
                                  .setDiff(newStockItem.itemAmount)
@@ -623,7 +615,7 @@ void InventoryDialog::on_treeInventory_doubleClicked(const QModelIndex &index)
     if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
         actInventoryEdit->trigger();
     }
-    qDebug() << m_inventoryModel->getInventoryItemByIndex(m_searchProxyModel->mapToSource(index));
+//    qDebug() << m_inventoryModel->getInventoryItemByIndex(m_searchProxyModel->mapToSource(index));
 }
 
 void InventoryDialog::on_editSearch_textChanged(const QString &arg1)

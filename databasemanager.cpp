@@ -291,14 +291,11 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
 
 qint32 DataBaseManager::insertCategory(const qint32 classId, const QString &name)
 {
-    // REFACTOR
-//    QTextCodec *encode = QTextCodec::codecForLocale();
-//    QString encodedName = encode->toUnicode(name.toUtf8());
-//    QSqlQuery q = execSimpleQuery("CALL insertCategory('"+encodedName+"')");
-//    q.next();
-////    qDebug() << q.value(0).toInt();
-//    return q.value(0).toInt();
-    return 100;
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(name.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL insertCategory("+QString::number(classId)+", '"+encodedName+"')");
+    q.next();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateCategory(const CategoryItem &item)
@@ -316,13 +313,11 @@ void DataBaseManager::deleteCategory(const CategoryItem &item)
 
 qint32 DataBaseManager::insertGroup(const qint32 catId, const QString &grpName)
 {
-    // REFACTOR
-    return 100;
-//    QTextCodec *encode = QTextCodec::codecForLocale();
-//    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
-//    QSqlQuery q = execSimpleQuery("CALL insertGroup('"+encodedName+"', "+QString::number(item.itemCategoryRef)+")");
-//    q.next();
-//    return q.value(0).toInt();
+    QTextCodec *encode = QTextCodec::codecForLocale();
+    QString encodedName = encode->toUnicode(grpName.toUtf8());
+    QSqlQuery q = execSimpleQuery("CALL insertGroup("+QString::number(catId)+", '"+encodedName+"')");
+    q.next();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateGroup(const GroupItem &item)
@@ -340,49 +335,45 @@ void DataBaseManager::deleteGroup(const GroupItem &item)
 
 qint32 DataBaseManager::insertProduct(const ProductRelation &relation, const ProductItem &item)
 {
-    // REFACTOR
-    return 100;
-//    QTextCodec *encode = QTextCodec::codecForLocale();
+    QTextCodec *encode = QTextCodec::codecForLocale();
 
-//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
 
-//    QSqlQuery q = execSimpleQuery("CALL insertProduct('"
-//                                  +encodedName    +"', '"
-//                                  +encodedFullname+"', '"
-//                                  +encodedSerialn +"', '"
-//                                  +encodedUnit    +"', '"
-//                                  +encodedMisctag +"', "
-//                                  +QString::number(item.itemGroupRef)+", "
-//                                  +QString::number(item.itemCategoryRef)+")");
-//    q.next();
-//    return q.value(0).toInt();
+    QSqlQuery q = execSimpleQuery("CALL insertProduct('"
+                                  +encodedName    +"', '"
+                                  +encodedFullname+"', '"
+                                  +encodedSerialn +"', '"
+                                  +encodedUnit    +"', '"
+                                  +encodedMisctag +"', "
+                                  +QString::number(relation.parentGroup)+", "
+                                  +QString::number(relation.parentCategory)+")");
+    q.next();
+    return q.value(0).toInt();
 }
 
 void DataBaseManager::updateProduct(const ProductRelation &relation, const ProductItem &item)
 {
-    // REFACTOR
-//    QTextCodec *encode = QTextCodec::codecForLocale();
-////    QTextCodec *encode = QTextCodec::codecForName("Windows-1251");
+    QTextCodec *encode = QTextCodec::codecForLocale();
 
-//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
 
-//    QSqlQuery q = execSimpleQuery("CALL updateProduct("
-//                                  +QString::number(item.itemId)+", '"
-//                                  +encodedName    +"', '"
-//                                  +encodedFullname+"', '"
-//                                  +encodedSerialn +"', '"
-//                                  +encodedUnit    +"', '"
-//                                  +encodedMisctag +"', "
-//                                  +QString::number(item.itemGroupRef)+", "
-//                                  +QString::number(item.itemCategoryRef)+")");
+    QSqlQuery q = execSimpleQuery("CALL updateProduct("
+                                  +QString::number(item.itemId)+", '"
+                                  +encodedName    +"', '"
+                                  +encodedFullname+"', '"
+                                  +encodedSerialn +"', '"
+                                  +encodedUnit    +"', '"
+                                  +encodedMisctag +"', "
+                                  +QString::number(relation.parentGroup)+", "
+                                  +QString::number(relation.parentCategory)+")");
 }
 
 void DataBaseManager::deleteProduct(const ProductItem &item)
@@ -398,7 +389,6 @@ qint32 DataBaseManager::insertStock(const StockItem &item)
                                   +QString::number(item.itemLocation)+", "
                                   +QString::number(item.itemProject)+")");
     q.next();
-    qDebug() << q.value(0).toInt();
     return q.value(0).toInt();
 }
 

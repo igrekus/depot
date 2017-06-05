@@ -352,9 +352,7 @@ QModelIndex InventoryModel::addCategory(const QModelIndex &pindex, const QString
 {
     // TODO: obey custom sort order
     InventoryNode *pnode = static_cast<InventoryNode *>(pindex.internalPointer());
-
     qint32 classId = pnode->inventoryItem.itemId;
-
     qint32 newId = m_dbman->insertCategory(classId, catName);
 
     auto row_iterator = std::find_if(pnode->children.begin(), pnode->children.end(),
@@ -380,7 +378,7 @@ void InventoryModel::editCategory(const QModelIndex &index, const QString &newNa
 
     editItem.itemName = newName;
 
-    // TODO: conver InventoryItem to CategoryItem via a method
+    // TODO: convert InventoryItem to CategoryItem via a method
     m_dbman->updateCategory(CategoryItem::CategoryItemBuilder()
                             .setId  (editItem.itemId)
                             .setName(editItem.itemName)
@@ -398,7 +396,7 @@ void InventoryModel::deleteCategory(const QModelIndex &index)
                             .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
-    m_nodes.removeAt(index.row());
+    delNode->parent->children.removeAt(index.row());
     endRemoveRows();
 }
 
@@ -493,12 +491,6 @@ QModelIndex InventoryModel::editInventory(const QModelIndex &index, const Produc
     InventoryNode *sourceNode = static_cast<InventoryNode *>(index.parent().internalPointer());
     InventoryNode *destNode = findDestinationNode(relation);
 
-//    qDebug() << "edit:" << editNode->inventoryItem;
-//    qDebug() << "source:" << sourceNode->inventoryItem << sourceNode->children.size();
-//    qDebug() << sourceNode->children.at(index.row()).inventoryItem;
-//    qDebug() << "dest:" << destNode->inventoryItem;
-//    qDebug() << "dest index" << destIndex << destIndex.data(Qt::DisplayRole);
-
     beginRemoveRows(index.parent(), index.row(), index.row());
     sourceNode->children.removeAt(index.row());
     endRemoveRows();
@@ -514,11 +506,8 @@ QModelIndex InventoryModel::editInventory(const QModelIndex &index, const Produc
     QModelIndex destIndex = createIndex(findRow(destNode), 0, destNode);
     beginInsertRows(destIndex, row, row);
     destNode->children.insert(row, makeProductNode(item, destNode));
-//    destNode->children.append(makeProductNode(item, destNode));
     endInsertRows();
 
-//    *editNode = std::move(makeProductNode(item, destNode));
-//    emit dataChanged(index, index);
     return this->index(row, 0, destIndex);
 }
 
@@ -528,7 +517,7 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
     InventoryNode *parentNode = delNode->parent;
 
     m_dbman->deleteProduct(ProductItem::ProductItemBuilder()
-                           .setId  (delNode->inventoryItem.itemId)
+                           .setId(delNode->inventoryItem.itemId)
                            .build());
 
     beginRemoveRows(index.parent(), index.row(), index.row());
@@ -538,7 +527,6 @@ void InventoryModel::deleteInventory(const QModelIndex &index)
 
 ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
 {
-    // REFACTOR
     InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
     return (ProductItem::ProductItemBuilder()
             .setId      (tmpnode->inventoryItem.itemId)
@@ -547,8 +535,6 @@ ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
             .setSerialn (tmpnode->inventoryItem.itemSerialn)
             .setUnit    (tmpnode->inventoryItem.itemUnit)
             .setMiscTag (tmpnode->inventoryItem.itemMiscTag)
-//            .setGroup   (tmpnode->parent->inventoryItem.itemId)          // TODO: FIX this shit
-//            .setCategory(tmpnode->parent->parent->inventoryItem.itemId)
             .build());
 }
 
@@ -560,7 +546,6 @@ InventoryItem InventoryModel::getInventoryItemByIndex(const QModelIndex &index)
 
 InventoryModel::InventoryNode *InventoryModel::findDestinationNode(const ProductRelation &relation)
 {
-//    qDebug() << relation;
     decltype(m_nodes.begin()) categoryIter;
     for (auto &it : m_nodes) {
         categoryIter = std::find_if(it.children.begin(),
@@ -569,17 +554,15 @@ InventoryModel::InventoryNode *InventoryModel::findDestinationNode(const Product
                                         return node.inventoryItem.itemId == relation.parentCategory;
                                     });
         if (categoryIter != it.children.end()) {
-//            qDebug() << "class:" << it.inventoryItem;
             break;
         }
     }
-//    qDebug() << "cat:" << categoryIter->inventoryItem;
 
     auto groupIter = std::find_if(categoryIter->children.begin(),
                                   categoryIter->children.end(),
                                   [&relation](const InventoryNode &node) -> bool {
                                       return node.inventoryItem.itemId == relation.parentGroup;
                                   });
-//    qDebug() << "grp:" << groupIter->inventoryItem;
+
     return &(*groupIter);
 }

@@ -114,6 +114,13 @@
            </widget>
           </item>
           <item>
+           <widget class="QPushButton" name="btnAddTransact">
+            <property name="text">
+             <string>Новый приход/расход</string>
+            </property>
+           </widget>
+          </item>
+          <item>
            <widget class="QPushButton" name="btnEditStock">
             <property name="text">
              <string>Изменить</string>
@@ -155,13 +162,6 @@
              </size>
             </property>
            </spacer>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btnAddTransact">
-            <property name="text">
-             <string>Добавить</string>
-            </property>
-           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="btnEditTransact">
@@ -265,7 +265,7 @@
         <item>
          <widget class="QPushButton" name="btnInventoryEditor">
           <property name="text">
-           <string>Номенклатура &amp;a</string>
+           <string>Номенклатура</string>
           </property>
          </widget>
         </item>

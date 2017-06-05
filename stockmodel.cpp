@@ -402,13 +402,12 @@ QModelIndex StockModel::addStock(const StockItem &item)
             return it.stockItem.itemName > grpIter->stockItem.itemName;});
     qint32 targetRow = std::distance(grpIter->children.begin(), targetIter);
 
-    qint32 newId = m_dbman->insertStock(item);
+//    qint32 newId = m_dbman->insertStock(item);
+    qint32 newId = 100;
 
     StockNode *pnode = &catIter->children[grprow];
-
     QModelIndex pindex = createIndex(targetRow, RamificationColumn, pnode);
 
-//    beginInsertRows(pindex, targetRow, targetRow + 1);
     beginInsertRows(pindex, targetRow, targetRow);
     pnode->children.insert(targetRow, std::move(makeStockNode(StockItem::StockItemBuilder(item)
                                                               .setId  (newId)

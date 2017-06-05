@@ -4,18 +4,14 @@
 /*
  TODO:
 
-    db update\insert bug
+    комбобоксы -- мультивыбор
+    оформление
 
-    Редактор словарей
-    - темы
-    - сотрудники
-    - места хранения
+    Редактор словарей:
 
     Склад:
-    - ввести уровень надкотегорий
 
     Номенклатура:
-    - сделать сортировку при добавлении
 
     Транзакции:
     - Транзакции изменяют остаток на складе
@@ -28,7 +24,7 @@
     - !!!rewrite deletes to bool toggle!!!
     - удаление номенклатуры, только если на складе нет регистрации данной номенклатуры
 
-      - обработчик ошибок через throw, сделать в одном месте -- где?;
+    - обработчик ошибок через throw, сделать в одном месте -- где?;
 
 Если в классе только слоты и нет сигналов, и используется new signal/slots syntax (connect в компайл-тайм к
 указателю на метод / лямбде вместо макросов SIGNAL/SLOT), то класс не должен иметь макрос Q_OBJECT и для него не
@@ -88,8 +84,8 @@ http://artlang.net/article/view/14/
 */
 
 // TODO: убрать в общий класс настроек, не использовать .qrc
-QImage MainWindow::iconOpenFolder = QImage(":/gfx/openfolder.ico");
-QImage MainWindow::iconClosedFolder = QImage(":/gfx/closedfolder.ico");
+QImage MainWindow::iconOpenFolder     = QImage(":/gfx/openfolder.ico");
+QImage MainWindow::iconClosedFolder   = QImage(":/gfx/closedfolder.ico");
 QImage MainWindow::iconDisabledFolder = QImage(":/gfx/disabledfolder.ico");
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -97,6 +93,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+
+    ui->btnAddStock->setVisible(false);
 
     createActions();
 
@@ -279,18 +277,6 @@ void MainWindow::procActRefreshView()
 
 void MainWindow::procActStockAdd()
 {
-//    QModelIndex cur = ui->treeStock->selectionModel()->selectedIndexes().first();
-//    QModelIndex pindex = [cur]() -> QModelIndex {
-//        switch (cur.data(Constants::RoleNodeType).toInt()) {
-//        case Constants::ItemGroup:
-//            return cur;
-//            break;
-//        case Constants::ItemItem:
-//            return cur.parent();     // TODO: fix cur.parent chain
-//            break;
-//        }
-//    }();
-
     StockItem newStockItem = StockItem::StockItemBuilder().build();
 
     StockDataDialog dialog(this);
@@ -305,8 +291,6 @@ void MainWindow::procActStockAdd()
     newStockItem = dialog.getData();
 
     m_stockModel->addStock(newStockItem);
-//    qDebug() << pindex;
-//    statusBar()->showMessage("Позиция добавлена на склад.", 10000);
 //    refreshStock(); // TODO: search and add to the correct branch
 }
 
@@ -553,7 +537,6 @@ void MainWindow::on_btnDictEditor_clicked()
 }
 
 // ---------------------- other controls ------------------------------
-
 void MainWindow::on_treeStock_doubleClicked(const QModelIndex &index)
 {
     qDebug() << m_stockModel->getStockItemByIndex(m_stockSearchProxyModel->mapToSource(index));
