@@ -216,9 +216,8 @@ void StockModel::clear()
 
 QVariant StockModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Каталог", "Наименование", "Единица", "Остаток", "№ партии", "Тема", "Место хранения", "Полное наименование"};
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
-        return headers[section];
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < m_headers.size()) {
+        return m_headers[section];
     }
     return QVariant();
 }

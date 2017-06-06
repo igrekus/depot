@@ -28,6 +28,15 @@ public:
     };
     Q_ENUM(Columns)
 
+    const QStringList m_headers = {"Каталог",
+                                   "Наименование",
+                                   "Единица",
+                                   "Остаток",
+                                   "№ партии",
+                                   "Тема",
+                                   "Место хранения",
+                                   "Полное наименование"};
+
     // данные
     struct StockNode;
     typedef QList<StockNode> StockNodeList;

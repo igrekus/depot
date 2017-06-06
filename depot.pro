@@ -44,7 +44,8 @@ SOURCES += main.cpp\
     delegatehighligtabletabletext.cpp \
     delegatehighligtabltreetext.cpp \
     dicteditordialog.cpp \
-    classitem.cpp
+    classitem.cpp \
+    transactrecursivefilterproxymodel.cpp
 
 HEADERS  += mainwindow.h \
     linkeddict.h \
@@ -77,7 +78,8 @@ HEADERS  += mainwindow.h \
     delegatehighligtabletabletext.h \
     delegatehighligtabltreetext.h \
     dicteditordialog.h \
-    classitem.h
+    classitem.h \
+    transactrecursivefilterproxymodel.h
 
 FORMS    += mainwindow.ui \
     inventorydialog.ui \

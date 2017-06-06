@@ -17,17 +17,17 @@ void DataBaseManager::connectToDatabase()
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
 
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setUserName("root");
-    db.setPassword("");
-    db.setDatabaseName("wh");
-
-//    db.setHostName("10.10.15.9");
+//    db.setHostName("localhost");
 //    db.setPort(3306);
 //    db.setUserName("root");
-//    db.setPassword("123456");
+//    db.setPassword("");
 //    db.setDatabaseName("wh");
+
+    db.setHostName("10.10.15.9");
+    db.setPort(3306);
+    db.setUserName("root");
+    db.setPassword("123456");
+    db.setDatabaseName("wh");
 
 //    db.open();
     if (!db.open()) {

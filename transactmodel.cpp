@@ -24,9 +24,8 @@ void TransactModel::initModel()
 
 QVariant TransactModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    const QStringList headers = {"Дата", "Наименование", "+/-", "Сотрудник", "Тема", "Примечание"};
-    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < headers.size()) {
-        return headers.at(section);
+    if (orientation == Qt::Horizontal && role == Qt::DisplayRole && section < m_headers.size()) {
+        return m_headers.at(section);
     }
     return QVariant();
 }
@@ -91,7 +90,7 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
     case Qt::TextAlignmentRole: {
         switch (index.column()) {
         case ColumnDate :{
-            return Qt::AlignCenter;
+//            return Qt::AlignCenter;
             break;
         }
         case ColumnDiff: {
@@ -99,11 +98,11 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
             break;
         }
         case ColumnStaff: {
-            return Qt::AlignCenter;
+//            return Qt::AlignCenter;
             break;
         }
         case ColumnProject: {
-            return Qt::AlignCenter;
+//            return Qt::AlignCenter;
             break;
         }
         }
@@ -119,6 +118,11 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
             break;
         }
         }
+        break;
+    }
+    case Constants::RoleProjectId: {
+        return QVariant(m_data.at(index.row()).itemProjectRef);
+        break;
     }
     default:
         break;

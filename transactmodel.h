@@ -25,6 +25,13 @@ public:
         ColumnCount
     };
 
+    const QStringList m_headers = {"Дата",
+                                   "Наименование",
+                                   "+/-",
+                                   "Сотрудник",
+                                   "Тема",
+                                   "Примечание"};
+
     // данные
     using TransactItemList = QList<TransactItem>;
     TransactItemList m_data;

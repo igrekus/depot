@@ -4,6 +4,7 @@
 /*
  TODO:
 
+    система настроек
     комбобоксы -- мультивыбор
     оформление
 
@@ -34,7 +35,7 @@
 мы легко получаем механизм подписки на события любым своим (не входящий в метасистему Qt и соответственно хоть с
 шаблонами, хоть с чем угодно) классом в виде конструкции connect(sender, signal, [=]{reciver_object.handler();}).
 
-rework model:
+rework model for performace:
       - store navigational data in the nodes (self row, parent row, etc.):
       https://www.hardcoded.net/articles/using_qtreeview_with_qabstractitemmodel.htm
 
@@ -107,7 +108,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stockSearchProxyModel->setSourceModel(m_stockModel);
     m_stockSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);
+//    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);
+    m_transactSearchProxyModel= new TransactRecursiveFilterProxyModel(this);
     m_transactSearchProxyModel->setSourceModel(m_transactModel);
     m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 }
@@ -569,6 +571,9 @@ void MainWindow::on_comboProject_currentIndexChanged(int index)
 //    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
     m_stockSearchProxyModel->setFilterProjectId(ui->comboProject->currentData(Constants::RoleNodeId).toInt());
     m_stockSearchProxyModel->invalidate();
+
+    m_transactSearchProxyModel->setFilterProjectId(ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+    m_transactSearchProxyModel->invalidate();
 
     searchExpand();
 }

@@ -26,6 +26,7 @@
 #include <projectrecursivefilterproxymodel.h>
 #include <delegatehighligtabltreetext.h>
 #include <dicteditordialog.h>
+#include <transactrecursivefilterproxymodel.h>
 
 namespace Ui {
 class MainWindow;
@@ -117,7 +118,8 @@ private:
     TransactModel *m_transactModel;
 
     ProjectRecursiveFilterProxyModel *m_stockSearchProxyModel;
-    RecursiveFilterProxyModel *m_transactSearchProxyModel;
+//    RecursiveFilterProxyModel *m_transactSearchProxyModel;
+    TransactRecursiveFilterProxyModel *m_transactSearchProxyModel;
 
     // combo completers
     QCompleter *projectCompleter;
