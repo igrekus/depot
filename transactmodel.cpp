@@ -9,7 +9,9 @@ TransactModel::TransactModel(DataBaseManager *dbman, DictModel *dictModel, QObje
 
 void TransactModel::clear()
 {
+    beginRemoveRows(QModelIndex(), 0, m_data.size());
     m_data.clear();
+    endRemoveRows();
 }
 
 void TransactModel::initModel()
@@ -161,7 +163,7 @@ void TransactModel::deleteTransact(const QModelIndex &index)
 {
     m_dbman->deleteTransact(m_data.at(index.row()));
 
-    beginRemoveRows(QModelIndex(), 0, 0);
+    beginRemoveRows(QModelIndex(), index.row(), index.row());
     m_data.removeAt(index.row());
     endRemoveRows();
 }
