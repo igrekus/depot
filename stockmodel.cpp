@@ -96,7 +96,10 @@ StockModel::StockNode StockModel::makeStockNode(const StockItem &item, StockMode
 void StockModel::fillClassNode(const QModelIndex &index, StockNode &node)
 {
     CategoryItem::CategoryList list = m_dbman->getCategoryList(node.stockItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const CategoryItem &it : list) {
         node.children.append(std::move(makeCategoryNode(it, &node)));
     }
@@ -106,7 +109,10 @@ void StockModel::fillClassNode(const QModelIndex &index, StockNode &node)
 void StockModel::fillCategoryNode(const QModelIndex &index, StockNode &node)
 {
     GroupItem::GroupList list = m_dbman->getGroupList(node.stockItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const GroupItem &it : list) {
         node.children.append(std::move(makeGroupNode(it, &node)));
     }
@@ -117,7 +123,10 @@ void StockModel::fillGroupNode(const QModelIndex &index, StockNode &node)
 {
     // TODO: finish
     StockItem::StockList list = m_dbman->getStockList(node.stockItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const StockItem &it : list) {
         node.children.append(std::move(makeStockNode(it, &node)));
     }

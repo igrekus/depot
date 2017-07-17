@@ -17,17 +17,17 @@ void DataBaseManager::connectToDatabase()
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
 
-//    db.setHostName("localhost");
-//    db.setPort(3306);
-//    db.setUserName("root");
-//    db.setPassword("");
-//    db.setDatabaseName("wh");
-
-    db.setHostName("10.10.15.9");
+    db.setHostName("localhost");
     db.setPort(3306);
     db.setUserName("root");
-    db.setPassword("123456");
+    db.setPassword("");
     db.setDatabaseName("wh");
+
+//    db.setHostName("10.10.15.9");
+//    db.setPort(3306);
+//    db.setUserName("root");
+//    db.setPassword("123456");
+//    db.setDatabaseName("wh");
 
 //    db.open();
     if (!db.open()) {
@@ -75,7 +75,7 @@ ClassItem::ClassList DataBaseManager::getClassList()
     while (q.next()) {
         tmplist.append(ClassItem::ClassItemBuilder()
                        .setId  (q.value(0).toInt())
-                       .setName(q.value(1).toString().toLocal8Bit())
+                       .setName(q.value(1).toString())
                        .build());
     }
     return tmplist;
@@ -88,7 +88,7 @@ CategoryItem::CategoryList DataBaseManager::getCategoryList(const qint32 classId
     while (q.next()) {
         tmplist.append(CategoryItem::CategoryItemBuilder()
                        .setId   (q.value(0).toInt())
-                       .setName (q.value(1).toString().toLocal8Bit())
+                       .setName (q.value(1).toString())
                        .build());
     }
     return tmplist;
@@ -101,7 +101,7 @@ GroupItem::GroupList DataBaseManager::getGroupList(const qint32 catId)
     while (q.next()) {
         tmplist.append(GroupItem::GroupItemBuilder()
                        .setId      (q.value(0).toInt())
-                       .setName    (q.value(1).toString().toLocal8Bit())
+                       .setName    (q.value(1).toString())
                        .build());
     }
     return tmplist;
@@ -114,16 +114,16 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 groupId)
     while (q.next()) {
         tmplist.append(StockItem::StockItemBuilder()
                        .setId      (q.value(0).toInt())
-                       .setName    (q.value(1).toString().toLocal8Bit())
+                       .setName    (q.value(1).toString())
                        .setType    (Constants::ItemItem)
                        .setLevel   (Constants::Level_3)
                        .setAmount  (q.value(2).toInt())
-                       .setSerialn (q.value(3).toString().toLocal8Bit())
+                       .setSerialn (q.value(3).toString())
                        .setProject (q.value(4).toInt())
                        .setLocation(q.value(5).toInt())
                        .setProduct (q.value(6).toInt())
-                       .setFullname(q.value(7).toString().toLocal8Bit())
-                       .setUnit    (q.value(8).toString().toLocal8Bit())
+                       .setFullname(q.value(7).toString())
+                       .setUnit    (q.value(8).toString())
                        .build());
     }
     return tmplist;
@@ -136,11 +136,11 @@ ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 gro
     while (q.next()) {
         tmplist.append(ProductItem::ProductItemBuilder()
                        .setId      (q.value(0).toInt())
-                       .setName    (q.value(1).toString().toLocal8Bit())
-                       .setFullname(q.value(2).toString().toLocal8Bit())
-                       .setSerialn (q.value(3).toString().toLocal8Bit())
-                       .setUnit    (q.value(4).toString().toLocal8Bit())
-                       .setMiscTag (q.value(5).toString().toLocal8Bit())
+                       .setName    (q.value(1).toString())
+                       .setFullname(q.value(2).toString())
+                       .setSerialn (q.value(3).toString())
+                       .setUnit    (q.value(4).toString())
+                       .setMiscTag (q.value(5).toString())
                        .build());
     }
     return tmplist;
@@ -156,9 +156,9 @@ TransactItem::TransactList DataBaseManager::getTransactList()
                        .setId     (q.value(0).toInt())
                        .setDate   (q.value(1).toDate())
                        .setDiff   (q.value(2).toInt())
-                       .setNote   (q.value(3).toString().toLocal8Bit())
+                       .setNote   (q.value(3).toString())
                        .setStaff  (q.value(4).toInt())
-                       .setName   (q.value(5).toString().toLocal8Bit())
+                       .setName   (q.value(5).toString())
                        .setProject(q.value(6).toInt())
                        .setStock  (q.value(7).toInt())
                        .setBill   (q.value(8).toInt())
@@ -174,7 +174,7 @@ IdStringList DataBaseManager::getIdProductList()
     while (q.next()) {
         QPair<qint32, QString> tmppair;
         tmppair.first  = q.value(0).toInt();
-        tmppair.second = q.value(1).toString().toLocal8Bit();
+        tmppair.second = q.value(1).toString();
         tmplist.append(tmppair);
     }
     return tmplist;
@@ -190,11 +190,11 @@ StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
 
     return StockItem::StockItemBuilder()
            .setId         (q.value(0).toInt())
-           .setName       (q.value(1).toString().toLocal8Bit())
+           .setName       (q.value(1).toString())
            .setType       (Constants::ItemItem)
            .setLevel      (Constants::Level_3)
            .setAmount     (q.value(2).toInt())
-           .setSerialn    (q.value(3).toString().toLocal8Bit())
+           .setSerialn    (q.value(3).toString())
            .setProject    (q.value(4).toString().toInt())
            .setLocation   (q.value(5).toString().toInt())
            .setProduct    (q.value(6).toString().toInt())
@@ -219,8 +219,8 @@ HashDict DataBaseManager::fillHashDict(QSqlQuery &&q) {
     HashDict tmphash;
     while (q.next()) {
         tmphash.id.insert(q.value(0).toInt(),
-                          q.value(1).toString().toLocal8Bit());
-        tmphash.di.insert(q.value(1).toString().toLocal8Bit(),
+                          q.value(1).toString());
+        tmphash.di.insert(q.value(1).toString(),
                           q.value(0).toInt());
     }
     return tmphash;

@@ -108,7 +108,10 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
 void InventoryModel::fillClassNode(const QModelIndex &index, InventoryNode &node)
 {
     CategoryItem::CategoryList list = m_dbman->getCategoryList(node.inventoryItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const CategoryItem &it : list) {
         node.children.append(std::move(makeCategoryNode(it, &node)));
     }
@@ -118,7 +121,10 @@ void InventoryModel::fillClassNode(const QModelIndex &index, InventoryNode &node
 void InventoryModel::fillCategoryNode(const QModelIndex &index, InventoryNode &node)
 {
     GroupItem::GroupList list = m_dbman->getGroupList(node.inventoryItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const GroupItem &it : list) {
         node.children.append(std::move(makeGroupNode(it, &node)));
     }
@@ -128,7 +134,10 @@ void InventoryModel::fillCategoryNode(const QModelIndex &index, InventoryNode &n
 void InventoryModel::fillGroupNode(const QModelIndex &index, InventoryNode &node)
 {
     ProductItem::ProductList list = m_dbman->getProductListByGroup(node.inventoryItem.itemId);
-    beginInsertRows(index, 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(index, 0, count);
     for (const ProductItem &it : list) {
         node.children.append(std::move(makeProductNode(it, &node)));
     }
@@ -139,7 +148,10 @@ void InventoryModel::buildClassLevel()
 {
     qDebug() << "inventory: building class level (0)";
     ClassItem::ClassList list = m_dbman->getClassList();
-    beginInsertRows(QModelIndex(), 0, list.size()-1);
+    qint32 count = list.size()-1;
+    if (count < 0)
+        count = 0;
+    beginInsertRows(QModelIndex(), 0, count);
     for (const ClassItem &it : list) {
         m_nodes.append(std::move(makeClassNode(it)));
     }
