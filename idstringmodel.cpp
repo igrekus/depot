@@ -20,7 +20,7 @@ bool IdStringModel::isEmpty()
 
 void IdStringModel::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, m_data.count());
+    beginRemoveRows(QModelIndex(), 0, m_data.isEmpty() ? 0 : m_data.count());
     m_data.clear();
     endRemoveRows();
 }

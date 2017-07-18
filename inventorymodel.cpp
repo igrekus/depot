@@ -111,7 +111,7 @@ void InventoryModel::fillClassNode(const QModelIndex &index, InventoryNode &node
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const CategoryItem &it : list) {
         node.children.append(std::move(makeCategoryNode(it, &node)));
     }
@@ -124,7 +124,7 @@ void InventoryModel::fillCategoryNode(const QModelIndex &index, InventoryNode &n
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const GroupItem &it : list) {
         node.children.append(std::move(makeGroupNode(it, &node)));
     }
@@ -137,7 +137,7 @@ void InventoryModel::fillGroupNode(const QModelIndex &index, InventoryNode &node
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const ProductItem &it : list) {
         node.children.append(std::move(makeProductNode(it, &node)));
     }
@@ -151,7 +151,7 @@ void InventoryModel::buildClassLevel()
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(QModelIndex(), 0, count);
+    beginInsertRows(QModelIndex(), 0, list.isEmpty() ? 0 : list.size()-1);
     for (const ClassItem &it : list) {
         m_nodes.append(std::move(makeClassNode(it)));
     }
@@ -320,6 +320,20 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
+    case Constants::RoleBackground: {
+        switch (tmpitem.itemLevel) {
+        case Constants::Level_1: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_1))));
+        }
+        case Constants::Level_2: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_2))));
+        }
+        case Constants::Level_3: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_3))));
+        }
+        }
+        break;
+    }
     case Constants::RoleLevelId: {
         return tmpitem.itemLevel;
         break;
@@ -483,6 +497,7 @@ QModelIndex InventoryModel::addInventory(const QModelIndex &pindex, const Produc
 
     qint32 row = std::distance(destNode->children.begin(), row_iterator);
 
+//    qint32 newId = 100;
     qint32 newId = m_dbman->insertProduct(relation, item);
 
     QModelIndex destIndex = createIndex(findRow(destNode), 0, destNode);
@@ -554,6 +569,12 @@ InventoryItem InventoryModel::getInventoryItemByIndex(const QModelIndex &index)
 {
     InventoryNode *tmpnode = static_cast<InventoryNode *>(index.internalPointer());
     return (tmpnode->inventoryItem);
+}
+
+QModelIndex InventoryModel::getParentIndexByRelation(const ProductRelation &relation)
+{
+    InventoryNode *destNode = findDestinationNode(relation);
+    return createIndex(findRow(destNode), 0, destNode);
 }
 
 InventoryModel::InventoryNode *InventoryModel::findDestinationNode(const ProductRelation &relation)

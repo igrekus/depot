@@ -99,7 +99,7 @@ void StockModel::fillClassNode(const QModelIndex &index, StockNode &node)
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const CategoryItem &it : list) {
         node.children.append(std::move(makeCategoryNode(it, &node)));
     }
@@ -112,7 +112,7 @@ void StockModel::fillCategoryNode(const QModelIndex &index, StockNode &node)
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const GroupItem &it : list) {
         node.children.append(std::move(makeGroupNode(it, &node)));
     }
@@ -126,7 +126,7 @@ void StockModel::fillGroupNode(const QModelIndex &index, StockNode &node)
     qint32 count = list.size()-1;
     if (count < 0)
         count = 0;
-    beginInsertRows(index, 0, count);
+    beginInsertRows(index, 0, list.isEmpty() ? 0 : list.size()-1);
     for (const StockItem &it : list) {
         node.children.append(std::move(makeStockNode(it, &node)));
     }
@@ -137,7 +137,7 @@ void StockModel::buildClassLevel()
 {
     qDebug() << "stock: building class level (0)";
     ClassItem::ClassList list = m_dbman->getClassList();
-    beginInsertRows(QModelIndex(), 0, list.size()-1);
+    beginInsertRows(QModelIndex(), 0, list.isEmpty() ? 0 :list.size()-1);
     for (const ClassItem &it : list) {
         m_nodes.append(std::move(makeClassNode(it)));
     }
@@ -296,6 +296,8 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
 //    Q_ASSERT(stockNode != nullptr);
 
     switch (role) {
+    case Qt::ToolTipRole:
+    case Qt::StatusTipRole:
     case Qt::DisplayRole: {
         switch (index.column()) {
         case NumberColumn: {
@@ -356,8 +358,23 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         break;
     }
+    case Constants::RoleBackground: {
+        switch (tmpitem.itemLevel) {
+        case Constants::Level_1: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_1))));
+        }
+        case Constants::Level_2: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_2))));
+        }
+        case Constants::Level_3: {
+            return QVariant(QBrush(QColor(QRgb(Constants::ColorLevel_3))));
+        }
+        }
+        break;
+    }
     case Constants::RoleLevelId: {
         return tmpitem.itemLevel;
+        break;
     }
     case Constants::RoleNodeType: {
         return tmpitem.itemType;
@@ -365,6 +382,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     }
     case Constants::RoleNodeId: {
         return tmpitem.itemId;
+        break;
     }
     case Constants::RoleNodeHasChildren: {
         return !tmpnode->children.isEmpty();
@@ -372,6 +390,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     }
     case Constants::RoleProjectId: {
         return tmpitem.itemProject;
+        break;
     }
     default:
         break;

@@ -85,12 +85,12 @@ void InventoryDialog::procActRefreshView()
         trwidth = ui->grpInventory->frameGeometry().width()-50;
     }
     ui->treeInventory->hide();
-    ui->treeInventory->setColumnWidth(0, trwidth*0.20);
+    ui->treeInventory->setColumnWidth(0, trwidth*0.15);
 //    ui->treeInventory->setColumnWidth(1, trwidth*0.05); // -5, hidden code column
-    ui->treeInventory->setColumnWidth(2, trwidth*0.35);
+    ui->treeInventory->setColumnWidth(2, trwidth*0.55);
     ui->treeInventory->setColumnWidth(3, trwidth*0.05);
     ui->treeInventory->setColumnWidth(4, trwidth*0.10);   // +5
-    ui->treeInventory->setColumnWidth(5, trwidth*0.30);
+    ui->treeInventory->setColumnWidth(5, trwidth*0.15);
     ui->treeInventory->show();
 }
 
@@ -282,16 +282,26 @@ void InventoryDialog::procActInventoryAdd()
 {
     // TODO: merge with copy method
     QModelIndexList path;
-    getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
+    if (ui->treeInventory->selectionModel()->hasSelection()) {
+        getPathToRoot(ui->treeInventory->selectionModel()->selectedIndexes().first(), path);
+    }
 
-    QModelIndex parentIndex = m_searchProxyModel->mapToSource(path.end()[-1-2]);
+//    qDebug() << "path: " << path.size();
 
-    InventoryDataDialog::DialogData dummyData(ProductItem::ProductItemBuilder().build(),
-                                              ProductRelation::ProductRelationBuilder()
-                                              .setClass   (path.end()[-1-0].data(Constants::RoleNodeId).toInt())
-                                              .setCategory(path.end()[-1-1].data(Constants::RoleNodeId).toInt())
-                                              .setGroup   (path.end()[-1-2].data(Constants::RoleNodeId).toInt())
-                                              .build()); // TODO: extract to a method
+    InventoryDataDialog::DialogData dummyData;
+
+    if (path.size() > 2) {
+        dummyData = InventoryDataDialog::DialogData(ProductItem::ProductItemBuilder().build(),
+                                                    ProductRelation::ProductRelationBuilder()
+                                                    .setClass   (path.end()[-1-0].data(Constants::RoleNodeId).toInt())
+                                                    .setCategory(path.end()[-1-1].data(Constants::RoleNodeId).toInt())
+                                                    .setGroup   (path.end()[-1-2].data(Constants::RoleNodeId).toInt())
+                                                    .build()); // TODO: extract to a method
+    } else {
+        dummyData = InventoryDataDialog::DialogData(ProductItem::ProductItemBuilder().build(),
+                                                    ProductRelation::ProductRelationBuilder()
+                                                    .build()); // TODO: extract to a method
+    }
 
     InventoryDataDialog dialog(this);
 
@@ -303,7 +313,9 @@ void InventoryDialog::procActInventoryAdd()
         return;
     }
 
-    InventoryDataDialog::DialogData recievedData(dialog.getData());
+    InventoryDataDialog::DialogData recievedData = dialog.getData();
+
+    QModelIndex parentIndex = m_inventoryModel->getParentIndexByRelation(recievedData.relation);
 
     QModelIndex index = m_inventoryModel->addInventory(parentIndex, recievedData.relation, recievedData.item);
 
@@ -430,6 +442,7 @@ void InventoryDialog::procActInventoryDelete()
 
 void InventoryDialog::procActRegisterStock()
 {
+    // FIXME: ХАК: работает в обход модели, переписать на работу со стокмоделью
     QModelIndex proxyIndex = ui->treeInventory->selectionModel()->selectedIndexes().first();
     QModelIndex sourceIndex = m_searchProxyModel->mapToSource(proxyIndex);
 
@@ -526,21 +539,21 @@ void InventoryDialog::on_btnAddGroup_clicked()
 
 void InventoryDialog::on_btnAddInventory_clicked()
 {
-    if (!ui->treeInventory->selectionModel()->hasSelection()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите группу для добавления номенклатуры.");
-        return;
-    }
+//    if (!ui->treeInventory->selectionModel()->hasSelection()) {
+//        QMessageBox::warning(this,
+//                             "Ошибка!",
+//                             "Выберите группу для добавления номенклатуры.");
+//        return;
+//    }
 
-    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
-    if ((index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) ||
-        (index.data(Constants::RoleNodeType).toInt() == Constants::ItemCategory)) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите группу для добавления номенклатуры.");
-        return;
-    }
+//    QModelIndex index = ui->treeInventory->selectionModel()->selectedIndexes().first();
+//    if ((index.data(Constants::RoleNodeType).toInt() == Constants::ItemClass) ||
+//        (index.data(Constants::RoleNodeType).toInt() == Constants::ItemCategory)) {
+//        QMessageBox::warning(this,
+//                             "Ошибка!",
+//                             "Выберите группу для добавления номенклатуры.");
+//        return;
+//    }
     actInventoryAdd->trigger();
 }
 

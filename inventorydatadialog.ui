@@ -40,6 +40,9 @@
      </item>
      <item row="0" column="1">
       <widget class="QComboBox" name="comboCategory">
+       <property name="enabled">
+        <bool>true</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -56,7 +59,11 @@
       </widget>
      </item>
      <item row="1" column="1">
-      <widget class="QComboBox" name="comboGroup"/>
+      <widget class="QComboBox" name="comboGroup">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="2" column="0">
       <widget class="QLabel" name="lblName">
@@ -67,6 +74,9 @@
      </item>
      <item row="2" column="1">
       <widget class="QLineEdit" name="editName">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="minimumSize">
         <size>
          <width>300</width>
@@ -83,7 +93,11 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLineEdit" name="editFullname"/>
+      <widget class="QLineEdit" name="editFullname">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="4" column="0">
       <widget class="QLabel" name="lblSerialn">
@@ -93,7 +107,11 @@
       </widget>
      </item>
      <item row="4" column="1">
-      <widget class="QLineEdit" name="editSerialn"/>
+      <widget class="QLineEdit" name="editSerialn">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
+      </widget>
      </item>
      <item row="5" column="0">
       <widget class="QLabel" name="lblUnit">
@@ -104,6 +122,9 @@
      </item>
      <item row="5" column="1">
       <widget class="QLineEdit" name="editUnit">
+       <property name="enabled">
+        <bool>false</bool>
+       </property>
        <property name="text">
         <string>шт.</string>
        </property>

@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stockSearchProxyModel->setSourceModel(m_stockModel);
     m_stockSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-//    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);
+//    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);r
     m_transactSearchProxyModel= new TransactRecursiveFilterProxyModel(this);
     m_transactSearchProxyModel->setSourceModel(m_transactModel);
     m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -171,6 +171,8 @@ void MainWindow::initApplication()
     ui->comboProject->setCurrentIndex(0);
 
     actRefreshView->trigger();
+
+    ui->statusBar->showMessage("Готов к работе");
 }
 
 
@@ -253,14 +255,14 @@ void MainWindow::procActRefreshView()
 {
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
-    ui->treeStock->setColumnWidth(0, trwidth*0.25);
-    ui->treeStock->setColumnWidth(1, trwidth*0.35);
+    ui->treeStock->setColumnWidth(0, trwidth*0.20);
+    ui->treeStock->setColumnWidth(1, trwidth*0.45);
     ui->treeStock->setColumnWidth(2, trwidth*0.05);
     ui->treeStock->setColumnWidth(3, trwidth*0.05);
     ui->treeStock->setColumnWidth(4, trwidth*0.05);
     ui->treeStock->setColumnWidth(5, trwidth*0.07);
     ui->treeStock->setColumnWidth(6, trwidth*0.08);
-    ui->treeStock->setColumnWidth(7, trwidth*0.10);
+    ui->treeStock->setColumnWidth(7, trwidth*0.05);
     ui->treeStock->show();
 
     qint32 tbwidth = ui->tableTransact->frameGeometry().width()-20;

@@ -19,7 +19,7 @@ void TransactModel::initModel()
     // TODO: Динамическая подгруза списка после первых 1к, когда прокрутка вниз
     qDebug()<<"building transact list";
     TransactItem::TransactList tmplist = m_dbman->getTransactList();
-    beginInsertRows(QModelIndex(), 0, tmplist.size()-1);
+    beginInsertRows(QModelIndex(), 0, tmplist.isEmpty() ? 0 : tmplist.size()-1);
     m_data = std::move(tmplist.toList());
     endInsertRows();
 }

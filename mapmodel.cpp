@@ -11,7 +11,7 @@ void MapModel::initModel(const HashDict &data)
     qint32 cnt = data.id.values().size() - 1;
     if (cnt <= 0)
         cnt = 0;
-    beginInsertRows(QModelIndex(), 0, cnt);
+    beginInsertRows(QModelIndex(), 0, data.id.values().isEmpty() ? 0 : data.id.values().size()-1);
     m_mapData = data;
     m_strList = data.id.values();
     std::sort(m_strList.begin(), m_strList.end());
@@ -20,7 +20,7 @@ void MapModel::initModel(const HashDict &data)
 
 void MapModel::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, m_strList.size() - 1);
+    beginRemoveRows(QModelIndex(), 0, m_strList.isEmpty() ? 0 : m_strList.size()-1);
     m_mapData.id.clear();
     m_mapData.di.clear();
     m_strList.clear();

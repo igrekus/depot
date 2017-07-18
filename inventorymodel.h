@@ -99,6 +99,7 @@ public:
 
     ProductItem getProductItemByIndex(const QModelIndex &index);
     InventoryItem getInventoryItemByIndex(const QModelIndex &index);
+    QModelIndex getParentIndexByRelation(const ProductRelation &relation);
 
     // helpers
     InventoryNode *findDestinationNode(const ProductRelation &relation);

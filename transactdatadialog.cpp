@@ -109,12 +109,12 @@ void TransactDataDialog::on_btnOk_clicked()
                              "Выберите тему, на которую следует записать текущий приход/расход.");
         return;
     }
-    if (ui->editNote->text().isEmpty()) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Введите комментарий, поясняющий информацию о текущем приходе/расходе.");
-        return;
-    }
+//    if (ui->editNote->text().isEmpty()) {
+//        QMessageBox::warning(this,
+//                             "Ошибка!",
+//                             "Введите комментарий, поясняющий информацию о текущем приходе/расходе.");
+//        return;
+//    }
     if (ui->spinDiff->value() == 0) {
         QMessageBox::warning(this,
                              "Ошибка!",
