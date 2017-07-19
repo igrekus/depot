@@ -1,5 +1,9 @@
 #include "databasemanager.h"
 
+#include <QFile>
+#include <QFileInfo>
+#include <QTextStream>
+
 #define AT_WORK
 
 DataBaseManager::DataBaseManager(QObject *parent) : QObject(parent)
@@ -17,11 +21,39 @@ void DataBaseManager::connectToDatabase()
 
     QSqlDatabase db = QSqlDatabase::addDatabase("QMYSQL");
 
-    db.setHostName("localhost");
-    db.setPort(3306);
-    db.setUserName("root");
-    db.setPassword("");
-    db.setDatabaseName("wh");
+    QFileInfo fi("settings.ini");
+    QFile f(fi.absoluteFilePath());
+
+    if (!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        throw f.error();
+    } else {
+        qDebug() << "loading settings...";
+    }
+
+    QTextStream in(&f);
+    QStringList lst;
+
+    while (!in.atEnd()) {
+        QString line = in.readLine();
+        if (!line.isEmpty() && !line.contains("#"))
+            lst << line.right(line.count() - line.lastIndexOf("=") - 1);
+    }
+
+    f.close();
+
+//    qDebug() << lst;
+
+    db.setHostName(lst.at(0));
+    db.setPort(lst.at(1).toInt());
+    db.setUserName(lst.at(2));
+    db.setPassword(lst.at(3));
+    db.setDatabaseName(lst.at(4));
+
+//    db.setHostName("localhost");
+//    db.setPort(3306);
+//    db.setUserName("root");
+//    db.setPassword("");
+//    db.setDatabaseName("wh");
 
 //    db.setHostName("10.10.15.9");
 //    db.setPort(3306);
@@ -180,7 +212,7 @@ IdStringList DataBaseManager::getIdProductList()
     return tmplist;
 }
 
-StockItem DataBaseManager::getStockByProductId(const qint32 prodId)
+StockItem DataBaseManager::getStockItemByProductId(const qint32 prodId)
 {
     QSqlQuery q = execSimpleQuery("CALL getStockByProductId("+QString::number(prodId)+")");
 
@@ -527,20 +559,4 @@ bool DataBaseManager::checkProjectFk(const qint32 projId)
     QSqlQuery q = execSimpleQuery("CALL checkProjectStockTransactFk("+QString::number(projId)+")");
     q.next();
     return q.value(0).toBool();
-}
-
-// ------------------------------- utility -----------------------------------
-TransactItem DataBaseManager::makeTransactItemFromStockItem(const StockItem &stock)
-{
-    return (TransactItem::TransactItemBuilder()
-//            .setId(0)                           // new transact
-            .setName(stock.itemName)
-            .setDate(QDate::currentDate())
-//            .setDiff(0)
-//            .setNote(QString())
-            .setStock(stock.itemId)               // ref to appropriate stock item
-//            .setStaff(0)
-            .setProject(stock.itemProject)
-//            .setBill(0)
-            .build());
 }

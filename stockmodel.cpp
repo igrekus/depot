@@ -475,6 +475,26 @@ StockItem StockModel::getStockItemByIndex(const QModelIndex &index)
     return (static_cast<StockNode *>(index.internalPointer())->stockItem);
 }
 
+QModelIndex StockModel::findStockIndexByTransactItem(const TransactItem &item)
+{
+    // FIXME rafactor into a recursive function
+    StockNode *targetNode = nullptr;
+    for (auto &classNode : m_nodes) {
+        for (auto &catNode : classNode.children) {
+            for (auto &grpNode : catNode.children) {
+                for (auto &itemNode : grpNode.children) {
+                    if (itemNode.stockItem.itemId == item.itemStockRef) {
+                        targetNode = &itemNode;
+                    }
+                }
+            }
+        }
+    }
+    Q_ASSERT(targetNode != nullptr);
+
+    return createIndex(findRow(targetNode), RamificationColumn, targetNode);
+}
+
 void StockModel::debugInfo(const QModelIndex &index)
 {
     StockNode *node = static_cast<StockNode *>(index.internalPointer());

@@ -87,8 +87,7 @@ FORMS    += mainwindow.ui \
     transactdatadialog.ui \
     stockdatadialog.ui \
     reportmanager.ui \
-    dicteditordialog.ui \
-    mw.ui
+    dicteditordialog.ui
 
 RESOURCES += \
     resource.qrc

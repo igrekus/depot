@@ -82,8 +82,11 @@ private slots:
     void procActTransactEdit();
     void procActTransactDelete();
 
+    void procActSetSearchFilter(const QString &searchStr, const qint32 comboIndex);
+
     // events
     void resizeEvent(QResizeEvent *event) override;
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
     // control events
     void on_btnInventoryEditor_clicked();

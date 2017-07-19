@@ -52,7 +52,7 @@ void StockDataDialog::initDialog()
     ui->comboLocation->setModel(m_dictModel->m_locationListModel);
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
-    m_oldData = m_dbman->getStockByProductId(m_data.itemProduct);
+    m_oldData = m_dbman->getStockItemByProductId(m_data.itemProduct);
 //    m_oldData.itemName = m_data.itemName;
 
     if (m_data.itemId == 0) {
@@ -102,7 +102,7 @@ void StockDataDialog::on_editSearchProduct_textChanged(const QString &arg1)
 
 void StockDataDialog::on_listProduct_doubleClicked(const QModelIndex &index)
 {
-    m_data = m_dbman->getStockByProductId(index.data(Constants::RoleNodeId).toInt());
+    m_data = m_dbman->getStockItemByProductId(index.data(Constants::RoleNodeId).toInt());
 
     if (m_data.itemId == 0) {
         updateWidgetsWithProduct(index.data(Constants::RoleNodeId).toInt());

@@ -86,7 +86,7 @@ public:
     void deleteStock(const QModelIndex &index);
 
     StockItem getStockItemByIndex(const QModelIndex &index);
-
+    QModelIndex findStockIndexByTransactItem(const TransactItem &item);
     // TODO: debug helper
     void debugInfo(const QModelIndex &index);
 

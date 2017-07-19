@@ -4,6 +4,9 @@
 /*
  TODO:
 
+    общая архитектура:
+    !!!При расширении программы, переписать модель, выделить доменную модель, в которую запихнуть всю логику из procActX!!!
+
     система настроек
     комбобоксы -- мультивыбор
     оформление
@@ -112,6 +115,8 @@ MainWindow::MainWindow(QWidget *parent) :
     m_transactSearchProxyModel= new TransactRecursiveFilterProxyModel(this);
     m_transactSearchProxyModel->setSourceModel(m_transactModel);
     m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+
+    qApp->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -172,7 +177,7 @@ void MainWindow::initApplication()
 
     actRefreshView->trigger();
 
-    ui->statusBar->showMessage("Готов к работе");
+    ui->statusBar->showMessage("Готов к работе", 5000);
 }
 
 
@@ -336,15 +341,23 @@ void MainWindow::procActStockDelete()
 
 void MainWindow::procActTransactAdd()
 {
+    StockItem stockItem;
+//    QModelIndex stockIndex;
+    if (!ui->treeStock->selectionModel()->hasSelection()) {
+        ui->treeStock->selectionModel()->clear();
+        ui->treeStock->selectionModel()->setCurrentIndex(m_stockSearchProxyModel->index(0, 0), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+    }
     QModelIndex selectedIndex = ui->treeStock->selectionModel()->selectedIndexes().first();
-    QModelIndex stockIndex = m_stockSearchProxyModel->mapToSource(selectedIndex);
-    StockItem stockItem = m_stockModel->getStockItemByIndex(stockIndex);
+    if (selectedIndex.data(Constants::RoleNodeType) == Constants::ItemItem) {
+        stockItem = m_stockModel->getStockItemByIndex(m_stockSearchProxyModel->mapToSource(selectedIndex));
+    }
 
-    TransactItem newTransactItem = m_dbman->makeTransactItemFromStockItem(stockItem);
+    TransactItem newTransactItem = TransactItem::TransactItemBuilder().fromStockItem(stockItem);
 
     TransactDataDialog dialog(this);
     dialog.setData(newTransactItem)
           .setDictModel(m_dictModel)
+          .setStockModel(m_stockModel)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
@@ -352,12 +365,16 @@ void MainWindow::procActTransactAdd()
     }
 
     newTransactItem = dialog.getData();
-    QModelIndex index = m_transactModel->addTransact(newTransactItem);
 
+    QModelIndex transactIndex = m_transactModel->addTransact(newTransactItem);
+    QModelIndex stockIndex = m_stockModel->findStockIndexByTransactItem(newTransactItem);
+
+    stockItem = m_stockModel->getStockItemByIndex(stockIndex);
     stockItem.itemAmount += newTransactItem.itemDiff;
+
     m_stockModel->editStock(stockIndex, stockItem);
 
-    QModelIndex indexToSelect = m_transactSearchProxyModel->mapFromSource(index);
+    QModelIndex indexToSelect = m_transactSearchProxyModel->mapFromSource(transactIndex);
 
     ui->tableTransact->selectionModel()->clear();
     ui->tableTransact->selectionModel()->setCurrentIndex(indexToSelect, QItemSelectionModel::Select | QItemSelectionModel::Rows);
@@ -373,6 +390,7 @@ void MainWindow::procActTransactEdit()
     TransactDataDialog dialog(this);
     dialog.setData(oldTransItem)
           .setDictModel(m_dictModel)
+          .setStockModel(m_stockModel)
           .initDialog();
 
     if (dialog.exec() != QDialog::Accepted) {
@@ -401,11 +419,59 @@ void MainWindow::procActTransactDelete()
 //    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
+void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 searchIndex) {
+    m_stockSearchProxyModel->setFilterWildcard(searchStr);
+    m_stockSearchProxyModel->setFilterProjectId(searchIndex);
+
+    m_transactSearchProxyModel->setFilterWildcard(searchStr);
+    m_transactSearchProxyModel->setFilterProjectId(searchIndex);
+
+    m_stockSearchProxyModel->invalidate();
+    m_transactSearchProxyModel->invalidate();
+
+    if (searchStr.isEmpty()) {
+        ui->treeStock->collapseAll();
+        return;
+    }
+}
+
 // -------------------- Misc Events -----------------------------------
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
     actRefreshView->trigger();
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if (event->type() == QEvent::KeyPress) {
+        QKeyEvent *key = static_cast<QKeyEvent *>(event);
+        if (key->key() == Qt::Key_Escape) {
+            if (ui->editSearch->text().isEmpty()) {
+                return QObject::eventFilter(watched, event);
+            }
+            if (watched == ui->editSearch     ||
+                    watched == ui->tableTransact  ||
+                    watched == ui->treeStock      ||
+                    watched == ui->tabStock       ||
+                    watched == ui->tabTransact    ||
+                    watched == ui->tabWidget      ||
+                    watched == ui->btnEditStock   ||
+                    watched == ui->btnDelStock    ||
+                    watched == ui->btnReport      ||
+                    watched == ui->btnAddTransact ||
+                    watched == ui->btnReloadData  ||
+                    watched == ui->btnEditTransact||
+                    watched == ui->btnDelTransact ||
+                    watched == ui->comboProject) {
+                procActSetSearchFilter(QString(""), 0);
+                ui->editSearch->setText(QString(""));
+                ui->comboProject->setCurrentIndex(0);
+                return true;
+            }
+        }
+    }
+    return QObject::eventFilter(watched, event);
 }
 
 // -------------------- Control Events --------------------------------
@@ -435,13 +501,13 @@ void MainWindow::on_btnOrderEditor_clicked()
 
 void MainWindow::on_btnAddTransact_clicked()
 {
-    if (!ui->treeStock->selectionModel()->hasSelection() ||
-         ui->treeStock->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem) {
-        QMessageBox::warning(this,
-                             "Ошибка!",
-                             "Выберите продукт на складе для создания записи о приходе/расходе.");
-        return;
-    }
+//    if (!ui->treeStock->selectionModel()->hasSelection() ||
+//         ui->treeStock->selectionModel()->selectedIndexes().first().data(Constants::RoleNodeType).toInt() != Constants::ItemItem) {
+//        QMessageBox::warning(this,
+//                             "Ошибка!",
+//                             "Выберите продукт на складе для создания записи о приходе/расходе.");
+//        return;
+//    }
     actTransactAdd->trigger();
 }
 
@@ -557,12 +623,7 @@ void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 
 void MainWindow::on_editSearch_textChanged(const QString &arg1)
 {    
-    m_transactSearchProxyModel->setFilterWildcard(arg1);
-    m_stockSearchProxyModel->setFilterWildcard(arg1);
-    if (arg1.isEmpty()) {
-        ui->treeStock->collapseAll();
-        return;
-    }
+    procActSetSearchFilter(arg1, ui->comboProject->currentIndex());
     searchExpand();
     actRefreshView->trigger();
 }
@@ -571,11 +632,7 @@ void MainWindow::on_comboProject_currentIndexChanged(int index)
 {
     Q_UNUSED(index)
 //    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
-    m_stockSearchProxyModel->setFilterProjectId(ui->comboProject->currentData(Constants::RoleNodeId).toInt());
-    m_stockSearchProxyModel->invalidate();
-
-    m_transactSearchProxyModel->setFilterProjectId(ui->comboProject->currentData(Constants::RoleNodeId).toInt());
-    m_transactSearchProxyModel->invalidate();
+    procActSetSearchFilter(ui->editSearch->text(), ui->comboProject->currentData(Constants::RoleNodeId).toInt());
 
     searchExpand();
 }

@@ -43,7 +43,7 @@ public:
 
     IdStringList getIdProductList();
 
-    StockItem getStockByProductId(const qint32 prodId);
+    StockItem getStockItemByProductId(const qint32 prodId);
     ProductRelation getProductParents(const qint32 prodId);
 
     // словари
@@ -91,9 +91,6 @@ public:
     bool checkLocationFk(const qint32 locId);
     bool checkStaffFk(const qint32 staffId);
     bool checkProjectFk(const qint32 projId);
-
-    // utility
-    TransactItem makeTransactItemFromStockItem(const StockItem &stock);
 
 signals:
 

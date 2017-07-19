@@ -6,6 +6,7 @@
 #include <QDebug>
 
 #include <abstractitem.h>
+#include <stockitem.h>
 
 class TransactItem : public AbstractItem
 {
@@ -123,8 +124,23 @@ public:
         TransactItemBuilder& setStock  (const qint32  &stock) { this->transStockRef= stock; return *this; }
         TransactItemBuilder& setStaff  (const qint32  &staff) { this->transStaffRef= staff; return *this; }
         TransactItemBuilder& setProject(const qint32  &proj ) { this->transProject = proj;  return *this; }
-        TransactItemBuilder& setBill(const qint32  &bill)  { this->transBillRef = bill;  return *this; }
+        TransactItemBuilder& setBill(const qint32  &bill)     { this->transBillRef = bill;  return *this; }
         TransactItem build() {
+            return TransactItem(this->transId,
+                                this->transName,
+                                this->transDate,
+                                this->transDiff,
+                                this->transNote,
+                                this->transStockRef,
+                                this->transStaffRef,
+                                this->transProject,
+                                this->transBillRef);
+        }
+        TransactItem fromStockItem(const StockItem &stock) {
+            this->transName = stock.itemName;
+            this->transDate = QDate::currentDate();
+            this->transStockRef = stock.itemId;
+            this->transProject = stock.itemProject;
             return TransactItem(this->transId,
                                 this->transName,
                                 this->transDate,
