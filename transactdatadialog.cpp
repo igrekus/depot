@@ -75,7 +75,6 @@ void TransactDataDialog::initDialog()
     m_searchFilterModel->setFilterProjectId(0);
 
     ui->treeStock->setModel(m_searchFilterModel);
-//    ui->treeStock->hideColumn(0);
     ui->treeStock->hideColumn(2);
     ui->treeStock->hideColumn(3);
     ui->treeStock->hideColumn(4);
@@ -86,9 +85,10 @@ void TransactDataDialog::initDialog()
     ui->treeStock->setSelectionBehavior(QAbstractItemView::SelectRows);
     ui->treeStock->setUniformRowHeights(true);
     ui->treeStock->header()->setDefaultAlignment(Qt::AlignCenter); // Qt::TextWordWrap
-//    ui->treeStock->setAlternatingRowColors(true);
-    ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
     ui->treeStock->header()->setStretchLastSection(true);
+    ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
+    ui->treeStock->setRootIsDecorated(false);
+    ui->treeStock->setStyleSheet(QString("QTreeView::branch { border-image: none; }"));
 
     refreshView();
 

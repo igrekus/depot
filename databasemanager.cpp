@@ -324,7 +324,8 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
 qint32 DataBaseManager::insertCategory(const qint32 classId, const QString &name)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(name.toUtf8());
+//    QString encodedName = encode->toUnicode(name.toUtf8());
+    QString encodedName = name;
     QSqlQuery q = execSimpleQuery("CALL insertCategory("+QString::number(classId)+", '"+encodedName+"')");
     q.next();
     return q.value(0).toInt();
@@ -333,7 +334,8 @@ qint32 DataBaseManager::insertCategory(const qint32 classId, const QString &name
 void DataBaseManager::updateCategory(const CategoryItem &item)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedName = item.itemName;
     QSqlQuery q = execSimpleQuery("CALL updateCategory("+QString::number(item.itemId)+", '"
                                                         +encodedName+"')");
 }
@@ -346,8 +348,9 @@ void DataBaseManager::deleteCategory(const CategoryItem &item)
 qint32 DataBaseManager::insertGroup(const qint32 catId, const QString &grpName)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(grpName.toUtf8());
-    QSqlQuery q = execSimpleQuery("CALL insertGroup("+QString::number(catId)+", '"+encodedName+"')");
+//    QString encodedName = encode->toUnicode(grpName.toUtf8());
+    QString encodedName = grpName;
+    QSqlQuery q = execSimpleQuery("CALL insertGroup('"+encodedName+"', "+QString::number(catId)+")");
     q.next();
     return q.value(0).toInt();
 }
@@ -355,7 +358,8 @@ qint32 DataBaseManager::insertGroup(const qint32 catId, const QString &grpName)
 void DataBaseManager::updateGroup(const GroupItem &item)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedName = encode->toUnicode(item.itemName.toUtf8());
+    QString encodedName = item.itemName;
     QSqlQuery q = execSimpleQuery("CALL updateGroup("+QString::number(item.itemId)+", '"
                                                      +encodedName+"')");
 }
@@ -369,11 +373,16 @@ qint32 DataBaseManager::insertProduct(const ProductRelation &relation, const Pro
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
 
-    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+    QString encodedName     = item.itemName;
+    QString encodedFullname = item.itemFullname;
+    QString encodedSerialn  = item.itemSerialn;
+    QString encodedUnit     = item.itemUnit;
+    QString encodedMisctag  = item.itemMiscTag;
 
     QSqlQuery q = execSimpleQuery("CALL insertProduct('"
                                   +encodedName    +"', '"
@@ -391,11 +400,16 @@ void DataBaseManager::updateProduct(const ProductRelation &relation, const Produ
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
 
-    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
-    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
-    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
-    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
-    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+//    QString encodedName     = encode->toUnicode(item.itemName.toUtf8());
+//    QString encodedFullname = encode->toUnicode(item.itemFullname.toUtf8());
+//    QString encodedSerialn  = encode->toUnicode(item.itemSerialn.toUtf8());
+//    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
+//    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
+    QString encodedName     = item.itemName;
+    QString encodedFullname = item.itemFullname;
+    QString encodedSerialn  = item.itemSerialn;
+    QString encodedUnit     = item.itemUnit;
+    QString encodedMisctag  = item.itemMiscTag;
 
     QSqlQuery q = execSimpleQuery("CALL updateProduct("
                                   +QString::number(item.itemId)+", '"
@@ -444,7 +458,8 @@ qint32 DataBaseManager::insertTransact(const TransactItem &item)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
 
-    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+//    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+    QString encodedNote = item.itemNote;
 
     QSqlQuery q = execSimpleQuery("CALL insertTransact('"
                                   +item.itemDate.toString(Qt::ISODate)+"', "
@@ -463,7 +478,8 @@ void DataBaseManager::updateTransact(const TransactItem &item)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
 
-    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+//    QString encodedNote = encode->toUnicode(item.itemNote.toUtf8());
+    QString encodedNote = item.itemNote;
 
     QSqlQuery q = execSimpleQuery("CALL updateTransact("
                                   +QString::number(item.itemId)+", '"
@@ -484,7 +500,8 @@ void DataBaseManager::deleteTransact(const TransactItem &item)
 qint32 DataBaseManager::insertDictRecord(const qint32 &tableId, const QString &name)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(name.toUtf8());
+//    QString encodedName = encode->toUnicode(name.toUtf8());
+    QString encodedName = name;
     QSqlQuery q;
     // TODO: FIXME refactor this crap
     switch (tableId) {
@@ -505,7 +522,8 @@ qint32 DataBaseManager::insertDictRecord(const qint32 &tableId, const QString &n
 void DataBaseManager::updateDictRecord(const qint32 &tableId, const qint32 recId, const QString &name)
 {
     QTextCodec *encode = QTextCodec::codecForLocale();
-    QString encodedName = encode->toUnicode(name.toUtf8());
+//    QString encodedName = encode->toUnicode(name.toUtf8());
+    QString encodedName = name;
     QSqlQuery q;
     switch (tableId) {
     case 0:

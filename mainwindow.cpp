@@ -111,7 +111,6 @@ MainWindow::MainWindow(QWidget *parent) :
     m_stockSearchProxyModel->setSourceModel(m_stockModel);
     m_stockSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 
-//    m_transactSearchProxyModel= new RecursiveFilterProxyModel(this);r
     m_transactSearchProxyModel= new TransactRecursiveFilterProxyModel(this);
     m_transactSearchProxyModel->setSourceModel(m_transactModel);
     m_transactSearchProxyModel->setFilterCaseSensitivity(Qt::CaseInsensitive);
@@ -234,6 +233,21 @@ void MainWindow::createActions()
     connect(actTransactEdit, &QAction::triggered, this, &MainWindow::procActTransactEdit);
     actTransactDelete = new QAction("Удалить приход/расход", this);
     connect(actTransactDelete, &QAction::triggered, this, &MainWindow::procActTransactDelete);
+//---
+    actInventoryEditorOpen = new QAction("Номенклатура...", this);
+    actInventoryEditorOpen->setShortcut(QKeySequence("Ctrl+E"));
+    ui->menuTools->addAction(actInventoryEditorOpen);
+    connect(actInventoryEditorOpen, QAction::triggered, this, &MainWindow::procActInventoryEditorOpen);
+
+    actReportManagerOpen = new QAction("Отчёты...", this);
+    actReportManagerOpen->setShortcut(QKeySequence("Ctrl+W"));
+    ui->menuTools->addAction(actReportManagerOpen);
+    connect(actReportManagerOpen, QAction::triggered, this, &MainWindow::procActReportManagerOpen);
+
+    actDictEditorOpen = new QAction("Словари...", this);
+    actDictEditorOpen->setShortcut(QKeySequence("Ctrl+D"));
+    ui->menuTools->addAction(actDictEditorOpen);
+    connect(actDictEditorOpen, QAction::triggered, this, &MainWindow::procActDictEditorOpen);
 }
 
 void MainWindow::refreshStock()
@@ -434,6 +448,49 @@ void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 s
         return;
     }
 }
+void MainWindow::procActInventoryEditorOpen()
+{
+    InventoryDialog dialog(this);
+
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
+
+    if (dialog.treeUpdated) {
+        refreshStock();
+        refreshTransact();
+    }
+}
+
+void MainWindow::procActReportManagerOpen()
+{
+    ReportManager dialog;
+
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
+}
+
+void MainWindow::procActDictEditorOpen()
+{
+    DictEditorDialog dialog;
+
+    dialog.setDbManager(m_dbman)
+          .setDictModel(m_dictModel)
+          .initDialog();
+
+    dialog.exec();
+
+    m_dictModel->updateLocationList();
+    m_dictModel->updateStaffList();
+    m_dictModel->updateProjectList();
+
+    ui->comboProject->setCurrentIndex(0);
+}
 
 // -------------------- Misc Events -----------------------------------
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -478,18 +535,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
 // -------------------- buttons ---------------------------------------
 void MainWindow::on_btnInventoryEditor_clicked()
 {
-    InventoryDialog dialog(this);
-
-    dialog.setDbManager(m_dbman)
-          .setDictModel(m_dictModel)
-          .initDialog();
-
-    dialog.exec();
-
-    if (dialog.treeUpdated) {
-        refreshStock();
-        refreshTransact();
-    }
+    actInventoryEditorOpen->trigger();
 }
 
 void MainWindow::on_btnOrderEditor_clicked()
@@ -580,30 +626,12 @@ void MainWindow::on_btnReloadData_clicked()
 
 void MainWindow::on_btnReport_clicked()
 {
-    ReportManager dialog;
-
-    dialog.setDbManager(m_dbman)
-          .setDictModel(m_dictModel)
-          .initDialog();
-
-    dialog.exec();
+    actReportManagerOpen->trigger();
 }
 
 void MainWindow::on_btnDictEditor_clicked()
 {
-    DictEditorDialog dialog;
-
-    dialog.setDbManager(m_dbman)
-          .setDictModel(m_dictModel)
-          .initDialog();
-
-    dialog.exec();
-
-    m_dictModel->updateLocationList();
-    m_dictModel->updateStaffList();
-    m_dictModel->updateProjectList();
-
-    ui->comboProject->setCurrentIndex(0);
+    actDictEditorOpen->trigger();
 }
 
 // ---------------------- other controls ------------------------------

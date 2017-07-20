@@ -8,7 +8,7 @@ ReportManager::ReportManager(QWidget *parent) :
     ui->setupUi(this);
 
     m_reportDir = QCoreApplication::applicationDirPath()+"/reports/";
-    qDebug() << "report dir:" << QCoreApplication::applicationDirPath()+"/reports/";
+    qDebug() << "report dir:" << m_reportDir;
 }
 
 ReportManager::~ReportManager()
@@ -68,7 +68,7 @@ void ReportManager::initDialog()
     m_filteredGroupModel_2 = new MapModel(this);
     m_reportModel = new QSqlQueryModel(this);
     m_decoderModel = new DecoderProxyModel(this);
-    m_proxyModel = new QSortFilterProxyModel(this);
+    m_proxyModel = new DecoratorProxyModel(this);
 
     m_decoderModel->setSourceModel(m_reportModel);
     m_proxyModel->setSourceModel(m_decoderModel);
@@ -82,6 +82,7 @@ void ReportManager::initDialog()
     ui->tableView->setEditTriggers(QAbstractItemView::NoEditTriggers);
     ui->tableView->horizontalHeader()->setHighlightSections(false);
     ui->tableView->horizontalHeader()->setFixedHeight(20);
+    ui->tableView->horizontalHeader()->setStretchLastSection(true);
 //    ui->tableView->setSortingEnabled(true);
 //    ui->tableView->sortByColumn(1, Qt::DescendingOrder);
 
@@ -154,13 +155,14 @@ void ReportManager::resizeStockTable()
     qint32 trwidth = ui->tableView->frameGeometry().width()-18;
     ui->tableView->hide();
     ui->tableView->setColumnWidth(1, trwidth*0.05);
-    ui->tableView->setColumnWidth(2, trwidth*0.15);
-    ui->tableView->setColumnWidth(3, trwidth*0.15);
-    ui->tableView->setColumnWidth(4, trwidth*0.33);
-    ui->tableView->setColumnWidth(5, trwidth*0.10);
+    ui->tableView->setColumnWidth(2, trwidth*0.10);
+    ui->tableView->setColumnWidth(3, trwidth*0.10);
+    ui->tableView->setColumnWidth(4, trwidth*0.30);
+    ui->tableView->setColumnWidth(5, trwidth*0.08);
     ui->tableView->setColumnWidth(6, trwidth*0.05);
-    ui->tableView->setColumnWidth(7, trwidth*0.12);
-    ui->tableView->setColumnWidth(8, trwidth*0.05);
+    ui->tableView->setColumnWidth(7, trwidth*0.08);
+    ui->tableView->setColumnWidth(8, trwidth*0.07);
+    ui->tableView->setColumnWidth(9, trwidth*0.17);
     ui->tableView->show();
 }
 
@@ -168,15 +170,16 @@ void ReportManager::resizeTransactTable()
 {
     qint32 trwidth = ui->tableView->frameGeometry().width()-35;
     ui->tableView->hide();
-    ui->tableView->setColumnWidth(1, trwidth*0.06);
-    ui->tableView->setColumnWidth(2, trwidth*0.10);
-    ui->tableView->setColumnWidth(3, trwidth*0.10);
-    ui->tableView->setColumnWidth(4, trwidth*0.25);
-    ui->tableView->setColumnWidth(5, trwidth*0.10);
-    ui->tableView->setColumnWidth(6, trwidth*0.05);
-    ui->tableView->setColumnWidth(7, trwidth*0.07);
-    ui->tableView->setColumnWidth(8, trwidth*0.07);
-    ui->tableView->setColumnWidth(9, trwidth*0.22);
+    ui->tableView->setColumnWidth(1,  trwidth*0.06);
+    ui->tableView->setColumnWidth(2,  trwidth*0.07);
+    ui->tableView->setColumnWidth(3,  trwidth*0.07);
+    ui->tableView->setColumnWidth(4,  trwidth*0.25);
+    ui->tableView->setColumnWidth(5,  trwidth*0.08);
+    ui->tableView->setColumnWidth(6,  trwidth*0.05);
+    ui->tableView->setColumnWidth(7,  trwidth*0.07);
+    ui->tableView->setColumnWidth(8,  trwidth*0.07);
+    ui->tableView->setColumnWidth(9,  trwidth*0.08);
+    ui->tableView->setColumnWidth(10, trwidth*0.22);
     ui->tableView->show();
 }
 
@@ -252,7 +255,9 @@ void ReportManager::xlsxWriteTableHeader(QXlsx::Document &doc,
     fmt.setFontBold(true);
     fmt.setPatternBackgroundColor(QColor(QRgb(hdrCaptionBg)));
     for (qint32 i=1; i<model->columnCount(); ++i) {
-        doc.write(topleft.row(), topleft.column()+i-1, model->headerData(i, Qt::Horizontal).toString(), fmt);
+        QString str = model->headerData(i, Qt::Horizontal).toString();
+        doc.setColumnWidth(topleft.column()+i-1, str.size() * 2);
+        doc.write(topleft.row(), topleft.column()+i-1, str, fmt);
     }
 }
 
@@ -269,6 +274,7 @@ void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
     fmt.setBottomBorderStyle(QXlsx::Format::BorderThin);
     fmt.setVerticalAlignment(QXlsx::Format::AlignVCenter);
     fmt.setTextWarp(true);
+//    fmt.setShrinkToFit(true);
     QXlsx::Format strFmt(fmt);
     strFmt.setHorizontalAlignment(QXlsx::Format::AlignLeft);
     // TODO: fix this if needed moe reports (new class - tablewriter?)
@@ -284,6 +290,7 @@ void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
             doc.write(topleft.row()+1+i, topleft.column()+5, model->data(model->index(i, 6)).toInt()   , numFmt);
             doc.write(topleft.row()+1+i, topleft.column()+6, model->data(model->index(i, 7)).toString(), strFmt);
             doc.write(topleft.row()+1+i, topleft.column()+7, model->data(model->index(i, 8)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+8, model->data(model->index(i, 9)).toString(), strFmt);
         }
     }
     if (m_reportType == ReportTransact) {
@@ -304,6 +311,7 @@ void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
             doc.write(topleft.row()+1+i, topleft.column()+6, model->data(model->index(i, 7)).toString(), strFmt);
             doc.write(topleft.row()+1+i, topleft.column()+7, model->data(model->index(i, 8)).toString(), strFmt);
             doc.write(topleft.row()+1+i, topleft.column()+8, model->data(model->index(i, 9)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+9, model->data(model->index(i, 10)).toString(), strFmt);
         }
     }}
 
@@ -352,13 +360,14 @@ void ReportManager::saveStockReport()
     // write table
     xlsxWriteTable(xlsx, tblTopLeft, m_proxyModel);
 
+    qDebug() << "stock report filename:" << fname;
     xlsx.saveAs(fname);
 }
 
 void ReportManager::saveTransactReport()
 {
-    //    QString fname = m_reportDir+m_exportFileName;
-        QString fname = "d:/"+m_exportFileName;
+        QString fname = m_reportDir+m_exportFileName;
+//        QString fname = "d:/"+m_exportFileName;
 
         QXlsx::Document xlsx;
 
@@ -379,6 +388,7 @@ void ReportManager::saveTransactReport()
         // write table
         xlsxWriteTable(xlsx, tblTopLeft, m_proxyModel);
 
+        qDebug() << "transact report filename:" << fname;
         xlsx.saveAs(fname);
 }
 
@@ -446,12 +456,13 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(0, Qt::Horizontal, "Склад");
         m_reportModel->setHeaderData(1, Qt::Horizontal, "Код");
         m_reportModel->setHeaderData(2, Qt::Horizontal, "Категория");
-        m_reportModel->setHeaderData(3, Qt::Horizontal, "Группа");
-        m_reportModel->setHeaderData(4, Qt::Horizontal, "Наименование");
-        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии/серии");
+        m_reportModel->setHeaderData(3, Qt::Horizontal, " Группа ");
+        m_reportModel->setHeaderData(4, Qt::Horizontal, "    Наименование    ");
+        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии");
         m_reportModel->setHeaderData(6, Qt::Horizontal, "Остаток");
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Место");
+        m_reportModel->setHeaderData(9, Qt::Horizontal, "Полное наименование");
         ui->tableView->hideColumn(0);
 //        ui->tableView->sortByColumn(4, Qt::AscendingOrder);
         resizeStockTable();
@@ -464,12 +475,13 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(1, Qt::Horizontal, "Дата");
         m_reportModel->setHeaderData(2, Qt::Horizontal, "Категория");
         m_reportModel->setHeaderData(3, Qt::Horizontal, "Группа");
-        m_reportModel->setHeaderData(4, Qt::Horizontal, "Наименование");
-        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии/серии");
+        m_reportModel->setHeaderData(4, Qt::Horizontal, "     Наименование     ");
+        m_reportModel->setHeaderData(5, Qt::Horizontal, "№ партии");
         m_reportModel->setHeaderData(6, Qt::Horizontal, "+/-");
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Сотрудник");
         m_reportModel->setHeaderData(9, Qt::Horizontal, "Примечание");
+        m_reportModel->setHeaderData(10, Qt::Horizontal, "Полное наименование");
         ui->tableView->hideColumn(0);
 //        ui->tableView->sortByColumn(1, Qt::DescendingOrder);
         resizeTransactTable();
@@ -480,6 +492,7 @@ void ReportManager::on_btnShow_clicked()
         break;
     }
     m_exportFileName = makeFileName();
+    qDebug() << "make filename:" << m_exportFileName;
 }
 
 void ReportManager::on_btnExport_clicked()

@@ -98,9 +98,9 @@ enum Color {
     ColorExpenseBackground = 0xffFFD3C9,
     ColorSearchHighligh  = 0xffFFFF71,
 
-    ColorLevel_1 = 0xffF0F6FF,
-    ColorLevel_2 = 0xffE6F0FF,
-    ColorLevel_3 = 0xffD3E5FF
+    ColorLevel_1 = 0xffEBFFEB,
+    ColorLevel_2 = 0xffFEFFBF,
+    ColorLevel_3 = 0xffFFECB1
 };
 
 }

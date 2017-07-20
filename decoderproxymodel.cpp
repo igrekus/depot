@@ -16,13 +16,14 @@ QVariant DecoderProxyModel::data(const QModelIndex &proxyIndex, int role) const
         return QIdentityProxyModel::data(proxyIndex, role);
 
     QVariant d = QIdentityProxyModel::data(proxyIndex, role);
+
     switch (d.type()) {
     case QVariant::Date:
         return d.toDate().toString("dd.MM.yyyy");
         break;
-    case QVariant::String:
-        return d.toString().toLocal8Bit();
-        break;
+//    case QVariant::String:
+//        return d.toString();
+//        break;
     default:
         return d;
         break;

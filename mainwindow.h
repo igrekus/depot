@@ -84,6 +84,10 @@ private slots:
 
     void procActSetSearchFilter(const QString &searchStr, const qint32 comboIndex);
 
+    void procActInventoryEditorOpen();
+    void procActReportManagerOpen();
+    void procActDictEditorOpen();
+
     // events
     void resizeEvent(QResizeEvent *event) override;
     bool eventFilter(QObject *watched, QEvent *event) override;
@@ -137,6 +141,10 @@ private:
     QAction *actTransactAdd;
     QAction *actTransactEdit;
     QAction *actTransactDelete;
+
+    QAction *actInventoryEditorOpen;
+    QAction *actReportManagerOpen;
+    QAction *actDictEditorOpen;
 };
 
 #endif // MAINWINDOW_H

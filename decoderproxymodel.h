@@ -4,11 +4,14 @@
 #include <QObject>
 #include <QIdentityProxyModel>
 #include <QDate>
+#include <QDebug>
 
 class DecoderProxyModel : public QIdentityProxyModel
 {
     Q_OBJECT
 public:
+    qint32 m_rowCount = 0;
+
     DecoderProxyModel(QObject *parent = nullptr);
     ~DecoderProxyModel();
 

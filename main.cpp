@@ -18,7 +18,7 @@ int main(int argc, char *argv[])
 //    a.setStyle("plastique");
 
     MainWindow w;
-    w.show();
+    w.showMaximized();
 
     try {
         w.initApplication();

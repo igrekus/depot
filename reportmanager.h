@@ -5,7 +5,6 @@
 #include <QDebug>
 #include <QDate>
 #include <QSqlQueryModel>
-#include <QSortFilterProxyModel>
 #include <QMessageBox>
 #include <QUrl>
 #include <QDesktopServices>
@@ -16,6 +15,7 @@
 #include <mapmodel.h>
 #include <reportrequest.h>
 #include <decoderproxymodel.h>
+#include <decoratorproxymodel.h>
 
 #include "xlsxdocument.h"
 #include "xlsxworkbook.h"
@@ -50,7 +50,7 @@ public:
     MapModel *m_filteredGroupModel_2;
 
     QSqlQueryModel *m_reportModel;
-    QSortFilterProxyModel *m_proxyModel;
+    DecoratorProxyModel *m_proxyModel;
     DecoderProxyModel *m_decoderModel;
 
     QString m_reportDir;

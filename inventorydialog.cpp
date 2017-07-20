@@ -75,6 +75,8 @@ void InventoryDialog::initDialog()
     ui->treeInventory->header()->setStretchLastSection(true);
     ui->treeInventory->hideColumn(1); // hide "code" column
 
+    showMaximized();
+
     actRefreshView->trigger();
 }
 
