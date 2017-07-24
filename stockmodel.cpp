@@ -429,8 +429,8 @@ QModelIndex StockModel::addStock(const StockItem &item)
             return it.stockItem.itemName > grpIter->stockItem.itemName;});
     qint32 targetRow = std::distance(grpIter->children.begin(), targetIter);
 
-//    qint32 newId = m_dbman->insertStock(item);
-    qint32 newId = 100;
+    qint32 newId = m_dbman->insertStock(item);
+//    qint32 newId = 100;
 
     StockNode *pnode = &catIter->children[grprow];
     QModelIndex pindex = createIndex(targetRow, RamificationColumn, pnode);
@@ -476,7 +476,7 @@ void StockModel::modifyStockByTransact(const TransactItem &item)
 
     targetNode->stockItem.itemAmount += item.itemDiff;
 
-//    m_dbman->updateStock(targetNode->stockItem);
+    m_dbman->updateStock(targetNode->stockItem);
 
     QModelIndex index = createIndex(findRow(targetNode), RamificationColumn, targetNode);
 

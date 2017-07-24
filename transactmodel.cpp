@@ -140,8 +140,8 @@ TransactItem TransactModel::getTransactItemByIndex(const QModelIndex &index)
 
 QModelIndex TransactModel::addTransact(const TransactItem &item)
 {
-    qint32 newId = 100;
-//    qint32 newId = m_dbman->insertTransact(item);
+//    qint32 newId = 100;
+    qint32 newId = m_dbman->insertTransact(item);
 
     TransactItem tmpitem(item);
     tmpitem.itemId = newId;
@@ -155,7 +155,7 @@ QModelIndex TransactModel::addTransact(const TransactItem &item)
 
 void TransactModel::editTransact(const QModelIndex &index, const TransactItem &item)
 {
-//    m_dbman->updateTransact(item);
+    m_dbman->updateTransact(item);
 
     m_data.replace(index.row(), item);
     emit dataChanged(index, index);
@@ -163,7 +163,7 @@ void TransactModel::editTransact(const QModelIndex &index, const TransactItem &i
 
 void TransactModel::deleteTransact(const QModelIndex &index)
 {
-//    m_dbman->deleteTransact(m_data.at(index.row()));
+    m_dbman->deleteTransact(m_data.at(index.row()));
 
     beginRemoveRows(QModelIndex(), index.row(), index.row());
     m_data.removeAt(index.row());
