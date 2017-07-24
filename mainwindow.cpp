@@ -18,10 +18,6 @@
     Номенклатура:
 
     Транзакции:
-    - Транзакции изменяют остаток на складе
-      + add
-      - edit
-      - delete
 
     Отчёты:
 
@@ -227,7 +223,9 @@ void MainWindow::createActions()
     actStockDelete = new QAction("Удалить позицию хранения", this);
     connect(actStockDelete, &QAction::triggered, this, &MainWindow::procActStockDelete);
 //---
-    actTransactAdd = new QAction("Добавить приход/расход", this);
+    actTransactAdd = new QAction("Новый приход/расход", this);
+    actTransactAdd->setShortcut(QKeySequence("Ctrl+A"));
+    ui->menuTools->addAction(actTransactAdd);
     connect(actTransactAdd, &QAction::triggered, this, &MainWindow::procActTransactAdd);
     actTransactEdit = new QAction("Изменить приход/расход", this);
     connect(actTransactEdit, &QAction::triggered, this, &MainWindow::procActTransactEdit);
@@ -381,12 +379,8 @@ void MainWindow::procActTransactAdd()
     newTransactItem = dialog.getData();
 
     QModelIndex transactIndex = m_transactModel->addTransact(newTransactItem);
-    QModelIndex stockIndex = m_stockModel->findStockIndexByTransactItem(newTransactItem);
 
-    stockItem = m_stockModel->getStockItemByIndex(stockIndex);
-    stockItem.itemAmount += newTransactItem.itemDiff;
-
-    m_stockModel->editStock(stockIndex, stockItem);
+    m_stockModel->modifyStockByTransact(newTransactItem);
 
     QModelIndex indexToSelect = m_transactSearchProxyModel->mapFromSource(transactIndex);
 
@@ -411,7 +405,13 @@ void MainWindow::procActTransactEdit()
         return;
     }
 
-    m_transactModel->editTransact(index, dialog.getData());
+    TransactItem editedTransactItem = dialog.getData();
+
+    m_transactModel->editTransact(index, editedTransactItem);
+
+    editedTransactItem.itemDiff -= oldTransItem.itemDiff;
+
+    m_stockModel->modifyStockByTransact(editedTransactItem);
 }
 
 void MainWindow::procActTransactDelete()
@@ -425,12 +425,19 @@ void MainWindow::procActTransactDelete()
                                        "Вы действительно хотите удалить выбранную запись о приходе/расходе?",
                                        QMessageBox::Yes,
                                        QMessageBox::No | QMessageBox::Default);
-    if (res == QMessageBox::Yes) {
-        m_transactModel->deleteTransact(index);
+    if (res != QMessageBox::Yes) {
+        return;
     }
 
+    TransactItem deletedTransactItem = m_transactModel->getTransactItemByIndex(index);
+
+    deletedTransactItem.itemDiff = -deletedTransactItem.itemDiff;
+
+    m_stockModel->modifyStockByTransact(deletedTransactItem);
+
+    m_transactModel->deleteTransact(index);
+
     ui->tableTransact->selectionModel()->clear();
-//    ui->tableTransact->selectionModel()->setCurrentIndex(index, QItemSelectionModel::Select | QItemSelectionModel::Rows);
 }
 
 void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 searchIndex) {

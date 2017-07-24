@@ -470,12 +470,25 @@ void StockModel::deleteStock(const QModelIndex &index)
     endRemoveRows();
 }
 
+void StockModel::modifyStockByTransact(const TransactItem &item)
+{
+    StockNode *targetNode = findStockNodeByTransactItem(item);
+
+    targetNode->stockItem.itemAmount += item.itemDiff;
+
+//    m_dbman->updateStock(targetNode->stockItem);
+
+    QModelIndex index = createIndex(findRow(targetNode), RamificationColumn, targetNode);
+
+    emit dataChanged(index, index);
+}
+
 StockItem StockModel::getStockItemByIndex(const QModelIndex &index)
 {
     return (static_cast<StockNode *>(index.internalPointer())->stockItem);
 }
 
-QModelIndex StockModel::findStockIndexByTransactItem(const TransactItem &item)
+StockModel::StockNode *StockModel::findStockNodeByTransactItem(const TransactItem &item)
 {
     // FIXME rafactor into a recursive function
     StockNode *targetNode = nullptr;
@@ -490,6 +503,12 @@ QModelIndex StockModel::findStockIndexByTransactItem(const TransactItem &item)
             }
         }
     }
+    return targetNode;
+}
+
+QModelIndex StockModel::findStockIndexByTransactItem(const TransactItem &item)
+{
+    StockNode *targetNode = findStockNodeByTransactItem(item);
     Q_ASSERT(targetNode != nullptr);
 
     return createIndex(findRow(targetNode), RamificationColumn, targetNode);

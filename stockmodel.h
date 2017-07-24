@@ -84,9 +84,12 @@ public:
     QModelIndex addStock(const StockItem &item);
     void editStock(const QModelIndex &index, const StockItem &item);
     void deleteStock(const QModelIndex &index);
+    void modifyStockByTransact(const TransactItem &item);
 
     StockItem getStockItemByIndex(const QModelIndex &index);
+    StockModel::StockNode *findStockNodeByTransactItem(const TransactItem &item);
     QModelIndex findStockIndexByTransactItem(const TransactItem &item);
+
     // TODO: debug helper
     void debugInfo(const QModelIndex &index);
 

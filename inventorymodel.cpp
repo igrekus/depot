@@ -275,6 +275,7 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
     const InventoryItem tmpitem = tmpnode->inventoryItem;
 
     switch (role) {
+    case Qt::ToolTipRole:
     case Qt::DisplayRole: {
         switch (index.column()) {
         case CategoryColumn: {

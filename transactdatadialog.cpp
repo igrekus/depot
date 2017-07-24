@@ -76,7 +76,7 @@ void TransactDataDialog::initDialog()
 
     ui->treeStock->setModel(m_searchFilterModel);
     ui->treeStock->hideColumn(2);
-    ui->treeStock->hideColumn(3);
+//    ui->treeStock->hideColumn(3);
     ui->treeStock->hideColumn(4);
     ui->treeStock->hideColumn(6);
     ui->treeStock->hideColumn(7);
@@ -89,6 +89,7 @@ void TransactDataDialog::initDialog()
     ui->treeStock->setItemDelegate(new DelegateHighligtableTreeText(ui->treeStock));
     ui->treeStock->setRootIsDecorated(false);
     ui->treeStock->setStyleSheet(QString("QTreeView::branch { border-image: none; }"));
+    ui->treeStock->header()->moveSection(3, 5);
 
     refreshView();
 
@@ -105,8 +106,9 @@ void TransactDataDialog::refreshView()
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
     ui->treeStock->setColumnWidth(0, trwidth*0.20);
-    ui->treeStock->setColumnWidth(1, trwidth*0.70);
-    ui->treeStock->setColumnWidth(5, trwidth*0.10);
+    ui->treeStock->setColumnWidth(1, trwidth*0.50);
+    ui->treeStock->setColumnWidth(3, trwidth*0.10);
+    ui->treeStock->setColumnWidth(5, trwidth*0.20);
     ui->treeStock->show();
 }
 
@@ -153,6 +155,12 @@ void TransactDataDialog::on_spinDiff_valueChanged(int arg1)
 
 void TransactDataDialog::on_btnOk_clicked()
 {
+    if (ui->editProductName->text().isEmpty()) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите позицию на складе, для которой нужно создать новый приход/расход.");
+        return;
+    }
     if (ui->comboProject->currentData(Constants::RoleNodeId).toInt() == 0) {
         QMessageBox::warning(this,
                              "Ошибка!",

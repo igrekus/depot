@@ -9,8 +9,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>749</width>
-    <height>464</height>
+    <width>873</width>
+    <height>424</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -43,7 +43,7 @@
        <widget class="QTreeView" name="treeStock">
         <property name="minimumSize">
          <size>
-          <width>400</width>
+          <width>500</width>
           <height>0</height>
          </size>
         </property>
@@ -164,39 +164,14 @@
          </property>
         </widget>
        </item>
-       <item row="6" column="0" colspan="2">
-        <widget class="QSlider" name="sliderDiff">
-         <property name="minimum">
-          <number>-100</number>
-         </property>
-         <property name="maximum">
-          <number>100</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="invertedAppearance">
-          <bool>false</bool>
-         </property>
-         <property name="invertedControls">
-          <bool>false</bool>
-         </property>
-         <property name="tickPosition">
-          <enum>QSlider::TicksAbove</enum>
-         </property>
-         <property name="tickInterval">
-          <number>10</number>
-         </property>
-        </widget>
-       </item>
-       <item row="7" column="0">
+       <item row="6" column="0">
         <widget class="QLabel" name="lblNote">
          <property name="text">
           <string>Примечание:</string>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
+       <item row="6" column="1">
         <widget class="QLineEdit" name="editNote"/>
        </item>
       </layout>
@@ -264,38 +239,6 @@
     <hint type="destinationlabel">
      <x>359</x>
      <y>192</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>sliderDiff</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>spinDiff</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>429</x>
-     <y>191</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>480</x>
-     <y>161</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>spinDiff</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>sliderDiff</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>480</x>
-     <y>161</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>429</x>
-     <y>188</y>
     </hint>
    </hints>
   </connection>

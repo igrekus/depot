@@ -31,7 +31,7 @@ bool ProjectRecursiveFilterProxyModel::filterAcceptsRow(int sourceRow, const QMo
         // test self
         qint32 projId = sourceModel()->index(sourceRow, StockModel::ProjectColumn, sourceParent).data(Constants::RoleProjectId).toInt();
         if (m_filterProjectId == 0 || m_filterProjectId == projId) {
-            for (qint32 i=0; i<sourceModel()->columnCount(); ++i) {
+            for (qint32 i=1; i<sourceModel()->columnCount(); ++i) {
                 if (sourceModel()->index(sourceRow, i, sourceParent).data(Qt::DisplayRole).toString().contains(filterRegExp())) {
                     return true;
                 }
