@@ -75,6 +75,7 @@ void DictModel::updateLocationList()
         m_locationListModel->clear();
     }
     m_locationListModel->initModel(m_dbman->getMapLocation());
+    m_locationListModel->addItemAtPosition(0, 0, "Все");
 }
 
 void DictModel::updateStaffList()

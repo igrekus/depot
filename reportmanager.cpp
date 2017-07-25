@@ -95,6 +95,9 @@ void ReportManager::initDialog()
     ui->comboGroup->setModel(m_filteredGroupModel_1);
     ui->comboGroup->setCurrentIndex(0);
 
+    ui->comboLocation->setModel(m_dictModel->m_locationListModel);
+    ui->comboLocation->setCurrentIndex(0);
+
     ui->dateFrom->setDate(QDate::currentDate().addDays(-1));
     ui->dateUntil->setDate(QDate::currentDate());
 
@@ -106,6 +109,9 @@ void ReportManager::initDialog()
 
     ui->comboGroup_2->setModel(m_filteredGroupModel_2);
     ui->comboGroup_2->setCurrentIndex(0);
+
+    ui->comboLocation_2->setModel(m_dictModel->m_locationListModel);
+    ui->comboLocation_2->setCurrentIndex(0);
 
 //    ui->dateFrom_2->setDate(QDate::currentDate().addDays(-1));
 //    ui->dateUntil_2->setDate(QDate::currentDate());
@@ -126,7 +132,8 @@ ReportRequest ReportManager::collectStockRequestData()
            .setGroup    (ui->comboGroup->currentData(Constants::RoleNodeId).toInt())
            .setFromDate (ui->dateFrom->date())     // not used
            .setUntilDate(ui->dateUntil->date())    // not used
-           .setSearch   (ui->editSearch_1->text())
+           .setLocation (ui->comboLocation->currentData(Constants::RoleNodeId).toInt())
+           .setSearch   (ui->editSearch->text())
            .build();
 }
 
@@ -145,6 +152,7 @@ ReportRequest ReportManager::collectTransactRequestData()
            .setGroup    (ui->comboGroup_2->currentData(Constants::RoleNodeId).toInt())
            .setFromDate (ui->dateFrom_2->date())
            .setUntilDate(ui->dateUntil_2->date())
+           .setLocation (ui->comboLocation_2->currentData(Constants::RoleNodeId).toInt())
            .setFlag     (flag)
            .setSearch   (ui->editSearch_2->text())
            .build();
@@ -179,7 +187,8 @@ void ReportManager::resizeTransactTable()
     ui->tableView->setColumnWidth(7,  trwidth*0.07);
     ui->tableView->setColumnWidth(8,  trwidth*0.07);
     ui->tableView->setColumnWidth(9,  trwidth*0.08);
-    ui->tableView->setColumnWidth(10, trwidth*0.22);
+    ui->tableView->setColumnWidth(10, trwidth*0.05);
+    ui->tableView->setColumnWidth(11, trwidth*0.18);
     ui->tableView->show();
 }
 
@@ -191,7 +200,7 @@ QString ReportManager::makeFileName()
                        ui->comboProject->currentText()+")("+
                        ui->comboCategory->currentText()+")("+
                        ui->comboGroup->currentText()+")("+
-                       ui->editSearch_1->text()+").xlsx");
+                       ui->editSearch->text()+").xlsx");
     } else {
         return QString("Приход-расход с "+
                        ui->dateFrom_2->date().toString(Qt::ISODate)+" по "+
@@ -232,7 +241,7 @@ void ReportManager::xlsxWriteDocumentHeader(QXlsx::Document &doc,
     doc.mergeCells(QXlsx::CellRange(topleft.row()+2, topleft.column(), topleft.row()+2, topleft.column()+2), fmt);
     doc.write(topleft.row()+3, topleft.column(), "Группа: "+ui->comboGroup->currentText(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+3, topleft.column(), topleft.row()+3, topleft.column()+2), fmt);
-    doc.write(topleft.row()+4, topleft.column(),"Ключевое слово в наименовании: "+ui->editSearch_1->text(), fmt);
+    doc.write(topleft.row()+4, topleft.column(),"Ключевое слово в наименовании: "+ui->editSearch->text(), fmt);
     doc.mergeCells(QXlsx::CellRange(topleft.row()+4, topleft.column(), topleft.row()+4, topleft.column()+2), fmt);}
 
     {QXlsx::Format fmt;
@@ -312,6 +321,7 @@ void ReportManager::xlsxWriteTable(QXlsx::Document &doc,
             doc.write(topleft.row()+1+i, topleft.column()+7, model->data(model->index(i, 8)).toString(), strFmt);
             doc.write(topleft.row()+1+i, topleft.column()+8, model->data(model->index(i, 9)).toString(), strFmt);
             doc.write(topleft.row()+1+i, topleft.column()+9, model->data(model->index(i, 10)).toString(), strFmt);
+            doc.write(topleft.row()+1+i, topleft.column()+10, model->data(model->index(i, 11)).toString(), strFmt);
         }
     }}
 
@@ -481,7 +491,8 @@ void ReportManager::on_btnShow_clicked()
         m_reportModel->setHeaderData(7, Qt::Horizontal, "Тема");
         m_reportModel->setHeaderData(8, Qt::Horizontal, "Сотрудник");
         m_reportModel->setHeaderData(9, Qt::Horizontal, "Примечание");
-        m_reportModel->setHeaderData(10, Qt::Horizontal, "Полное наименование");
+        m_reportModel->setHeaderData(10, Qt::Horizontal, "Место");
+        m_reportModel->setHeaderData(11, Qt::Horizontal, "Полное наименование");
         ui->tableView->hideColumn(0);
 //        ui->tableView->sortByColumn(1, Qt::DescendingOrder);
         resizeTransactTable();

@@ -305,7 +305,8 @@ QSqlQuery DataBaseManager::getStockStats(const ReportRequest &req)
     return execSimpleQuery("CALL getStockStat("+
                            QString::number(req.projectId) +", "+
                            QString::number(req.categoryId)+", "+
-                           QString::number(req.groupId)   +", '"+
+                           QString::number(req.groupId)   +", "+
+                           QString::number(req.locationId)+", '"+
                            req.searchString+"')");
 }
 
@@ -317,7 +318,8 @@ QSqlQuery DataBaseManager::getTransactStats(const ReportRequest &req)
                            QString::number(req.flag)+", "+
                            QString::number(req.projectId) +", "+
                            QString::number(req.categoryId)+", "+
-                           QString::number(req.groupId)   +", '"+
+                           QString::number(req.groupId)   +", "+
+                           QString::number(req.locationId)+", '"+
                            req.searchString+"')");
 }
 

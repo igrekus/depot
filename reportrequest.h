@@ -13,6 +13,7 @@ public:
     qint32  groupId;
     QDate   fromDate;
     QDate   untilDate;
+    qint32  locationId;
     qint32  flag;
     QString searchString;
 
@@ -25,6 +26,7 @@ public:
                   const qint32   groupId,
                   const QDate   &fromDate,
                   const QDate   &untilDate,
+                  const qint32   locationId,
                   const qint32   flag,
                   const QString &str):
         projectId(projectId),
@@ -32,6 +34,7 @@ public:
         groupId(groupId),
         fromDate(fromDate),
         untilDate(untilDate),
+        locationId(locationId),
         flag(flag),
         searchString(str)
     {}
@@ -42,8 +45,9 @@ public:
                       << " grp:"   << right.groupId
                       << " from:"  << right.fromDate
                       << " until:" << right.untilDate
+                      << " loc:"   << right.locationId
                       << " flag:"  << right.flag
-                      << "  str:"  << right.searchString
+                      << " str:"   << right.searchString
                       << ")";
         return dbg.maybeSpace();
     }
@@ -55,6 +59,7 @@ public:
         qint32  groupId    = 0;
         QDate   fromDate   = QDate();
         QDate   untilDate  = QDate();
+        qint32  locationId = 0;
         qint32  flag       = 0;
         QString searchStr  = QString();
 
@@ -63,6 +68,7 @@ public:
         ReportRequestBuilder& setGroup     (const qint32   grp)   { this->groupId    = grp;  return *this; }
         ReportRequestBuilder& setFromDate  (const QDate   &from)  { this->fromDate   = from; return *this; }
         ReportRequestBuilder& setUntilDate (const QDate   &till)  { this->untilDate  = till; return *this; }
+        ReportRequestBuilder& setLocation  (const qint32  &loc)   { this->locationId = loc;  return *this; }
         ReportRequestBuilder& setFlag      (const qint32   flag)  { this->flag       = flag; return *this; }
         ReportRequestBuilder& setSearch    (const QString &str)   { this->searchStr  = str;  return *this; }
 
@@ -72,6 +78,7 @@ public:
                                  this->groupId,
                                  this->fromDate,
                                  this->untilDate,
+                                 this->locationId,
                                  this->flag,
                                  this->searchStr);
         }

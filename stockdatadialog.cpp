@@ -134,6 +134,12 @@ void StockDataDialog::on_btnOk_clicked()
                              "Выберите тему, на которую будет зарегистрирована данная позиция.");
         return;
     }
+    if (ui->comboLocation->currentData(Constants::RoleNodeId).toInt() == 0) {
+        QMessageBox::warning(this,
+                             "Ошибка!",
+                             "Выберите место хранения, на котором будет зарегистрирована данная позиция.");
+        return;
+    }
 
     m_data = collectData();
     accept();
