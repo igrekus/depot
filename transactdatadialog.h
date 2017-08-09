@@ -41,6 +41,7 @@ public:
     TransactDataDialog &setStockModel(      StockModel   *stock) {m_stockModel = stock; return *this;}
 
     void resetWidgets();
+    void initWidgets();
     void updateWidgets();
     void initDialog();
 

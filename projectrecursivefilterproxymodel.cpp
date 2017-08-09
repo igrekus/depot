@@ -18,6 +18,7 @@ bool ProjectRecursiveFilterProxyModel::filterAcceptsRow(int sourceRow, const QMo
 
     QModelIndex sourceIndex = sourceModel()->index(sourceRow, filterKeyColumn(), sourceParent);
     if(sourceIndex.isValid()) {
+
         // recursive call to test children
         qint32 rows = sourceModel()->rowCount(sourceIndex);
         if (rows > 0) {

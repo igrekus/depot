@@ -230,6 +230,8 @@ StockItem DataBaseManager::getStockItemByProductId(const qint32 prodId)
            .setProject    (q.value(4).toString().toInt())
            .setLocation   (q.value(5).toString().toInt())
            .setProduct    (q.value(6).toString().toInt())
+           .setFullname   (q.value(7).toString())
+           .setUnit       (q.value(8).toString())
            .build();
 }
 

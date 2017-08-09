@@ -25,7 +25,7 @@ void TransactDataDialog::resetWidgets()
     ui->editSearch->setText(QString(""));
 }
 
-void TransactDataDialog::updateWidgets()
+void TransactDataDialog::initWidgets()
 {
     ui->editProductName->setText(m_data.itemName);
     ui->editProductCode->setText("здесь будет код товара в базе");
@@ -34,6 +34,18 @@ void TransactDataDialog::updateWidgets()
     ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(m_data.itemProjectRef));
     ui->spinDiff->setValue(m_data.itemDiff);
     ui->editNote->setText(m_data.itemNote);
+    ui->editSearch->setText(m_data.itemName);
+}
+
+void TransactDataDialog::updateWidgets()
+{
+    ui->editProductName->setText(m_data.itemName);
+    ui->editProductCode->setText("здесь будет код товара в базе");
+    ui->dateTransact->setDate(m_data.itemDate);
+    ui->comboStaff->setCurrentText(m_dictModel->m_staffListModel->getData(m_data.itemStaffRef));
+    ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(m_data.itemProjectRef));
+//    ui->spinDiff->setValue(m_data.itemDiff);
+//    ui->editNote->setText(m_data.itemNote);
     ui->editSearch->setText(m_data.itemName);
 }
 
@@ -93,7 +105,7 @@ void TransactDataDialog::initDialog()
 
     refreshView();
 
-    updateWidgets();
+    initWidgets();
 
     connect(ui->treeStock->selectionModel(),
             &QItemSelectionModel::currentChanged,
@@ -187,7 +199,7 @@ void TransactDataDialog::on_btnOk_clicked()
 void TransactDataDialog::on_editSearch_textChanged(const QString &arg1)
 {
     m_searchFilterModel->setFilterWildcard(arg1);
-    if (arg1.size() > 2) {
+    if (arg1.size() > 1) {
         ui->treeStock->expandAll();
     } else {
 //        ui->treeStock->clearSelection();
@@ -199,7 +211,6 @@ void TransactDataDialog::on_editSearch_textChanged(const QString &arg1)
 void TransactDataDialog::on_treeStock_clicked(const QModelIndex &index)
 {
 //    qDebug() << "tree click";
-//    on_treeStock_doubleClicked(index);
     if (index.data(Constants::RoleNodeType) == Constants::ItemItem) {
         QModelIndex sourceIndex = m_searchFilterModel->mapToSource(index);
 

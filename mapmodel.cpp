@@ -112,13 +112,15 @@ QVariant MapModel::data(const QModelIndex &index, int role) const
     if (!index.isValid())
         return QVariant();
 
+    qint32 row = index.row();
+
     switch (role) {
     case Qt::DisplayRole: {
-        return m_strList.at(index.row());
+        return m_strList.at(row);
         break;
     }
     case Constants::RoleNodeId: {
-        return m_mapData.di.value(m_strList.at(index.row()));
+        return m_mapData.di.value(m_strList.at(row));
     }
     }
 

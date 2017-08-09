@@ -37,6 +37,7 @@ void StockDataDialog::updateWidgetsWithProduct(const qint32 prodId)
 
 void StockDataDialog::initDialog()
 {
+    // TODO: m_data and m_oldData init logic fault?
     if (m_data.itemId == 0) {
         setWindowTitle("Добавить позицию хранения:");
     } else {
@@ -53,7 +54,8 @@ void StockDataDialog::initDialog()
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
 
     m_oldData = m_dbman->getStockItemByProductId(m_data.itemProduct);
-//    m_oldData.itemName = m_data.itemName;
+
+//    qDebug() << "dlg old data:" << m_oldData;
 
     if (m_data.itemId == 0) {
         updateWidgetsWithProduct(m_data.itemProduct);
@@ -91,6 +93,8 @@ StockItem StockDataDialog::collectData()
             .setProject    (ui->comboProject->currentData(Constants::RoleNodeId).toInt())
             .setLocation   (ui->comboLocation->currentData(Constants::RoleNodeId).toInt())
             .setProduct    (ui->editProductId->text().toInt())
+            .setFullname   (m_oldData.itemFullname)
+            .setUnit       (m_oldData.itemUnit)
             .build());
 }
 
@@ -98,7 +102,6 @@ void StockDataDialog::on_editSearchProduct_textChanged(const QString &arg1)
 {
     m_searchFilterModel->setFilterWildcard(arg1);
 }
-
 
 void StockDataDialog::on_listProduct_doubleClicked(const QModelIndex &index)
 {

@@ -175,14 +175,8 @@ void MainWindow::initApplication()
     ui->statusBar->showMessage("Готов к работе", 5000);
 }
 
-
 void MainWindow::createActions()
 {
-//  Этот метод создаёт actions для обмена сигналами между частями приложения
-
-//  Главное меню
-//    QMenu *fileMenu = menuBar()->addMenu(tr("Файл(&F)"));
-
 ////  Если будет нужен тулбар:
 ////  QToolBar *fileToolBar = addToolBar(tr("File"));
 ////  const QIcon newIcon = QIcon::fromTheme("document-new", QIcon(":/images/new.png"));
@@ -262,7 +256,7 @@ void MainWindow::refreshTransact()
 
 void MainWindow::searchExpand()
 {
-    if (ui->editSearch->text().size()>2) {
+    if (ui->editSearch->text().size() > 1) {
         ui->treeStock->expandAll();
     }
 }
@@ -322,6 +316,8 @@ void MainWindow::procActStockEdit()
 
     StockItem oldStockItem = m_stockModel->getStockItemByIndex(sourceIndex);
 
+//    qDebug() << "old stock:" << oldStockItem;
+
     StockDataDialog dialog(this);
     dialog.setData(oldStockItem)
           .setDictModel(m_dictModel)
@@ -333,6 +329,8 @@ void MainWindow::procActStockEdit()
     }
 
     oldStockItem = dialog.getData();
+
+//    qDebug() << "edited stock:" << oldStockItem;
 
     m_stockModel->editStock(sourceIndex, oldStockItem);
 }
@@ -441,6 +439,7 @@ void MainWindow::procActTransactDelete()
 }
 
 void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 searchIndex) {
+//    qDebug() << searchStr << searchIndex;
     m_stockSearchProxyModel->setFilterWildcard(searchStr);
     m_stockSearchProxyModel->setFilterProjectId(searchIndex);
 
@@ -452,9 +451,11 @@ void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 s
 
     if (searchStr.isEmpty()) {
         ui->treeStock->collapseAll();
-        return;
+    } else if (searchStr.size() > 1) {
+        ui->treeStock->expandAll();
     }
 }
+
 void MainWindow::procActInventoryEditorOpen()
 {
     InventoryDialog dialog(this);
@@ -629,6 +630,8 @@ void MainWindow::on_btnReloadData_clicked()
     qDebug() << "add test";
     refreshStock();
     refreshTransact();
+    procActSetSearchFilter(ui->editSearch->text(), ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+//    searchExpand();
 }
 
 void MainWindow::on_btnReport_clicked()
@@ -658,8 +661,8 @@ void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
 
 void MainWindow::on_editSearch_textChanged(const QString &arg1)
 {    
-    procActSetSearchFilter(arg1, ui->comboProject->currentIndex());
-    searchExpand();
+    procActSetSearchFilter(arg1, ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+//    searchExpand();
     actRefreshView->trigger();
 }
 
@@ -668,8 +671,7 @@ void MainWindow::on_comboProject_currentIndexChanged(int index)
     Q_UNUSED(index)
 //    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
     procActSetSearchFilter(ui->editSearch->text(), ui->comboProject->currentData(Constants::RoleNodeId).toInt());
-
-    searchExpand();
+//    searchExpand();
 }
 
 // -------------------- Delegates -------------------------------------
