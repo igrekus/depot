@@ -330,6 +330,8 @@ qint32 DataBaseManager::insertCategory(const qint32 classId, const QString &name
     QTextCodec *encode = QTextCodec::codecForLocale();
 //    QString encodedName = encode->toUnicode(name.toUtf8());
     QString encodedName = name;
+//    qDebug() << "insert cat:" << classId << encodedName;
+//    return 100;
     QSqlQuery q = execSimpleQuery("CALL insertCategory("+QString::number(classId)+", '"+encodedName+"')");
     q.next();
     return q.value(0).toInt();
