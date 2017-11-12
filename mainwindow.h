@@ -82,7 +82,7 @@ private slots:
     void procActTransactEdit();
     void procActTransactDelete();
 
-    void procActSetSearchFilter(const QString &searchStr, const qint32 comboIndex);
+    void procActSetSearchFilter(const QString &searchStr, const qint32 projectId, const qint32 locationId);
 
     void procActInventoryEditorOpen();
     void procActReportManagerOpen();
@@ -111,8 +111,9 @@ private slots:
     void on_treeStock_doubleClicked(const QModelIndex &index);
     void on_tableTransact_doubleClicked(const QModelIndex &index);    
 
-    void on_editSearch_textChanged(const QString &arg1);
+    void on_editSearch_textChanged(const QString &searchStr);
     void on_comboProject_currentIndexChanged(int index);
+    void on_comboLocation_currentIndexChanged(int index);
 
 private:
     Ui::MainWindow *ui;
@@ -127,9 +128,6 @@ private:
     ProjectRecursiveFilterProxyModel *m_stockSearchProxyModel;
 //    RecursiveFilterProxyModel *m_transactSearchProxyModel;
     TransactRecursiveFilterProxyModel *m_transactSearchProxyModel;
-
-    // combo completers
-    QCompleter *projectCompleter;
 
     // actions
     QAction *actRefreshView;

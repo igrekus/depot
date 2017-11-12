@@ -49,18 +49,6 @@ void DataBaseManager::connectToDatabase()
     db.setPassword(lst.at(3));
     db.setDatabaseName(lst.at(4));
 
-//    db.setHostName("localhost");
-//    db.setPort(3306);
-//    db.setUserName("root");
-//    db.setPassword("");
-//    db.setDatabaseName("wh");
-
-//    db.setHostName("10.10.15.9");
-//    db.setPort(3306);
-//    db.setUserName("root");
-//    db.setPassword("123456");
-//    db.setDatabaseName("wh");
-
 //    db.open();
     if (!db.open()) {
         throw db.lastError();
@@ -149,13 +137,13 @@ StockItem::StockList DataBaseManager::getStockList(const qint32 groupId)
                        .setName    (q.value(1).toString())
                        .setType    (Constants::ItemItem)
                        .setLevel   (Constants::Level_3)
-                       .setAmount  (q.value(2).toInt())
+                       .setAmount  (q.value(2).toReal())
                        .setSerialn (q.value(3).toString())
                        .setProject (q.value(4).toInt())
                        .setLocation(q.value(5).toInt())
                        .setProduct (q.value(6).toInt())
-                       .setFullname(q.value(7).toString())
-                       .setUnit    (q.value(8).toString())
+                       .setUnit    (q.value(7).toString())
+                       .setExpire  (q.value(8).toDate())
                        .build());
     }
     return tmplist;
@@ -169,10 +157,9 @@ ProductItem::ProductList DataBaseManager::getProductListByGroup(const qint32 gro
         tmplist.append(ProductItem::ProductItemBuilder()
                        .setId      (q.value(0).toInt())
                        .setName    (q.value(1).toString())
-                       .setFullname(q.value(2).toString())
-                       .setSerialn (q.value(3).toString())
-                       .setUnit    (q.value(4).toString())
-                       .setMiscTag (q.value(5).toString())
+                       .setSerialn (q.value(2).toString())
+                       .setUnit    (q.value(3).toString())
+                       .setMiscTag (q.value(4).toString())
                        .build());
     }
     return tmplist;
@@ -187,13 +174,14 @@ TransactItem::TransactList DataBaseManager::getTransactList()
         tmplist.append(TransactItem::TransactItemBuilder()
                        .setId     (q.value(0).toInt())
                        .setDate   (q.value(1).toDate())
-                       .setDiff   (q.value(2).toInt())
+                       .setDiff   (q.value(2).toReal())
                        .setNote   (q.value(3).toString())
                        .setStaff  (q.value(4).toInt())
                        .setName   (q.value(5).toString())
                        .setProject(q.value(6).toInt())
                        .setStock  (q.value(7).toInt())
                        .setBill   (q.value(8).toInt())
+                       .setExpire (q.value(9).toDate())
                        .build());
     }
     return tmplist;
@@ -225,13 +213,13 @@ StockItem DataBaseManager::getStockItemByProductId(const qint32 prodId)
            .setName       (q.value(1).toString())
            .setType       (Constants::ItemItem)
            .setLevel      (Constants::Level_3)
-           .setAmount     (q.value(2).toInt())
+           .setAmount     (q.value(2).toReal())
            .setSerialn    (q.value(3).toString())
            .setProject    (q.value(4).toString().toInt())
            .setLocation   (q.value(5).toString().toInt())
            .setProduct    (q.value(6).toString().toInt())
-           .setFullname   (q.value(7).toString())
-           .setUnit       (q.value(8).toString())
+           .setUnit       (q.value(7).toString())
+           .setExpire     (q.value(8).toDate())
            .build();
 }
 
@@ -385,14 +373,12 @@ qint32 DataBaseManager::insertProduct(const ProductRelation &relation, const Pro
 //    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
 //    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
     QString encodedName     = item.itemName;
-    QString encodedFullname = item.itemFullname;
     QString encodedSerialn  = item.itemSerialn;
     QString encodedUnit     = item.itemUnit;
     QString encodedMisctag  = item.itemMiscTag;
 
     QSqlQuery q = execSimpleQuery("CALL insertProduct('"
                                   +encodedName    +"', '"
-                                  +encodedFullname+"', '"
                                   +encodedSerialn +"', '"
                                   +encodedUnit    +"', '"
                                   +encodedMisctag +"', "
@@ -412,7 +398,6 @@ void DataBaseManager::updateProduct(const ProductRelation &relation, const Produ
 //    QString encodedUnit     = encode->toUnicode(item.itemUnit.toUtf8());
 //    QString encodedMisctag  = encode->toUnicode(item.itemMiscTag.toUtf8());
     QString encodedName     = item.itemName;
-    QString encodedFullname = item.itemFullname;
     QString encodedSerialn  = item.itemSerialn;
     QString encodedUnit     = item.itemUnit;
     QString encodedMisctag  = item.itemMiscTag;
@@ -420,7 +405,6 @@ void DataBaseManager::updateProduct(const ProductRelation &relation, const Produ
     QSqlQuery q = execSimpleQuery("CALL updateProduct("
                                   +QString::number(item.itemId)+", '"
                                   +encodedName    +"', '"
-                                  +encodedFullname+"', '"
                                   +encodedSerialn +"', '"
                                   +encodedUnit    +"', '"
                                   +encodedMisctag +"', "
@@ -436,10 +420,11 @@ void DataBaseManager::deleteProduct(const ProductItem &item)
 qint32 DataBaseManager::insertStock(const StockItem &item)
 {
     QSqlQuery q = execSimpleQuery("CALL insertStock("
-                                  +QString::number(item.itemAmount)+", "
+                                  +QString::number(item.itemAmount.getAsDouble())+", "
                                   +QString::number(item.itemProduct)+", "
                                   +QString::number(item.itemLocation)+", "
-                                  +QString::number(item.itemProject)+")");
+                                  +QString::number(item.itemProject)+", "
+                                  +item.itemExpire.toString(Qt::ISODate)+")");
     q.next();
     return q.value(0).toInt();
 }
@@ -448,10 +433,11 @@ void DataBaseManager::updateStock(const StockItem &item)
 {
     QSqlQuery q = execSimpleQuery("CALL updateStock("
                                   +QString::number(item.itemId)+", "
-                                  +QString::number(item.itemAmount)+", "
+                                  +QString::number(item.itemAmount.getAsDouble())+", "
                                   +QString::number(item.itemProduct)+", "
                                   +QString::number(item.itemLocation)+", "
-                                  +QString::number(item.itemProject)+")");
+                                  +QString::number(item.itemProject)+", "
+                                  +item.itemExpire.toString(Qt::ISODate)+")");
 }
 
 void DataBaseManager::deleteStock(const StockItem &item)
@@ -469,7 +455,7 @@ qint32 DataBaseManager::insertTransact(const TransactItem &item)
 
     QSqlQuery q = execSimpleQuery("CALL insertTransact('"
                                   +item.itemDate.toString(Qt::ISODate)+"', "
-                                  +QString::number(item.itemDiff)+", '"
+                                  +QString::number(item.itemDiff.getAsDouble())+", '"
                                   +encodedNote+"', "
                                   +QString::number(item.itemStockRef)+", "
                                   +QString::number(item.itemStaffRef)+", "
@@ -490,7 +476,7 @@ void DataBaseManager::updateTransact(const TransactItem &item)
     QSqlQuery q = execSimpleQuery("CALL updateTransact("
                                   +QString::number(item.itemId)+", '"
                                   +item.itemDate.toString(Qt::ISODate)+"', "
-                                  +QString::number(item.itemDiff)+", '"
+                                  +QString::number(item.itemDiff.getAsDouble())+", '"
                                   +encodedNote+"', "
                                   +QString::number(item.itemStockRef)+", "
                                   +QString::number(item.itemStaffRef)+", "

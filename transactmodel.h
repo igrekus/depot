@@ -22,15 +22,17 @@ public:
         ColumnStaff,
         ColumnProject,
         ColumnNote,
+        ColumnExpire,
         ColumnCount
     };
 
-    const QStringList m_headers = {"Дата",
+    const QStringList m_headers = {"Дата транзакции",
                                    "Наименование",
                                    "+/-",
                                    "Сотрудник",
                                    "Тема",
-                                   "Примечание"};
+                                   "Примечание",
+                                   "Срок годности"};
 
     // данные
     using TransactItemList = QList<TransactItem>;

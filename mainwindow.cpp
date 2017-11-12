@@ -156,19 +156,13 @@ void MainWindow::initApplication()
     ui->tableTransact->verticalHeader()->setDefaultSectionSize(14);
     ui->tableTransact->setItemDelegate(new DelegateHighligtableTableText(ui->tableTransact));
 
-    projectCompleter = new QCompleter(this);
-    projectCompleter->setModel(m_dictModel->m_projectListModel);
-//    projectCompleter->setCompletionRole(Qt::DisplayRole);
-//    projectCompleter->setCompletionColumn(0);
-    projectCompleter->setCaseSensitivity(Qt::CaseInsensitive);
-    projectCompleter->setCompletionMode(QCompleter::UnfilteredPopupCompletion);
-    projectCompleter->setMaxVisibleItems(20);
-    projectCompleter->setFilterMode(Qt::MatchContains);
-
     ui->comboProject->setModel(m_dictModel->m_projectListModel);
     ui->comboProject->setInsertPolicy(QComboBox::NoInsert);
-    ui->comboProject->setCompleter(projectCompleter);
     ui->comboProject->setCurrentIndex(0);
+
+    ui->comboLocation->setModel(m_dictModel->m_locationListModel);
+    ui->comboLocation->setInsertPolicy(QComboBox::NoInsert);
+    ui->comboLocation->setCurrentIndex(0);
 
     actRefreshView->trigger();
 
@@ -267,12 +261,12 @@ void MainWindow::procActRefreshView()
     qint32 trwidth = ui->treeStock->frameGeometry().width()-30;
     ui->treeStock->hide();
     ui->treeStock->setColumnWidth(0, trwidth*0.20);
-    ui->treeStock->setColumnWidth(1, trwidth*0.45);
+    ui->treeStock->setColumnWidth(1, trwidth*0.40);
     ui->treeStock->setColumnWidth(2, trwidth*0.05);
     ui->treeStock->setColumnWidth(3, trwidth*0.05);
-    ui->treeStock->setColumnWidth(4, trwidth*0.05);
-    ui->treeStock->setColumnWidth(5, trwidth*0.07);
-    ui->treeStock->setColumnWidth(6, trwidth*0.08);
+    ui->treeStock->setColumnWidth(4, trwidth*0.10);
+    ui->treeStock->setColumnWidth(5, trwidth*0.08);
+    ui->treeStock->setColumnWidth(6, trwidth*0.07);
     ui->treeStock->setColumnWidth(7, trwidth*0.05);
     ui->treeStock->show();
 
@@ -282,11 +276,12 @@ void MainWindow::procActRefreshView()
     }
     ui->tableTransact->hide();
     ui->tableTransact->setColumnWidth(0, tbwidth*0.15);
-    ui->tableTransact->setColumnWidth(1, tbwidth*0.35);
+    ui->tableTransact->setColumnWidth(1, tbwidth*0.30);
     ui->tableTransact->setColumnWidth(2, tbwidth*0.05);
     ui->tableTransact->setColumnWidth(3, tbwidth*0.13);
     ui->tableTransact->setColumnWidth(4, tbwidth*0.10);
-    ui->tableTransact->setColumnWidth(5, tbwidth*0.22);
+    ui->tableTransact->setColumnWidth(5, tbwidth*0.20);
+    ui->tableTransact->setColumnWidth(6, tbwidth*0.07);
     ui->tableTransact->show();
 }
 
@@ -438,13 +433,14 @@ void MainWindow::procActTransactDelete()
     ui->tableTransact->selectionModel()->clear();
 }
 
-void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 searchIndex) {
+void MainWindow::procActSetSearchFilter(const QString &searchStr, const qint32 projectId, const qint32 locationId) {
 //    qDebug() << searchStr << searchIndex;
     m_stockSearchProxyModel->setFilterWildcard(searchStr);
-    m_stockSearchProxyModel->setFilterProjectId(searchIndex);
+    m_stockSearchProxyModel->setFilterProjectId(projectId);
+    m_stockSearchProxyModel->setFilterLocationId(locationId);
 
     m_transactSearchProxyModel->setFilterWildcard(searchStr);
-    m_transactSearchProxyModel->setFilterProjectId(searchIndex);
+    m_transactSearchProxyModel->setFilterProjectId(projectId);
 
     m_stockSearchProxyModel->invalidate();
     m_transactSearchProxyModel->invalidate();
@@ -529,7 +525,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
                     watched == ui->btnEditTransact||
                     watched == ui->btnDelTransact ||
                     watched == ui->comboProject) {
-                procActSetSearchFilter(QString(""), 0);
+                procActSetSearchFilter(QString(""), 0, 0);
                 ui->editSearch->setText(QString(""));
                 ui->comboProject->setCurrentIndex(0);
                 return true;
@@ -630,7 +626,9 @@ void MainWindow::on_btnReloadData_clicked()
     qDebug() << "add test";
     refreshStock();
     refreshTransact();
-    procActSetSearchFilter(ui->editSearch->text(), ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+    procActSetSearchFilter(ui->editSearch->text(),
+                           ui->comboProject->currentData(Constants::RoleNodeId).toInt(),
+                           ui->comboLocation->currentData(Constants::RoleNodeId).toInt());
 //    searchExpand();
 }
 
@@ -659,9 +657,11 @@ void MainWindow::on_tableTransact_doubleClicked(const QModelIndex &index)
     actTransactEdit->trigger();
 }
 
-void MainWindow::on_editSearch_textChanged(const QString &arg1)
+void MainWindow::on_editSearch_textChanged(const QString &searchStr)
 {    
-    procActSetSearchFilter(arg1, ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+    procActSetSearchFilter(searchStr,
+                           ui->comboProject->currentData(Constants::RoleNodeId).toInt(),
+                           ui->comboLocation->currentData(Constants::RoleNodeId).toInt());
 //    searchExpand();
     actRefreshView->trigger();
 }
@@ -670,7 +670,19 @@ void MainWindow::on_comboProject_currentIndexChanged(int index)
 {
     Q_UNUSED(index)
 //    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
-    procActSetSearchFilter(ui->editSearch->text(), ui->comboProject->currentData(Constants::RoleNodeId).toInt());
+    procActSetSearchFilter(ui->editSearch->text(),
+                           ui->comboProject->currentData(Constants::RoleNodeId).toInt(),
+                           ui->comboLocation->currentData(Constants::RoleNodeId).toInt());
+//    searchExpand();
+}
+
+void MainWindow::on_comboLocation_currentIndexChanged(int index)
+{
+    Q_UNUSED(index)
+//    qDebug() << ui->comboProject->currentData(Constants::RoleNodeId).toInt();
+    procActSetSearchFilter(ui->editSearch->text(),
+                           ui->comboProject->currentData(Constants::RoleNodeId).toInt(),
+                           ui->comboLocation->currentData(Constants::RoleNodeId).toInt());
 //    searchExpand();
 }
 

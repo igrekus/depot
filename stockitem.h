@@ -3,8 +3,10 @@
 
 #include <QObject>
 #include <QDebug>
+#include <QDate>
 
 #include <abstracttreeitem.h>
+#include <decimal.h>
 
 class StockItem : public AbstractTreeItem
 {
@@ -12,13 +14,13 @@ public:
 
     // TODO: move&swap idiom constructors;
     // данные
-    qint32  itemAmount;
+    deci::decimal<3> itemAmount;
     QString itemSerialn;
     qint32  itemProject;
     qint32  itemLocation;
     qint32  itemProduct;
-    QString itemFullname;
     QString itemUnit;
+    QDate   itemExpire;
 
     StockItem():
         AbstractTreeItem(),
@@ -27,20 +29,20 @@ public:
         itemProject(),
         itemLocation(),
         itemProduct(),
-        itemFullname(),
-        itemUnit()
+        itemUnit(),
+        itemExpire()
     {}
     StockItem(const qint32 id,
               const QString &name,
               const Constants::TreeItemType type,
               const Constants::TreeItemLevel level,
-              const qint32 amount,
+              const deci::decimal<3> amount,
               const QString &serialn,
               const qint32 proj,
               const qint32 loc,
               const qint32 prod,
-              const QString &fullname,
-              const QString &unit):
+              const QString &unit,
+              const QDate &expire):
         AbstractTreeItem(id,
                          name,
                          type,
@@ -50,8 +52,8 @@ public:
         itemProject     (proj),
         itemLocation    (loc),
         itemProduct     (prod),
-        itemFullname    (fullname),
-        itemUnit        (unit)
+        itemUnit        (unit),
+        itemExpire      (expire)
     {}
     StockItem(const StockItem &copy):
         AbstractTreeItem(copy),
@@ -60,8 +62,8 @@ public:
         itemProject     (copy.itemProject),
         itemLocation    (copy.itemLocation),
         itemProduct     (copy.itemProduct),
-        itemFullname    (copy.itemFullname),
-        itemUnit        (copy.itemUnit)
+        itemUnit        (copy.itemUnit),
+        itemExpire      (copy.itemExpire)
     {}
     ~StockItem(){}
 
@@ -76,8 +78,8 @@ public:
             itemProject  = right.itemProject;
             itemLocation = right.itemLocation;
             itemProduct  = right.itemProduct;
-            itemFullname = right.itemFullname;
             itemUnit     = right.itemUnit;
+            itemExpire   = right.itemExpire;
         }
         return *this;
     }
@@ -92,8 +94,8 @@ public:
                 itemProject  == right.itemProject &&
                 itemLocation == right.itemLocation&&
                 itemProduct  == right.itemProduct &&
-                itemFullname == right.itemFullname&&
-                itemUnit     == right.itemUnit);
+                itemUnit     == right.itemUnit    &&
+                itemExpire   == right.itemExpire);
     }
 
     friend QDebug operator<<(QDebug dbg, const StockItem &right) {
@@ -102,13 +104,13 @@ public:
                       << " lvl:"  << right.itemLevel
                       << " id:"   << right.itemId
                       << " name:" << right.itemName
-                      << " amt:"  << right.itemAmount
+                      << " amt:"  << right.itemAmount.getAsDouble()
                       << " sn:"   << right.itemSerialn
                       << " proj:" << right.itemProject
                       << " loc:"  << right.itemLocation
                       << " prod:" << right.itemProduct
-                      << " full:" << right.itemFullname
                       << " unit:" << right.itemUnit
+                      << " exp:"  << right.itemExpire
                       << ")";
         return dbg.maybeSpace();
     }
@@ -121,13 +123,13 @@ public:
         QString       stockName       = QString();
         Constants::TreeItemType  stockType       = Constants::ItemItem;
         Constants::TreeItemLevel stockLevel      = Constants::Level_2;
-        qint32        stockAmount     = 0;
+        deci::decimal<3>         stockAmount     = deci::decimal<3>(0);
         QString       stockSerialn    = QString();
         qint32        stockProject    = 0;
         qint32        stockLocation   = 0;
         qint32        stockProductRef = 0;
-        QString       stockFullname   = QString();
         QString       stockUnit       = QString();
+        QDate         stockExpire     = QDate();
 
         StockItemBuilder() = default;
 
@@ -141,21 +143,21 @@ public:
             stockProject   (copy.itemProject),
             stockLocation  (copy.itemLocation),
             stockProductRef(copy.itemProduct),
-            stockFullname  (copy.itemFullname),
-            stockUnit      (copy.itemUnit)
+            stockUnit      (copy.itemUnit),
+            stockExpire    (copy.itemExpire)
         {}
 
         StockItemBuilder& setId       (const qint32    id)        { this->stockId         = id;        return *this; }
         StockItemBuilder& setName     (const QString  &name)      { this->stockName       = name;      return *this; }
         StockItemBuilder& setType     (const Constants::TreeItemType  itemtype) { this->stockType  = itemtype;  return *this; }
         StockItemBuilder& setLevel    (const Constants::TreeItemLevel itemlevel){ this->stockLevel = itemlevel; return *this; }
-        StockItemBuilder& setAmount   (const qint32    amout)     { this->stockAmount     = amout;     return *this; }
+        StockItemBuilder& setAmount   (const qreal    amount)     { this->stockAmount     = deci::decimal<3>(amount);     return *this; }
         StockItemBuilder& setSerialn  (const QString  &serialn)   { this->stockSerialn    = serialn;   return *this; }
         StockItemBuilder& setProject  (const qint32   &project)   { this->stockProject    = project;   return *this; }
         StockItemBuilder& setLocation (const qint32   &loc)       { this->stockLocation   = loc;       return *this; }
         StockItemBuilder& setProduct  (const qint32   &prod)      { this->stockProductRef = prod;      return *this; }
-        StockItemBuilder& setFullname (const QString  &fname)     { this->stockFullname   = fname;     return *this; }
         StockItemBuilder& setUnit     (const QString  &unit)      { this->stockUnit       = unit;      return *this; }
+        StockItemBuilder& setExpire   (const QDate    &expire)    { this->stockExpire     = expire;    return *this; }
         StockItem build() {
             return StockItem(this->stockId,
                              this->stockName,
@@ -166,8 +168,8 @@ public:
                              this->stockProject,
                              this->stockLocation,
                              this->stockProductRef,
-                             this->stockFullname,
-                             this->stockUnit);
+                             this->stockUnit,
+                             this->stockExpire);
         }
     };
 };

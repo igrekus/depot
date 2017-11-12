@@ -57,28 +57,25 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
         switch (index.column()) {
         case ColumnDate: {
             return QVariant(m_data.at(index.row()).itemDate.toString("dd.MM.yyyy"));
-            break;
         }
         case ColumnProduct: {
             return QVariant(m_data.at(index.row()).itemName);
-            break;
         }
         case ColumnDiff: {
 //            return QVariant(std::abs(m_nodeList.at(index.row()).transactItem.itemDiff));
-            return QVariant(m_data.at(index.row()).itemDiff);
-            break;
+            return QVariant(m_data.at(index.row()).itemDiff.getAsDouble());
         }
         case ColumnProject: {
             return QVariant(m_dictModel->m_projectListModel->getData(m_data.at(index.row()).itemProjectRef));
-            break;
         }
         case ColumnStaff: {
             return QVariant(m_dictModel->m_staffListModel->getData(m_data.at(index.row()).itemStaffRef));
-            break;
         }
         case ColumnNote: {
             return QVariant(m_data.at(index.row()).itemNote);
-            break;
+        }
+        case ColumnExpire: {
+            return QVariant(m_data.at(index.row()).itemExpire.toString("dd.MM.yyyy"));
         }
         case ColumnCount:
         default:
@@ -113,7 +110,7 @@ QVariant TransactModel::data(const QModelIndex &index, int role) const
     case Qt::BackgroundRole: {
         switch (index.column()) {
         case ColumnDiff: {
-            if (m_data.at(index.row()).itemDiff > 0) {
+            if (m_data.at(index.row()).itemDiff.getAsDouble() > 0) {
                 return QVariant(QBrush(QColor(QRgb(Constants::ColorReceiptBackground))));
             } else {
                 return QVariant(QBrush(QColor(QRgb(Constants::ColorExpenseBackground))));
