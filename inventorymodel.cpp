@@ -97,7 +97,6 @@ InventoryModel::InventoryNode InventoryModel::makeProductNode(const ProductItem 
                                          .setName(item.itemName)
                                          .setType (Constants::ItemItem)
                                          .setLevel(Constants::Level_3)
-                                         .setFullname(item.itemFullname)
                                          .setSerialn(item.itemSerialn)
                                          .setUnit(item.itemUnit)
                                          .setMiscTag(item.itemMiscTag)
@@ -309,12 +308,6 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
             }
             break;
         }
-        case FullnameColumn: {
-            if (tmpitem.itemType == Constants::ItemItem) {
-                return tmpitem.itemFullname;
-            }
-            break;
-        }
         case ColumnCount:
         default:
             break;
@@ -350,14 +343,6 @@ QVariant InventoryModel::data(const QModelIndex &index, int role) const
     case Constants::RoleNodeHasChildren: {
         return !tmpnode->children.isEmpty();
         break;
-    }
-    case Constants::RoleSearchString: {
-//        return QVariant(QString(tmpnode->inventoryItem.itemId+";"+
-//                                tmpnode->inventoryItem.itemName+";"+
-//                                tmpnode->inventoryItem.itemUnit+";"+
-//                                tmpnode->inventoryItem.itemSerialn+";"+
-//                                tmpnode->inventoryItem.itemFullname+";"));
-    break;
     }
     default:
         break;
@@ -559,7 +544,6 @@ ProductItem InventoryModel::getProductItemByIndex(const QModelIndex &index)
     return (ProductItem::ProductItemBuilder()
             .setId      (tmpnode->inventoryItem.itemId)
             .setName    (tmpnode->inventoryItem.itemName)
-            .setFullname(tmpnode->inventoryItem.itemFullname)
             .setSerialn (tmpnode->inventoryItem.itemSerialn)
             .setUnit    (tmpnode->inventoryItem.itemUnit)
             .setMiscTag (tmpnode->inventoryItem.itemMiscTag)

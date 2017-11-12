@@ -70,7 +70,8 @@ enum Role {
     RoleNodeHasChildren = Qt::UserRole+4,
     RoleSearchString    = Qt::UserRole+5,
     RoleProjectId       = Qt::UserRole+6,
-    RoleBackground      = Qt::UserRole+7
+    RoleBackground      = Qt::UserRole+7,
+    RoleLocationId      = Qt::UserRole+8
 };
 
 enum TreeItemType {

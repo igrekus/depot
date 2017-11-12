@@ -77,6 +77,16 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QLabel" name="lblLocaion">
+          <property name="text">
+           <string>Место:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="comboLocation"/>
+        </item>
        </layout>
       </item>
      </layout>

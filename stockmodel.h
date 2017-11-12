@@ -23,7 +23,7 @@ public:
         SerialnColumn,
         ProjectColumn,
         LocationColumn,
-        FullnameColumn,
+        ExpireColumn,
         ColumnCount
     };
     Q_ENUM(Columns)
@@ -35,7 +35,7 @@ public:
                                    "№ партии",
                                    "Тема",
                                    "Место хранения",
-                                   "Полное наименование"};
+                                   "Срок годности"};
 
     // данные
     struct StockNode;

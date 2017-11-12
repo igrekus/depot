@@ -33,8 +33,7 @@ void InventoryDataDialog::filterGroupCombo(const qint32 catId)
 
 void InventoryDataDialog::updateWidgets()
 {
-    ui->editFullname->setText(m_data.item.itemFullname);
-    ui->editMiscTag->setText("");
+//    ui->editMiscTag->setText("");
     ui->editName->setText(m_data.item.itemName);
     ui->editSerialn->setText(m_data.item.itemSerialn);
     ui->editUnit->setText(m_data.item.itemUnit);
@@ -84,10 +83,9 @@ InventoryDataDialog::DialogData InventoryDataDialog::collectData()
     DialogData tmpdata(ProductItem::ProductItemBuilder()
                        .setId(m_oldData.item.itemId)
                        .setName(ui->editName->text())
-                       .setFullname(ui->editFullname->text())
                        .setSerialn(ui->editSerialn->text())
                        .setUnit(ui->editUnit->text())
-                       .setMiscTag(ui->editMiscTag->text())
+//                       .setMiscTag(ui->editMiscTag->text())
                        .build(),
                        ProductRelation::ProductRelationBuilder()
                        .setClass(m_oldData.relation.parentClass)
@@ -110,13 +108,11 @@ void InventoryDataDialog::on_comboGroup_currentTextChanged(const QString &arg1)
     Q_UNUSED(arg1)
     if (ui->comboGroup->count() == 0) {
         ui->comboGroup->setDisabled(true);
-        ui->editFullname->setDisabled(true);
         ui->editName->setDisabled(true);
         ui->editSerialn->setDisabled(true);
         ui->editUnit->setDisabled(true);
     } else {
         ui->comboGroup->setDisabled(false);
-        ui->editFullname->setDisabled(false);
         ui->editName->setDisabled(false);
         ui->editSerialn->setDisabled(false);
         ui->editUnit->setDisabled(false);

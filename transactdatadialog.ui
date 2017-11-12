@@ -148,22 +148,6 @@
          </property>
         </widget>
        </item>
-       <item row="5" column="1">
-        <widget class="QSpinBox" name="spinDiff">
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="minimum">
-          <number>-10000000</number>
-         </property>
-         <property name="maximum">
-          <number>10000000</number>
-         </property>
-        </widget>
-       </item>
        <item row="6" column="0">
         <widget class="QLabel" name="lblNote">
          <property name="text">
@@ -173,6 +157,22 @@
        </item>
        <item row="6" column="1">
         <widget class="QLineEdit" name="editNote"/>
+       </item>
+       <item row="5" column="1">
+        <widget class="QDoubleSpinBox" name="spinDiff">
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
+           <height>16777215</height>
+          </size>
+         </property>
+         <property name="minimum">
+          <double>-999999.989999999990687</double>
+         </property>
+         <property name="maximum">
+          <double>999999.989999999990687</double>
+         </property>
+        </widget>
        </item>
       </layout>
      </item>

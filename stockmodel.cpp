@@ -321,7 +321,7 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
         }
         case AmountColumn: {
             if (tmpitem.itemType == Constants::ItemItem) {
-                return tmpitem.itemAmount;
+                return tmpitem.itemAmount.getAsDouble();
             }
             break;
         }
@@ -346,11 +346,10 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
             }
             break;
         }
-        case FullnameColumn: {
+        case ExpireColumn:{
             if (tmpitem.itemType == Constants::ItemItem) {
-                return tmpitem.itemFullname;
+                return tmpitem.itemExpire.toString("dd.MM.yyyy");
             }
-            break;
         }
         case ColumnCount:
         default:
@@ -374,23 +373,21 @@ QVariant StockModel::data(const QModelIndex &index, int role) const
     }
     case Constants::RoleLevelId: {
         return tmpitem.itemLevel;
-        break;
     }
     case Constants::RoleNodeType: {
         return tmpitem.itemType;
-        break;
     }
     case Constants::RoleNodeId: {
         return tmpitem.itemId;
-        break;
     }
     case Constants::RoleNodeHasChildren: {
         return !tmpnode->children.isEmpty();
-        break;
     }
     case Constants::RoleProjectId: {
         return tmpitem.itemProject;
-        break;
+    }
+    case Constants::RoleLocationId: {
+        return tmpitem.itemLocation;
     }
     default:
         break;

@@ -15,11 +15,13 @@ public:
     ~ProjectRecursiveFilterProxyModel();
 
     ProjectRecursiveFilterProxyModel &setFilterProjectId(const qint32 id) {m_filterProjectId = id; return *this;}
+    ProjectRecursiveFilterProxyModel &setFilterLocationId(const qint32 id) {m_filterLocationId = id; return *this;}
 
 protected:
     bool filterAcceptsRow(int sourceRow, const QModelIndex &sourceParent) const override;
 
     qint32 m_filterProjectId;
+    qint32 m_filterLocationId;
 };
 
 #endif // PROJECTRECURSIVEFILTERPROXYMODEL_H
