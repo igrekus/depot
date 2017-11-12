@@ -55,8 +55,6 @@ protected:
     void changeEvent(QEvent *e);
 
 private slots:
-    void on_spinDiff_valueChanged(int arg1);
-
     void on_btnOk_clicked();
 
     void on_editSearch_textChanged(const QString &arg1);

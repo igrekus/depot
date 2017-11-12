@@ -20,7 +20,7 @@ void StockDataDialog::updateWidgetsWithStock(const StockItem &tmpstock)
     ui->editProductId->setText(QString::number(tmpstock.itemProduct));
     ui->comboLocation->setCurrentText(m_dictModel->m_locationListModel->getData(tmpstock.itemLocation));
     ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(tmpstock.itemProject));
-    ui->spinAmount->setValue(tmpstock.itemAmount);
+    ui->spinAmount->setValue(tmpstock.itemAmount.getAsDouble());
 }
 
 void StockDataDialog::updateWidgetsWithProduct(const qint32 prodId)
@@ -93,7 +93,6 @@ StockItem StockDataDialog::collectData()
             .setProject    (ui->comboProject->currentData(Constants::RoleNodeId).toInt())
             .setLocation   (ui->comboLocation->currentData(Constants::RoleNodeId).toInt())
             .setProduct    (ui->editProductId->text().toInt())
-            .setFullname   (m_oldData.itemFullname)
             .setUnit       (m_oldData.itemUnit)
             .build());
 }

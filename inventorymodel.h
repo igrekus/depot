@@ -24,7 +24,6 @@ public:
         NameColumn,
         UnitColumn,
         SerialnColumn,
-        FullnameColumn,
         ColumnCount
     };
     Q_ENUM(Columns)
@@ -34,8 +33,7 @@ public:
                                    "Код",
                                    "Наименование",
                                    "Единица",
-                                   "№ партии",
-                                   "Полное наименование"};
+                                   "№ партии"};
 
     // данные
     struct InventoryNode;

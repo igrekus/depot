@@ -108,7 +108,7 @@
               <item row="3" column="0">
                <widget class="QLabel" name="lblLocation">
                 <property name="text">
-                 <string>Местно хранения:</string>
+                 <string>Место хранения:</string>
                 </property>
                </widget>
               </item>

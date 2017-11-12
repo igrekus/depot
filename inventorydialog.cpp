@@ -89,10 +89,9 @@ void InventoryDialog::procActRefreshView()
     ui->treeInventory->hide();
     ui->treeInventory->setColumnWidth(0, trwidth*0.15);
 //    ui->treeInventory->setColumnWidth(1, trwidth*0.05); // -5, hidden code column
-    ui->treeInventory->setColumnWidth(2, trwidth*0.55);
-    ui->treeInventory->setColumnWidth(3, trwidth*0.05);
-    ui->treeInventory->setColumnWidth(4, trwidth*0.10);   // +5
-    ui->treeInventory->setColumnWidth(5, trwidth*0.15);
+    ui->treeInventory->setColumnWidth(2, trwidth*0.60);
+    ui->treeInventory->setColumnWidth(3, trwidth*0.10);
+    ui->treeInventory->setColumnWidth(4, trwidth*0.15);   // +5
     ui->treeInventory->show();
 }
 
@@ -464,13 +463,13 @@ void InventoryDialog::procActRegisterStock()
     }
 
     newStockItem = dialog.getData();
-    if (newStockItem.itemAmount < 0)
-        newStockItem.itemAmount = 0;
+    if (newStockItem.itemAmount.getAsDouble() < 0)
+        newStockItem.itemAmount.setAsDouble(0);
 
     // TODO: check stock for dupes
     qint32 newStockId = m_dbman->insertStock(newStockItem);
 
-    if (newStockItem.itemAmount > 0) {
+    if (newStockItem.itemAmount.getAsDouble() > 0) {
         TransactItem newTransact(TransactItem::TransactItemBuilder()
                                  .setDate(QDate::currentDate())
                                  .setDiff(newStockItem.itemAmount)

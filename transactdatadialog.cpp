@@ -32,7 +32,7 @@ void TransactDataDialog::initWidgets()
     ui->dateTransact->setDate(m_data.itemDate);
     ui->comboStaff->setCurrentText(m_dictModel->m_staffListModel->getData(m_data.itemStaffRef));
     ui->comboProject->setCurrentText(m_dictModel->m_projectListModel->getData(m_data.itemProjectRef));
-    ui->spinDiff->setValue(m_data.itemDiff);
+    ui->spinDiff->setValue(m_data.itemDiff.getAsDouble());
     ui->editNote->setText(m_data.itemNote);
     ui->editSearch->setText(m_data.itemName);
 }
@@ -153,16 +153,6 @@ void TransactDataDialog::changeEvent(QEvent *e)
     default:
         break;
     }
-}
-
-void TransactDataDialog::on_spinDiff_valueChanged(int arg1)
-{
-//    if (arg1 > 0) {
-//        ui->editNote->setText("Приход");
-//    }
-//    else {
-//        ui->editNote->clear();
-//    }
 }
 
 void TransactDataDialog::on_btnOk_clicked()

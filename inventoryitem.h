@@ -10,31 +10,33 @@ class InventoryItem : public AbstractTreeItem
 {
 public:
 
-    QString   itemFullname;
     QString   itemSerialn;
     QString   itemUnit;
     QString   itemMiscTag;
 
     InventoryItem():
         AbstractTreeItem(),
-        itemFullname(),
         itemSerialn(),
         itemUnit(),
         itemMiscTag()
     {}
-    InventoryItem(qint32 id, const QString &name, Constants::TreeItemType type, Constants::TreeItemLevel level, const QString &fullname, const QString &serialn, const QString &unit, const QString misctag):
+    InventoryItem(qint32 id,
+                  const QString &name,
+                  Constants::TreeItemType type,
+                  Constants::TreeItemLevel level,
+                  const QString &serialn,
+                  const QString &unit,
+                  const QString misctag):
         AbstractTreeItem(id,
                          name,
                          type,
                          level),
-        itemFullname(fullname),
         itemSerialn(serialn),
         itemUnit(unit),
         itemMiscTag(misctag)
     {}
     InventoryItem(const InventoryItem &copy):
         AbstractTreeItem(copy),
-        itemFullname    (copy.itemFullname),
         itemSerialn     (copy.itemSerialn),
         itemUnit        (copy.itemUnit),
         itemMiscTag     (copy.itemMiscTag)
@@ -47,7 +49,6 @@ public:
             itemName     = right.itemName;
             itemType     = right.itemType;
             itemLevel    = right.itemLevel;
-            itemFullname = right.itemFullname;
             itemSerialn  = right.itemSerialn;
             itemUnit     = right.itemUnit;
             itemMiscTag  = right.itemMiscTag;
@@ -59,7 +60,6 @@ public:
                 itemName     == right.itemName    &&
                 itemType     == right.itemType    &&
                 itemLevel    == right.itemLevel   &&
-                itemFullname == right.itemFullname&&
                 itemSerialn  == right.itemSerialn &&
                 itemUnit     == right.itemUnit    &&
                 itemMiscTag  == right.itemMiscTag);
@@ -70,7 +70,6 @@ public:
                       << " lvl:"  << right.itemLevel
                       << " id:"   << right.itemId
                       << " name:" << right.itemName
-                      << " fname:"<< right.itemFullname
                       << " sn:"   << right.itemSerialn
                       << " unit:" << right.itemUnit
                       << " mtag:" << right.itemMiscTag
@@ -86,7 +85,6 @@ public:
         QString       invName     = QString();
         Constants::TreeItemType  invType     = Constants::ItemItem;
         Constants::TreeItemLevel invLevel    = Constants::Level_2;
-        QString       invFullname = QString();
         QString       invSerialn  = QString();
         QString       invUnit     = QString();
         QString       invMiscTag  = QString();
@@ -95,15 +93,14 @@ public:
         InventoryItemBuilder& setName    (const QString  &name)         { this->invName     = name;      return *this; }
         InventoryItemBuilder& setType    (const Constants::TreeItemType  itemtype) { this->invType     = itemtype;  return *this; }
         InventoryItemBuilder& setLevel   (const Constants::TreeItemLevel itemlevel){ this->invLevel    = itemlevel; return *this; }
-        InventoryItemBuilder& setFullname(const QString  &fullname)     { this->invFullname = fullname;  return *this; }
         InventoryItemBuilder& setSerialn (const QString  &serialn)      { this->invSerialn  = serialn;   return *this; }
         InventoryItemBuilder& setUnit    (const QString  &unit)         { this->invUnit     = unit;      return *this; }
         InventoryItemBuilder& setMiscTag (const QString  &misctag)      { this->invMiscTag  = misctag;   return *this; }
         InventoryItem build() {
             return InventoryItem(this->invId,       this->invName,
                                  this->invType,     this->invLevel,
-                                 this->invFullname, this->invSerialn,
-                                 this->invUnit,     this->invMiscTag);
+                                 this->invSerialn,  this->invUnit,
+                                 this->invMiscTag);
         }
     };
 };
